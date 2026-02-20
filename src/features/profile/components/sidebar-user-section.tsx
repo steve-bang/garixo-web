@@ -277,6 +277,7 @@ export function SidebarUserSection(): JSX.Element {
         open={generalOpen}
         title="Profile Information"
         width="md"
+        fullOnTabletMobile
         onClose={() => setGeneralOpen(false)}
         footer={
           <>
@@ -333,6 +334,7 @@ export function SidebarUserSection(): JSX.Element {
         open={passwordOpen}
         title="Change Password"
         width="md"
+        fullOnTabletMobile
         onClose={() => {
           setPasswordOpen(false);
           resetPasswordState();
@@ -373,6 +375,7 @@ export function SidebarUserSection(): JSX.Element {
         open={signOutOpen}
         title="Sign Out?"
         width="sm"
+        fullOnTabletMobile
         onClose={() => setSignOutOpen(false)}
         footer={
           <>

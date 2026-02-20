@@ -17,9 +17,16 @@ export interface ModalProps {
   width?: 'sm' | 'md' | 'lg';
   closeOnOverlayClick?: boolean;
   showCloseIcon?: boolean;
+  fullOnTabletMobile?: boolean;
 }
 
-function widthClass(width: ModalProps['width']): string {
+function widthClass(width: ModalProps['width'], fullOnTabletMobile: boolean): string {
+  if (fullOnTabletMobile) {
+    if (width === 'sm') return 'max-w-none lg:max-w-[400px]';
+    if (width === 'lg') return 'max-w-none lg:max-w-[640px]';
+    return 'max-w-none lg:max-w-[480px]';
+  }
+
   if (width === 'sm') return 'max-w-[400px]';
   if (width === 'lg') return 'max-w-[640px]';
   return 'max-w-[480px]';
@@ -33,7 +40,8 @@ export function Modal({
   footer,
   width = 'md',
   closeOnOverlayClick = true,
-  showCloseIcon = true
+  showCloseIcon = true,
+  fullOnTabletMobile = false
 }: ModalProps): JSX.Element | null {
   const titleId = useId();
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -46,7 +54,10 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-s4 animate-modal-fade-in"
+      className={cn(
+        'fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-modal-fade-in',
+        fullOnTabletMobile ? 'p-0 lg:p-s4' : 'p-s4'
+      )}
       onClick={closeOnOverlayClick ? onClose : undefined}
     >
       <div
@@ -59,7 +70,7 @@ export function Modal({
           'w-full rounded-lg border border-border bg-surface-default p-s6 shadow-md',
           'max-h-[100vh] overflow-hidden',
           'md:w-[90%]',
-          widthClass(width)
+          widthClass(width, fullOnTabletMobile)
         )}
         onClick={(event) => event.stopPropagation()}
       >
