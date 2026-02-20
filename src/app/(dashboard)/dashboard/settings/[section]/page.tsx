@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { JSX } from 'react';
 
-import { getSettingsNavItems, getSettingsSection } from '@/features/settings/api';
+import { getSettingsSection } from '@/features/settings/api';
 import { SettingsModule } from '@/features/settings/components/settings-module';
 
 type SettingsSectionPageProps = {
@@ -16,5 +16,5 @@ export default async function SettingsSectionPage({ params }: SettingsSectionPag
     notFound();
   }
 
-  return <SettingsModule activeSectionKey={sectionData.key} navItems={getSettingsNavItems()} section={sectionData} />;
+  return <SettingsModule section={sectionData} />;
 }

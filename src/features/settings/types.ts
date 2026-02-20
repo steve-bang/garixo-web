@@ -1,16 +1,6 @@
 export type SettingsSectionKey =
   | 'garage-information'
-  | 'branch-management'
-  | 'service-configuration'
-  | 'inventory-settings'
-  | 'notification-settings'
-  | 'subscription-plan';
-
-export type SettingsNavItem = {
-  key: SettingsSectionKey;
-  label: string;
-  href: string;
-};
+  | 'service-configuration';
 
 export type SettingsField = {
   label: string;

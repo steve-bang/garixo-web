@@ -13,6 +13,7 @@ import {
   Users,
   Wrench
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
@@ -26,7 +27,19 @@ import { useCreateWorkOrder, useWorkOrders } from '@/features/work-orders/hooks'
 import type { CreateWorkOrderInput } from '@/features/work-orders/schema';
 import { cn } from '@/lib/utils/cn';
 
-const menuItems = [
+type SidebarSubItem = {
+  href: string;
+  label: string;
+};
+
+type SidebarItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  children?: SidebarSubItem[];
+};
+
+const menuItems: SidebarItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/work-orders', label: 'Work Orders', icon: ClipboardList },
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
@@ -34,8 +47,16 @@ const menuItems = [
   { href: '/dashboard/services', label: 'Services', icon: Wrench },
   { href: '/dashboard/inventory', label: 'Inventory', icon: Package },
   { href: '/dashboard/staff', label: 'Staff', icon: UserCog },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings }
-] as const;
+  {
+    href: '/dashboard/settings',
+    label: 'Settings',
+    icon: Settings,
+    children: [
+      { href: '/dashboard/settings/garage-information', label: 'Garage Information' },
+      { href: '/dashboard/settings/service-configuration', label: 'Service Configuration' }
+    ]
+  }
+];
 
 type BreadcrumbItem = {
   label: string;
@@ -141,18 +162,42 @@ export function DashboardLayoutShell({ children }: { children: ReactNode }): JSX
           const Icon = item.icon;
 
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setIsSidebarOpen(false)}
-              className={cn(
-                'flex items-center gap-s2 rounded-md px-s3 py-s2 text-small text-sidebar-foreground transition-colors',
-                isActive ? 'bg-sidebar-active text-sidebar-active-text' : 'hover:bg-surface-hover'
-              )}
-            >
-              <Icon className="size-4" />
-              <span>{item.label}</span>
-            </Link>
+            <div key={item.href} className="space-y-s1">
+              <Link
+                href={item.href}
+                onClick={() => setIsSidebarOpen(false)}
+                className={cn(
+                  'flex items-center gap-s2 rounded-md px-s3 py-s2 text-small text-sidebar-foreground transition-colors',
+                  isActive ? 'bg-sidebar-active text-sidebar-active-text' : 'hover:bg-surface-hover'
+                )}
+              >
+                <Icon className="size-4" />
+                <span>{item.label}</span>
+              </Link>
+
+              {item.children?.length ? (
+                <div className="ml-s6 space-y-s1">
+                  {item.children.map((child) => {
+                    const isChildActive = pathname === child.href || pathname.startsWith(`${child.href}/`);
+                    return (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        onClick={() => setIsSidebarOpen(false)}
+                        className={cn(
+                          'block rounded-md px-s3 py-s2 text-small transition-colors',
+                          isChildActive
+                            ? 'bg-sidebar-active text-sidebar-active-text'
+                            : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
+                        )}
+                      >
+                        {child.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
           );
         })}
       </nav>
@@ -222,7 +267,7 @@ export function DashboardLayoutShell({ children }: { children: ReactNode }): JSX
           />
           <aside
             className={cn(
-              'absolute inset-y-0 left-0 w-[248px] border-r border-sidebar-border bg-sidebar-background',
+              'absolute inset-y-0 left-0 w-[85vw] max-w-[280px] border-r border-sidebar-border bg-sidebar-background',
               'transform transition-transform duration-200 ease-in-out',
               isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
             )}
