@@ -14,7 +14,12 @@ type DeleteStaffModalProps = {
   onConfirm: (id: string) => Promise<void>;
 };
 
-export function DeleteStaffModal({ open, staff, onClose, onConfirm }: DeleteStaffModalProps): JSX.Element | null {
+export function DeleteStaffModal({
+  open,
+  staff,
+  onClose,
+  onConfirm
+}: DeleteStaffModalProps): JSX.Element | null {
   const [confirmText, setConfirmText] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setSubmitting] = useState(false);
@@ -38,7 +43,7 @@ export function DeleteStaffModal({ open, staff, onClose, onConfirm }: DeleteStaf
     setError('');
 
     if (!canConfirm) {
-      setError('Please type the exact staff name to confirm.');
+      setError('Please type the staff name exactly to continue.');
       return;
     }
 
@@ -48,7 +53,11 @@ export function DeleteStaffModal({ open, staff, onClose, onConfirm }: DeleteStaf
       await onConfirm(staff.id);
       setConfirmText('');
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Could not delete staff.');
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : 'Could not remove this staff member.'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -58,25 +67,42 @@ export function DeleteStaffModal({ open, staff, onClose, onConfirm }: DeleteStaf
     <Modal
       open={open}
       onClose={onClose}
-      title="Confirm Delete"
+      title="Remove Staff Member"
       width="md"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleConfirm} disabled={isSubmitting}>
-            {isSubmitting ? 'Deleting...' : 'Confirm Delete'}
+          <Button
+            variant="destructive"
+            onClick={handleConfirm}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Removing...' : 'Remove Staff'}
           </Button>
         </>
       }
     >
       <div className="space-y-s2">
         <p className="text-small text-text-muted">
-          Type <span className="font-medium text-text-primary">{staff.fullName}</span> to set this profile as INACTIVE.
+          You are about to remove{' '}
+          <span className="font-medium text-text-primary">
+            {staff.fullName}
+          </span>{' '}
+          from your team list.
         </p>
-        <Input className="h-11" value={confirmText} onChange={(event) => setConfirmText(event.target.value)} />
-        {error ? <p className="text-caption text-state-error">{error}</p> : null}
+        <p className="text-small text-text-muted">
+          Type the staff name to confirm:
+        </p>
+        <Input
+          className="h-11"
+          value={confirmText}
+          onChange={(event) => setConfirmText(event.target.value)}
+        />
+        {error ? (
+          <p className="text-caption text-state-error">{error}</p>
+        ) : null}
       </div>
     </Modal>
   );

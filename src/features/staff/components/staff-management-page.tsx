@@ -12,8 +12,17 @@ import { DeleteStaffModal } from '@/features/staff/components/delete-staff-modal
 import { EditStaffDrawer } from '@/features/staff/components/edit-staff-drawer';
 import { StaffKpiRow } from '@/features/staff/components/staff-kpi-row';
 import { StaffTable } from '@/features/staff/components/staff-table';
-import { useCreateStaff, useDisableStaff, useStaff, useStaffKpis, useUpdateStaff } from '@/features/staff/hooks';
-import type { CreateStaffInput, UpdateStaffInput } from '@/features/staff/schema';
+import {
+  useCreateStaff,
+  useDisableStaff,
+  useStaff,
+  useStaffKpis,
+  useUpdateStaff
+} from '@/features/staff/hooks';
+import type {
+  CreateStaffInput,
+  UpdateStaffInput
+} from '@/features/staff/schema';
 import type { Role, Staff } from '@/features/staff/types';
 
 const currentUserRole: Role = 'OWNER';
@@ -34,17 +43,25 @@ export function StaffManagementPage(): JSX.Element {
 
   const staff = useMemo(() => staffQuery.data ?? [], [staffQuery.data]);
   const kpis = useStaffKpis(staff);
+  const isTableUpdating =
+    (staffQuery.isFetching && !staffQuery.isLoading) ||
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    disableMutation.isPending;
 
-  const canManage = currentUserRole === 'OWNER' || currentUserRole === 'MANAGER';
+  const canManage =
+    currentUserRole === 'OWNER' || currentUserRole === 'MANAGER';
 
   const handleCreate = async (values: CreateStaffInput) => {
     await createMutation.mutateAsync(values);
+    await staffQuery.refetch();
     toast.success('Staff created successfully.');
     setAddOpen(false);
   };
 
   const handleUpdate = async (values: UpdateStaffInput) => {
     await updateMutation.mutateAsync(values);
+    await staffQuery.refetch();
     toast.success('Staff updated successfully.');
     setSelected(null);
   };
@@ -57,11 +74,12 @@ export function StaffManagementPage(): JSX.Element {
     }
 
     if (target.id === currentUserId) {
-      throw new Error('You cannot delete your own account.');
+      throw new Error('You cannot remove your own profile.');
     }
 
     await disableMutation.mutateAsync({ id });
-    toast.success('Staff set to INACTIVE.');
+    await staffQuery.refetch();
+    toast.success('Staff member removed.');
     setDeleteOpen(false);
     setDeleteTarget(null);
   };
@@ -73,7 +91,9 @@ export function StaffManagementPage(): JSX.Element {
   if (staffQuery.isError) {
     return (
       <Card className="p-s4">
-        <p className="text-small text-state-error">Could not load staff list.</p>
+        <p className="text-small text-state-error">
+          Could not load staff list.
+        </p>
       </Card>
     );
   }
@@ -83,7 +103,9 @@ export function StaffManagementPage(): JSX.Element {
       <header className="flex flex-col items-start justify-between gap-s3 md:flex-row md:items-center">
         <div>
           <h1 className="text-h1">Staff Management</h1>
-          <p className="text-small text-text-muted">Manage team availability, roles, and workload.</p>
+          <p className="text-small text-text-muted">
+            Manage team availability, roles, and workload.
+          </p>
         </div>
 
         {canManage ? (
@@ -96,23 +118,24 @@ export function StaffManagementPage(): JSX.Element {
 
       <StaffKpiRow kpis={kpis} />
 
-      {staff.length === 0 ? (
-        <Card className="p-s6">
-          <p className="text-small text-text-muted">No staff found. Add your first team member.</p>
-        </Card>
-      ) : (
-        <StaffTable
-          staff={staff}
-          currentUserRole={currentUserRole}
-          onRowOpen={(item) => setSelected(item)}
-          onDeleteClick={(item) => {
-            setDeleteTarget(item);
-            setDeleteOpen(true);
-          }}
-        />
-      )}
+      <StaffTable
+        loading={isTableUpdating}
+        staff={staff}
+        canAddStaff={canManage}
+        onAddFirstStaff={() => setAddOpen(true)}
+        currentUserRole={currentUserRole}
+        onRowOpen={(item) => setSelected(item)}
+        onDeleteClick={(item) => {
+          setDeleteTarget(item);
+          setDeleteOpen(true);
+        }}
+      />
 
-      <AddStaffModal open={addOpen} onClose={() => setAddOpen(false)} onSubmit={handleCreate} />
+      <AddStaffModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onSubmit={handleCreate}
+      />
 
       <EditStaffDrawer
         open={Boolean(selected)}

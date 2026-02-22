@@ -2,8 +2,18 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { createStaff, disableStaff, getStaff, staffQueryKey, updateStaff } from '@/features/staff/api';
-import type { CreateStaffInput, DeleteStaffInput, UpdateStaffInput } from '@/features/staff/schema';
+import {
+  createStaff,
+  disableStaff,
+  getStaff,
+  staffQueryKey,
+  updateStaff
+} from '@/features/staff/api';
+import type {
+  CreateStaffInput,
+  DeleteStaffInput,
+  UpdateStaffInput
+} from '@/features/staff/schema';
 import type { Staff, StaffKpis } from '@/features/staff/types';
 
 function toKpis(staff: Staff[]): StaffKpis {
@@ -32,7 +42,9 @@ export function useCreateStaff() {
   return useMutation({
     mutationFn: (input: CreateStaffInput) => createStaff(input),
     onSuccess: (created) => {
-      queryClient.setQueryData<Staff[]>(staffQueryKey, (prev) => (prev ? [created, ...prev] : [created]));
+      queryClient.setQueryData<Staff[]>(staffQueryKey, (prev) =>
+        prev ? [created, ...prev] : [created]
+      );
     }
   });
 }
@@ -68,7 +80,9 @@ export function useUpdateStaff() {
     },
     onSuccess: (updated) => {
       queryClient.setQueryData<Staff[]>(staffQueryKey, (prev) =>
-        prev ? prev.map((item) => (item.id === updated.id ? updated : item)) : [updated]
+        prev
+          ? prev.map((item) => (item.id === updated.id ? updated : item))
+          : [updated]
       );
     }
   });
@@ -79,9 +93,9 @@ export function useDisableStaff() {
 
   return useMutation({
     mutationFn: (input: DeleteStaffInput) => disableStaff(input),
-    onSuccess: (updated) => {
+    onSuccess: (deleted) => {
       queryClient.setQueryData<Staff[]>(staffQueryKey, (prev) =>
-        prev ? prev.map((item) => (item.id === updated.id ? updated : item)) : [updated]
+        prev ? prev.filter((item) => item.id !== deleted.id) : prev
       );
     }
   });
