@@ -1,25 +1,45 @@
 import { NextResponse } from 'next/server';
 
-import { servicesDB } from '@/app/api/services/services-db';
+import {
+  deleteGarageService,
+  findGarageServiceById,
+  hasDuplicateServiceName,
+  isServiceUsedInWorkOrders,
+  updateGarageService
+} from '@/app/api/services/services-db';
 import { updateServiceSchema } from '@/features/services/schema';
 import type { Service } from '@/features/services/types';
+import { auth } from '@/lib/auth';
+import { getGarageByOwnerId } from '@/services/firebase/garage-service';
 import type { ApiResponse } from '@/types/api';
 
-function response<T>(payload: ApiResponse<T>, status = 200): NextResponse<ApiResponse<T>> {
+function response<T>(
+  payload: ApiResponse<T>,
+  status = 200
+): NextResponse<ApiResponse<T>> {
   return NextResponse.json(payload, { status });
-}
-
-function findById(id: string): Service | undefined {
-  return servicesDB.find((item) => item.id === id);
 }
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-export async function PUT(request: Request, context: RouteContext): Promise<NextResponse<ApiResponse<Service>>> {
+export async function PUT(
+  request: Request,
+  context: RouteContext
+): Promise<NextResponse<ApiResponse<Service>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const { id } = await context.params;
-  const existing = findById(id);
+  const existing = await findGarageServiceById(garage.id, id);
 
   if (!existing) {
     return response({ success: false, error: 'Service not found.' }, 404);
@@ -29,44 +49,73 @@ export async function PUT(request: Request, context: RouteContext): Promise<Next
   const parsed = updateServiceSchema.safeParse({ ...body, id });
 
   if (!parsed.success) {
-    return response({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid payload.' }, 400);
+    return response(
+      {
+        success: false,
+        error: parsed.error.issues[0]?.message ?? 'Invalid payload.'
+      },
+      400
+    );
   }
 
   const duplicate =
     parsed.data.name &&
-    servicesDB.find((item) => item.id !== id && item.name.toLowerCase() === parsed.data.name?.toLowerCase());
+    (await hasDuplicateServiceName(garage.id, parsed.data.name, id));
 
   if (duplicate) {
-    return response({ success: false, error: 'Service name already exists.' }, 409);
+    return response(
+      { success: false, error: 'Service name already exists.' },
+      409
+    );
   }
 
-  const updated: Service = {
-    ...existing,
-    ...parsed.data,
-    id,
-    updatedAt: new Date().toISOString()
-  };
-
-  const index = servicesDB.findIndex((item) => item.id === id);
-  servicesDB[index] = updated;
+  const updated = await updateGarageService(garage.id, id, parsed.data);
+  if (!updated) {
+    return response({ success: false, error: 'Service not found.' }, 404);
+  }
 
   return response({ success: true, data: updated });
 }
 
-export async function DELETE(_request: Request, context: RouteContext): Promise<NextResponse<ApiResponse<Service>>> {
+export async function DELETE(
+  _request: Request,
+  context: RouteContext
+): Promise<NextResponse<ApiResponse<Service>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const { id } = await context.params;
-  const existing = findById(id);
+  const existing = await findGarageServiceById(garage.id, id);
 
   if (!existing) {
     return response({ success: false, error: 'Service not found.' }, 404);
   }
 
-  if (existing.usedInWorkOrder) {
-    return response({ success: false, error: 'This service is used in a work order and cannot be deleted.' }, 400);
+  const usedInWorkOrder = await isServiceUsedInWorkOrders(garage.id, {
+    id: existing.id,
+    name: existing.name
+  });
+  if (usedInWorkOrder) {
+    return response(
+      {
+        success: false,
+        error: 'This service is used in a work order and cannot be deleted.'
+      },
+      400
+    );
   }
 
-  const index = servicesDB.findIndex((item) => item.id === id);
-  servicesDB.splice(index, 1);
+  const deleted = await deleteGarageService(garage.id, id);
+  if (!deleted) {
+    return response({ success: false, error: 'Service not found.' }, 404);
+  }
 
-  return response({ success: true, data: existing });
+  return response({ success: true, data: deleted });
 }

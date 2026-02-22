@@ -23,7 +23,11 @@ import {
   useUpdateService
 } from '@/features/services/hooks';
 import type { CreateServiceInput } from '@/features/services/schema';
-import type { Service, ServiceCategory, ServiceStatus } from '@/features/services/types';
+import type {
+  Service,
+  ServiceCategory,
+  ServiceStatus
+} from '@/features/services/types';
 
 const pageSize = 20;
 
@@ -42,7 +46,11 @@ export function ServicesManagementPage(): JSX.Element {
   const [status, setStatus] = useState<ServiceStatus | undefined>();
   const [page, setPage] = useState(1);
   const [sort] = useState<'default'>('default');
-  const [drawerState, setDrawerState] = useState<DrawerState>({ open: false, mode: 'create', service: null });
+  const [drawerState, setDrawerState] = useState<DrawerState>({
+    open: false,
+    mode: 'create',
+    service: null
+  });
   const [bulkOpen, setBulkOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Service | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
@@ -56,9 +64,23 @@ export function ServicesManagementPage(): JSX.Element {
     return () => window.clearTimeout(timer);
   }, [searchInput]);
 
-  const listParams = { search, category, status, page, pageSize, sort } as const;
+  const listParams = {
+    search,
+    category,
+    status,
+    page,
+    pageSize,
+    sort
+  } as const;
   const listQuery = useServices(listParams);
-  const kpiQuery = useServices({ search, category, status, page: 1, pageSize: 20, sort });
+  const kpiQuery = useServices({
+    search,
+    category,
+    status,
+    page: 1,
+    pageSize: 20,
+    sort
+  });
 
   const createMutation = useCreateService();
   const updateMutation = useUpdateService();
@@ -69,6 +91,7 @@ export function ServicesManagementPage(): JSX.Element {
   const kpiItems = kpiQuery.data?.items ?? [];
   const meta = listQuery.data?.meta;
   const kpis = useMemo(() => toServiceKpis(kpiItems), [kpiItems]);
+  const isTableRefreshing = listQuery.isFetching && !listQuery.isLoading;
 
   useEffect(() => {
     if (!highlightedId) {
@@ -82,11 +105,19 @@ export function ServicesManagementPage(): JSX.Element {
     return () => window.clearTimeout(timer);
   }, [highlightedId]);
 
-  const openCreateDrawer = () => setDrawerState({ open: true, mode: 'create', service: null });
-  const openEditDrawer = (service: Service) => setDrawerState({ open: true, mode: 'edit', service });
-  const openDuplicateDrawer = (service: Service) => setDrawerState({ open: true, mode: 'duplicate', service });
+  const openCreateDrawer = () =>
+    setDrawerState({ open: true, mode: 'create', service: null });
+  const openEditDrawer = (service: Service) =>
+    setDrawerState({ open: true, mode: 'edit', service });
+  const openDuplicateDrawer = (service: Service) =>
+    setDrawerState({ open: true, mode: 'duplicate', service });
 
-  const closeDrawer = () => setDrawerState((prev) => ({ ...prev, open: false }));
+  const closeDrawer = () =>
+    setDrawerState((prev) => ({ ...prev, open: false }));
+
+  const refreshServicesData = async (): Promise<void> => {
+    await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
+  };
 
   const handleDrawerSubmit = async (payload: CreateServiceInput) => {
     if (drawerState.mode === 'create' || drawerState.mode === 'duplicate') {
@@ -94,6 +125,7 @@ export function ServicesManagementPage(): JSX.Element {
       setHighlightedId(created.id);
       toast.success('Service saved successfully.');
       closeDrawer();
+      await refreshServicesData();
       return;
     }
 
@@ -101,22 +133,33 @@ export function ServicesManagementPage(): JSX.Element {
       return;
     }
 
-    const updated = await updateMutation.mutateAsync({ id: drawerState.service.id, payload });
+    const updated = await updateMutation.mutateAsync({
+      id: drawerState.service.id,
+      payload
+    });
     setHighlightedId(updated.id);
     toast.success('Service updated successfully.');
     closeDrawer();
+    await refreshServicesData();
   };
 
   const handleToggleStatus = async (service: Service) => {
-    const nextStatus: ServiceStatus = service.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    await updateMutation.mutateAsync({ id: service.id, payload: { status: nextStatus } });
-    toast.success(nextStatus === 'ACTIVE' ? 'Service activated.' : 'Service deactivated.');
+    const nextStatus: ServiceStatus =
+      service.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    await updateMutation.mutateAsync({
+      id: service.id,
+      payload: { status: nextStatus }
+    });
+    toast.success(
+      nextStatus === 'ACTIVE' ? 'Service activated.' : 'Service deactivated.'
+    );
   };
 
   const handleDelete = async (id: string) => {
     await deleteMutation.mutateAsync(id);
     toast.success('Service deleted successfully.');
     setDeleteTarget(null);
+    await refreshServicesData();
   };
 
   const handleBulkUpdate = async (percentage: number) => {
@@ -142,7 +185,9 @@ export function ServicesManagementPage(): JSX.Element {
       <header className="flex flex-col items-start justify-between gap-s3 md:flex-row md:items-center">
         <div>
           <h1 className="text-h1">Services Management</h1>
-          <p className="text-small text-text-muted">Manage service pricing and availability.</p>
+          <p className="text-small text-text-muted">
+            Manage service pricing and availability.
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-s2">
@@ -189,6 +234,7 @@ export function ServicesManagementPage(): JSX.Element {
       />
 
       <ServicesTable
+        loading={isTableRefreshing}
         services={listItems}
         highlightedId={highlightedId}
         onAddFirst={openCreateDrawer}
@@ -204,7 +250,12 @@ export function ServicesManagementPage(): JSX.Element {
             Page {meta.page} of {meta.totalPages} ({meta.total} services)
           </p>
           <div className="flex items-center gap-s2">
-            <Button variant="secondary" size="sm" disabled={meta.page <= 1} onClick={() => setPage((prev) => Math.max(prev - 1, 1))}>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={meta.page <= 1}
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            >
               Previous
             </Button>
             <Badge variant="default">{meta.page}</Badge>
@@ -212,7 +263,9 @@ export function ServicesManagementPage(): JSX.Element {
               variant="secondary"
               size="sm"
               disabled={meta.page >= meta.totalPages}
-              onClick={() => setPage((prev) => Math.min(prev + 1, meta.totalPages))}
+              onClick={() =>
+                setPage((prev) => Math.min(prev + 1, meta.totalPages))
+              }
             >
               Next
             </Button>
@@ -228,9 +281,19 @@ export function ServicesManagementPage(): JSX.Element {
         onSubmit={handleDrawerSubmit}
       />
 
-      <DeleteServiceModal open={Boolean(deleteTarget)} service={deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} />
+      <DeleteServiceModal
+        open={Boolean(deleteTarget)}
+        service={deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+      />
 
-      <BulkUpdateModal open={bulkOpen} services={kpiItems} onClose={() => setBulkOpen(false)} onConfirm={handleBulkUpdate} />
+      <BulkUpdateModal
+        open={bulkOpen}
+        services={kpiItems}
+        onClose={() => setBulkOpen(false)}
+        onConfirm={handleBulkUpdate}
+      />
     </div>
   );
 }

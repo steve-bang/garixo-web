@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRef } from 'react';
 
 const FOCUSABLE_SELECTOR = [
   'a[href]',
@@ -17,7 +18,17 @@ type UseModalA11yParams = {
   onClose: () => void;
 };
 
-export function useModalA11y({ open, container, onClose }: UseModalA11yParams): void {
+export function useModalA11y({
+  open,
+  container,
+  onClose
+}: UseModalA11yParams): void {
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (!open || !container) {
       return;
@@ -28,7 +39,9 @@ export function useModalA11y({ open, container, onClose }: UseModalA11yParams): 
 
     document.body.style.overflow = 'hidden';
 
-    const focusable = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+    const focusable = Array.from(
+      container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+    );
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
 
@@ -41,7 +54,7 @@ export function useModalA11y({ open, container, onClose }: UseModalA11yParams): 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -68,5 +81,5 @@ export function useModalA11y({ open, container, onClose }: UseModalA11yParams): 
       document.body.style.overflow = previousOverflow;
       previousActive?.focus();
     };
-  }, [open, container, onClose]);
+  }, [open, container]);
 }

@@ -28,6 +28,18 @@ declare module 'firebase-admin/firestore' {
             }>;
             delete: () => Promise<void>;
           };
+          where: (
+            field: string,
+            op: string,
+            value: unknown
+          ) => {
+            limit: (count: number) => {
+              get: () => Promise<{
+                docs: Array<{ id: string; data: () => unknown }>;
+                empty: boolean;
+              }>;
+            };
+          };
           get: () => Promise<{
             docs: Array<{ id: string; data: () => unknown }>;
           }>;
