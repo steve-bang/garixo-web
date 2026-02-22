@@ -5,7 +5,9 @@ export interface UserDocument {
   email: string;
   name: string;
   role: FirebaseRole;
+  avatarUrl?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface GarageDocument {

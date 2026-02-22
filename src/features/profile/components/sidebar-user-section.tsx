@@ -31,6 +31,7 @@ export function SidebarUserSection(): JSX.Element {
   const [signOutOpen, setSignOutOpen] = useState(false);
 
   const [profileName, setProfileName] = useState('');
+  const [profileEmail, setProfileEmail] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>();
   const [generalError, setGeneralError] = useState('');
@@ -53,12 +54,17 @@ export function SidebarUserSection(): JSX.Element {
     const loadMe = async () => {
       try {
         const response = await fetch('/api/me');
-        const payload = (await response.json()) as { success: boolean; data?: User; error?: string };
+        const payload = (await response.json()) as {
+          success: boolean;
+          data?: User;
+          error?: string;
+        };
 
         if (!mounted) return;
 
         if (payload.success && payload.data) {
           setUser(payload.data);
+          setProfileEmail(payload.data.email);
           setProfileName(payload.data.fullName ?? '');
           setAvatarPreview(payload.data.avatarUrl);
         }
@@ -75,6 +81,18 @@ export function SidebarUserSection(): JSX.Element {
   }, []);
 
   useEffect(() => {
+    if (!generalOpen || !user) {
+      return;
+    }
+
+    setProfileEmail(user.email);
+    setProfileName(user.fullName ?? '');
+    setAvatarPreview(user.avatarUrl);
+    setAvatarFile(null);
+    setGeneralError('');
+  }, [generalOpen, user]);
+
+  useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       if (!wrapperRef.current) return;
       if (!wrapperRef.current.contains(event.target as Node)) {
@@ -86,7 +104,10 @@ export function SidebarUserSection(): JSX.Element {
     return () => window.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const avatarText = useMemo(() => initials(user?.fullName || user?.email || 'User'), [user]);
+  const avatarText = useMemo(
+    () => initials(user?.fullName || user?.email || 'User'),
+    [user]
+  );
 
   const resetPasswordState = () => {
     setCurrentPassword('');
@@ -119,10 +140,29 @@ export function SidebarUserSection(): JSX.Element {
 
   const saveGeneral = async () => {
     setGeneralError('');
+
+    const normalizedEmail = profileEmail.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      setGeneralError('Please enter your email address.');
+      return;
+    }
+
+    if (normalizedEmail.length > 254) {
+      setGeneralError('Email address is too long.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(normalizedEmail)) {
+      setGeneralError('Please enter a valid email address.');
+      return;
+    }
+
     setSavingGeneral(true);
 
     try {
       const formData = new FormData();
+      formData.set('email', normalizedEmail);
       formData.set('fullName', profileName);
       if (avatarFile) formData.set('avatarFile', avatarFile);
 
@@ -130,7 +170,11 @@ export function SidebarUserSection(): JSX.Element {
         method: 'PUT',
         body: formData
       });
-      const payload = (await response.json()) as { success: boolean; data?: User; error?: string };
+      const payload = (await response.json()) as {
+        success: boolean;
+        data?: User;
+        error?: string;
+      };
 
       if (!payload.success || !payload.data) {
         setGeneralError(payload.error ?? 'Could not update profile.');
@@ -138,6 +182,7 @@ export function SidebarUserSection(): JSX.Element {
       }
 
       setUser(payload.data);
+      setProfileEmail(payload.data.email);
       setAvatarFile(null);
       setAvatarPreview(payload.data.avatarUrl);
       setGeneralOpen(false);
@@ -175,7 +220,10 @@ export function SidebarUserSection(): JSX.Element {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword })
       });
-      const payload = (await response.json()) as { success: boolean; error?: string };
+      const payload = (await response.json()) as {
+        success: boolean;
+        error?: string;
+      };
 
       if (!payload.success) {
         setPasswordError(payload.error ?? 'Could not update password.');
@@ -198,7 +246,10 @@ export function SidebarUserSection(): JSX.Element {
 
     try {
       const response = await fetch('/api/auth/logout', { method: 'POST' });
-      const payload = (await response.json()) as { success: boolean; error?: string };
+      const payload = (await response.json()) as {
+        success: boolean;
+        error?: string;
+      };
 
       if (!payload.success) {
         setSignOutError(payload.error ?? 'Could not sign out.');
@@ -215,19 +266,34 @@ export function SidebarUserSection(): JSX.Element {
   };
 
   return (
-    <div className="relative border-t border-sidebar-border p-s4" ref={wrapperRef}>
+    <div
+      className="relative border-t border-sidebar-border p-s4"
+      ref={wrapperRef}
+    >
       <button
         type="button"
         className="flex min-h-14 w-full items-center gap-s3 rounded-md px-s2 py-s2 text-left hover:bg-surface-hover"
         onClick={() => setMenuOpen((prev) => !prev)}
       >
         <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-surface-hover text-caption font-semibold text-text-secondary">
-          {avatarPreview ? <img src={avatarPreview} alt="Avatar" className="size-9 object-cover" /> : avatarText}
+          {avatarPreview ? (
+            <img
+              src={avatarPreview}
+              alt="Avatar"
+              className="size-9 object-cover"
+            />
+          ) : (
+            avatarText
+          )}
         </span>
 
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-small font-medium text-text-primary">{user?.fullName || 'User'}</span>
-          <span className="block truncate text-small text-text-secondary">{loading ? 'Loading…' : user?.email || '-'}</span>
+          <span className="block truncate text-small font-medium text-text-primary">
+            {user?.fullName || 'User'}
+          </span>
+          <span className="block truncate text-small text-text-secondary">
+            {loading ? 'Loading…' : user?.email || '-'}
+          </span>
         </span>
 
         <ChevronUp className="size-4 text-text-muted" />
@@ -297,7 +363,15 @@ export function SidebarUserSection(): JSX.Element {
               className="grid size-24 place-items-center overflow-hidden rounded-full border border-border bg-surface-hover text-small font-semibold text-text-secondary"
               onClick={() => document.getElementById('avatar-input')?.click()}
             >
-              {avatarPreview ? <img src={avatarPreview} alt="Avatar preview" className="size-24 object-cover" /> : avatarText}
+              {avatarPreview ? (
+                <img
+                  src={avatarPreview}
+                  alt="Avatar preview"
+                  className="size-24 object-cover"
+                />
+              ) : (
+                avatarText
+              )}
             </button>
 
             <div className="space-y-s2">
@@ -306,27 +380,51 @@ export function SidebarUserSection(): JSX.Element {
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 className="hidden"
-                onChange={(event) => handlePickAvatar(event.target.files?.[0] ?? null)}
+                onChange={(event) =>
+                  handlePickAvatar(event.target.files?.[0] ?? null)
+                }
               />
-              <Button variant="secondary" type="button" onClick={() => document.getElementById('avatar-input')?.click()}>
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => document.getElementById('avatar-input')?.click()}
+              >
                 Upload
               </Button>
-              <p className="text-caption text-text-muted">Max 2MB, jpg/png/webp.</p>
+              <p className="text-caption text-text-muted">
+                Max 2MB, jpg/png/webp.
+              </p>
             </div>
           </div>
 
           <div className="space-y-s1">
-            <label className="text-small font-medium text-text-secondary">Email</label>
-            <Input className="h-11" value={user?.email || ''} readOnly />
+            <label className="text-small font-medium text-text-secondary">
+              Email
+            </label>
+            <Input
+              className="h-11"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              value={profileEmail}
+              onChange={(event) => setProfileEmail(event.target.value)}
+            />
           </div>
 
           <div className="space-y-s1">
-            <label className="text-small font-medium text-text-secondary">Full Name</label>
-            <Input className="h-11" value={profileName} onChange={(event) => setProfileName(event.target.value)} />
+            <label className="text-small font-medium text-text-secondary">
+              Full Name
+            </label>
+            <Input
+              className="h-11"
+              value={profileName}
+              onChange={(event) => setProfileName(event.target.value)}
+            />
           </div>
 
-          {generalError ? <p className="text-caption text-state-error">{generalError}</p> : null}
-
+          {generalError ? (
+            <p className="text-caption text-state-error">{generalError}</p>
+          ) : null}
         </div>
       </Modal>
 
@@ -352,22 +450,44 @@ export function SidebarUserSection(): JSX.Element {
       >
         <div className="space-y-s4">
           <div className="space-y-s1">
-            <label className="text-small font-medium text-text-secondary">Current Password</label>
-            <Input className="h-11" type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} />
+            <label className="text-small font-medium text-text-secondary">
+              Current Password
+            </label>
+            <Input
+              className="h-11"
+              type="password"
+              value={currentPassword}
+              onChange={(event) => setCurrentPassword(event.target.value)}
+            />
           </div>
 
           <div className="space-y-s1">
-            <label className="text-small font-medium text-text-secondary">New Password</label>
-            <Input className="h-11" type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} />
+            <label className="text-small font-medium text-text-secondary">
+              New Password
+            </label>
+            <Input
+              className="h-11"
+              type="password"
+              value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)}
+            />
           </div>
 
           <div className="space-y-s1">
-            <label className="text-small font-medium text-text-secondary">Confirm New Password</label>
-            <Input className="h-11" type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
+            <label className="text-small font-medium text-text-secondary">
+              Confirm New Password
+            </label>
+            <Input
+              className="h-11"
+              type="password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+            />
           </div>
 
-          {passwordError ? <p className="text-caption text-state-error">{passwordError}</p> : null}
-
+          {passwordError ? (
+            <p className="text-caption text-state-error">{passwordError}</p>
+          ) : null}
         </div>
       </Modal>
 
@@ -382,16 +502,24 @@ export function SidebarUserSection(): JSX.Element {
             <Button variant="secondary" onClick={() => setSignOutOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmSignOut} disabled={signingOut}>
+            <Button
+              variant="destructive"
+              onClick={confirmSignOut}
+              disabled={signingOut}
+            >
               {signingOut ? 'Signing out...' : 'Sign Out'}
             </Button>
           </>
         }
       >
         <div className="space-y-s4">
-          <p className="text-small text-text-secondary">You will be signed out of the system.</p>
+          <p className="text-small text-text-secondary">
+            You will be signed out of the system.
+          </p>
 
-          {signOutError ? <p className="text-caption text-state-error">{signOutError}</p> : null}
+          {signOutError ? (
+            <p className="text-caption text-state-error">{signOutError}</p>
+          ) : null}
         </div>
       </Modal>
     </div>

@@ -7,6 +7,7 @@ export interface User {
 }
 
 export interface UpdateProfileDTO {
+  email?: string;
   fullName?: string;
   avatarFile?: File;
 }

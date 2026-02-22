@@ -87,6 +87,10 @@ declare module 'firebase-admin/auth' {
     getUserByEmail: (
       email: string
     ) => Promise<{ uid: string; email?: string | null }>;
+    updateUser: (
+      uid: string,
+      input: unknown
+    ) => Promise<{ uid: string; email?: string | null }>;
     createCustomToken: (uid: string) => Promise<string>;
   };
 
