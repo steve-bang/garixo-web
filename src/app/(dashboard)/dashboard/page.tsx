@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation';
 
 import { DashboardOnboardingState } from '@/features/onboarding/components/dashboard-onboarding-state';
 import { auth } from '@/lib/auth';
-import { getOnboardingState, listQuickWorkOrders } from '@/mocks/onboarding.mock';
+import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { listGarageWorkOrders } from '@/services/firebase/work-orders-service';
 
 export default async function DashboardPage(): Promise<JSX.Element> {
   const session = await auth();
@@ -11,13 +12,19 @@ export default async function DashboardPage(): Promise<JSX.Element> {
     redirect('/auth/login');
   }
 
-  const state = await getOnboardingState(session.user.id);
-
-  if (!state.garageConfigured) {
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
     redirect('/onboarding/setup-garage');
   }
 
-  const orders = await listQuickWorkOrders(session.user.id);
+  const orders = (await listGarageWorkOrders(garage.id)).map((item) => ({
+    id: item.id,
+    customerName: item.customerName,
+    licensePlate: item.licensePlate,
+    service: item.service,
+    notes: item.notes,
+    createdAt: item.createdAt
+  }));
 
   return <DashboardOnboardingState workOrders={orders} />;
 }

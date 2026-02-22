@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(garageId) {
+      return isSignedIn()
+        && get(/databases/$(database)/documents/garages/$(garageId)).data.ownerId == request.auth.uid;
+    }
+
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /garages/{garageId} {
+      allow read, write: if isOwner(garageId);
+
+      match /services/{serviceId} {
+        allow read, write: if isOwner(garageId);
+      }
+
+      match /workOrders/{workOrderId} {
+        allow read, write: if isOwner(garageId);
+      }
+    }
+  }
+}

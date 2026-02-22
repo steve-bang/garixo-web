@@ -13,15 +13,20 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.next();
   }
 
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET
+  });
 
   if (!token) {
-    const loginUrl = new URL('/login', request.url);
+    const loginUrl = new URL('/auth/login', request.url);
     loginUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  const restrictedRoute = Object.entries(roleAccess).find(([route]) => pathname.startsWith(route));
+  const restrictedRoute = Object.entries(roleAccess).find(([route]) =>
+    pathname.startsWith(route)
+  );
 
   if (restrictedRoute) {
     const [, allowedRoles] = restrictedRoute;

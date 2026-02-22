@@ -5,18 +5,18 @@ declare module 'next-auth' {
     accessToken?: string;
     user: DefaultSession['user'] & {
       id: string;
-      role: 'admin' | 'staff' | 'user';
+      role: 'owner' | 'admin' | 'staff' | 'user';
     };
   }
 
   interface User {
-    role: 'admin' | 'staff' | 'user';
+    role: 'owner' | 'admin' | 'staff' | 'user';
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    role?: 'admin' | 'staff' | 'user';
+    role?: 'owner' | 'admin' | 'staff' | 'user';
     accessToken?: string;
   }
 }

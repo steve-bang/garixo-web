@@ -9,10 +9,13 @@ import { LoadingState } from '@/components/common/loading-state';
 
 type ProtectedRouteProps = {
   children: ReactNode;
-  allowedRoles?: Array<'admin' | 'staff' | 'user'>;
+  allowedRoles?: Array<'owner' | 'admin' | 'staff' | 'user'>;
 };
 
-export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps): JSX.Element {
+export function ProtectedRoute({
+  children,
+  allowedRoles
+}: ProtectedRouteProps): JSX.Element {
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -22,7 +25,11 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps):
       return;
     }
 
-    if (status === 'authenticated' && allowedRoles && !allowedRoles.includes(session.user.role)) {
+    if (
+      status === 'authenticated' &&
+      allowedRoles &&
+      !allowedRoles.includes(session.user.role)
+    ) {
       router.replace('/dashboard');
     }
   }, [allowedRoles, router, session, status]);

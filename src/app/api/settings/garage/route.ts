@@ -1,11 +1,18 @@
 import { NextResponse } from 'next/server';
 
 import { auth } from '@/lib/auth';
-import { getMockGarageSettings, updateMockGarageSettings } from '@/mocks/garage-settings.mock';
 import type { GarageSettings } from '@/features/settings/garage-information.types';
+import { firebaseAdmin } from '@/lib/firebase-admin';
+import {
+  getGarageByOwnerId,
+  updateGarage
+} from '@/services/firebase/garage-service';
 import type { ApiResponse } from '@/types/api';
 
-function response<T>(payload: ApiResponse<T>, status = 200): NextResponse<ApiResponse<T>> {
+function response<T>(
+  payload: ApiResponse<T>,
+  status = 200
+): NextResponse<ApiResponse<T>> {
   return NextResponse.json(payload, { status });
 }
 
@@ -13,21 +20,40 @@ function validImageType(type: string): boolean {
   return ['image/jpeg', 'image/png', 'image/webp'].includes(type);
 }
 
-export async function GET(): Promise<NextResponse<ApiResponse<GarageSettings>>> {
+export async function GET(): Promise<
+  NextResponse<ApiResponse<GarageSettings>>
+> {
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const settings = await getMockGarageSettings();
-  return response({ success: true, data: settings });
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
+  return response({
+    success: true,
+    data: {
+      garageName: garage.name,
+      logoUrl: garage.logoUrl ?? '',
+      phone: garage.phone ?? '',
+      email: garage.email ?? session.user.email ?? '',
+      address: garage.address ?? '',
+      workingHours: garage.workingHours ?? '',
+      updatedAt: garage.updatedAt
+    }
+  });
 }
 
-export async function PUT(request: Request): Promise<NextResponse<ApiResponse<GarageSettings>>> {
+export async function PUT(
+  request: Request
+): Promise<NextResponse<ApiResponse<GarageSettings>>> {
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
@@ -37,7 +63,11 @@ export async function PUT(request: Request): Promise<NextResponse<ApiResponse<Ga
     return response({ success: false, error: 'Invalid payload format.' }, 400);
   }
 
-  const current = await getMockGarageSettings();
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const formData = await request.formData();
   const garageName = String(formData.get('garageName') ?? '').trim();
   const phone = String(formData.get('phone') ?? '').trim();
@@ -51,7 +81,7 @@ export async function PUT(request: Request): Promise<NextResponse<ApiResponse<Ga
     return response({ success: false, error: 'Garage name is required.' }, 400);
   }
 
-  let nextLogoUrl = current.logoUrl;
+  let nextLogoUrl = garage.logoUrl ?? '';
 
   if (removeLogo) {
     nextLogoUrl = '';
@@ -59,25 +89,57 @@ export async function PUT(request: Request): Promise<NextResponse<ApiResponse<Ga
 
   if (logoFile instanceof File && logoFile.size > 0) {
     if (!validImageType(logoFile.type)) {
-      return response({ success: false, error: 'Only PNG/JPG/WEBP files are allowed.' }, 400);
+      return response(
+        { success: false, error: 'Only PNG/JPG/WEBP files are allowed.' },
+        400
+      );
     }
 
     if (logoFile.size > 2 * 1024 * 1024) {
-      return response({ success: false, error: 'Logo size must be 2MB or smaller.' }, 400);
+      return response(
+        { success: false, error: 'Logo size must be 2MB or smaller.' },
+        400
+      );
     }
 
     const buffer = Buffer.from(await logoFile.arrayBuffer());
-    nextLogoUrl = `data:${logoFile.type};base64,${buffer.toString('base64')}`;
+    const bucket = firebaseAdmin.storage.bucket();
+    const filePath = `garages/${garage.id}/logo.png`;
+    const file = bucket.file(filePath);
+    await file.save(buffer, {
+      contentType: logoFile.type,
+      resumable: false,
+      metadata: {
+        cacheControl: 'public,max-age=3600'
+      }
+    });
+
+    const [signedUrl] = await file.getSignedUrl({
+      action: 'read',
+      expires: '03-01-2035'
+    });
+    nextLogoUrl = signedUrl;
   }
 
-  const updated = await updateMockGarageSettings({
-    garageName,
-    logoUrl: nextLogoUrl || '',
+  const updatedGarage = await updateGarage(garage.id, {
+    name: garageName,
+    address,
     phone,
     email,
-    address,
-    workingHours
+    workingHours,
+    logoUrl: nextLogoUrl || ''
   });
 
-  return response({ success: true, data: updated });
+  return response({
+    success: true,
+    data: {
+      garageName: updatedGarage.name,
+      logoUrl: updatedGarage.logoUrl ?? '',
+      phone: updatedGarage.phone ?? '',
+      email: updatedGarage.email ?? email,
+      address: updatedGarage.address ?? '',
+      workingHours: updatedGarage.workingHours ?? workingHours,
+      updatedAt: updatedGarage.updatedAt
+    }
+  });
 }
