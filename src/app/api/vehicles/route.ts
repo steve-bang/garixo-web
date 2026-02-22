@@ -1,12 +1,24 @@
 import { NextResponse } from 'next/server';
 
-import { findVehicleByNormalizedPlate, vehiclesDB, vehicleServicesDB } from '@/app/api/vehicles/vehicles-db';
-import { createVehicleSchema, vehiclesListQuerySchema } from '@/features/vehicles/schema';
+import {
+  createVehicleSchema,
+  vehiclesListQuerySchema
+} from '@/features/vehicles/schema';
 import type { Vehicle, VehicleListResponse } from '@/features/vehicles/types';
 import { normalizePlate, toPlateDisplay } from '@/features/vehicles/utils';
+import { auth } from '@/lib/auth';
+import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import {
+  createGarageVehicle,
+  findGarageVehicleByNormalizedPlate,
+  listGarageVehicles
+} from '@/services/firebase/vehicles-service';
 import type { ApiResponse } from '@/types/api';
 
-function response<T>(payload: ApiResponse<T>, status = 200): NextResponse<ApiResponse<T>> {
+function response<T>(
+  payload: ApiResponse<T>,
+  status = 200
+): NextResponse<ApiResponse<T>> {
   return NextResponse.json(payload, { status });
 }
 
@@ -18,16 +30,35 @@ function statusPriority(status: Vehicle['status']): number {
   return 1;
 }
 
-function brandKey(brand?: string): 'TOYOTA' | 'HONDA' | 'HYUNDAI' | 'FORD' | 'OTHER' {
+function brandKey(
+  brand?: string
+): 'TOYOTA' | 'HONDA' | 'HYUNDAI' | 'FORD' | 'OTHER' {
   const value = (brand ?? '').trim().toUpperCase();
-  if (value === 'TOYOTA' || value === 'HONDA' || value === 'HYUNDAI' || value === 'FORD') {
+  if (
+    value === 'TOYOTA' ||
+    value === 'HONDA' ||
+    value === 'HYUNDAI' ||
+    value === 'FORD'
+  ) {
     return value;
   }
 
   return 'OTHER';
 }
 
-export async function GET(request: Request): Promise<NextResponse<ApiResponse<VehicleListResponse>>> {
+export async function GET(
+  request: Request
+): Promise<NextResponse<ApiResponse<VehicleListResponse>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const url = new URL(request.url);
 
   const parsed = vehiclesListQuerySchema.safeParse({
@@ -39,12 +70,18 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Ve
   });
 
   if (!parsed.success) {
-    return response({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid query.' }, 400);
+    return response(
+      {
+        success: false,
+        error: parsed.error.issues[0]?.message ?? 'Invalid query.'
+      },
+      400
+    );
   }
 
   const { search, brand, status, page, pageSize } = parsed.data;
 
-  let filtered = [...vehiclesDB];
+  let filtered = await listGarageVehicles(garage.id);
 
   if (search) {
     const needle = search.toLowerCase().trim();
@@ -80,14 +117,20 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Ve
           return aScore - bScore;
         }
 
-        return (b.lastServiceDate ? new Date(b.lastServiceDate).getTime() : 0) - (a.lastServiceDate ? new Date(a.lastServiceDate).getTime() : 0);
+        return (
+          (b.lastServiceDate ? new Date(b.lastServiceDate).getTime() : 0) -
+          (a.lastServiceDate ? new Date(a.lastServiceDate).getTime() : 0)
+        );
       });
   } else {
     filtered.sort((a, b) => {
       const statusDiff = statusPriority(a.status) - statusPriority(b.status);
       if (statusDiff !== 0) return statusDiff;
 
-      return (b.lastServiceDate ? new Date(b.lastServiceDate).getTime() : 0) - (a.lastServiceDate ? new Date(a.lastServiceDate).getTime() : 0);
+      return (
+        (b.lastServiceDate ? new Date(b.lastServiceDate).getTime() : 0) -
+        (a.lastServiceDate ? new Date(a.lastServiceDate).getTime() : 0)
+      );
     });
   }
 
@@ -119,43 +162,62 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Ve
   });
 }
 
-export async function POST(request: Request): Promise<NextResponse<ApiResponse<Vehicle>>> {
+export async function POST(
+  request: Request
+): Promise<NextResponse<ApiResponse<Vehicle>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = createVehicleSchema.safeParse(body);
 
   if (!parsed.success) {
-    return response({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid payload.' }, 400);
+    return response(
+      {
+        success: false,
+        error: parsed.error.issues[0]?.message ?? 'Invalid payload.'
+      },
+      400
+    );
   }
 
-  const duplicate = findVehicleByNormalizedPlate(parsed.data.plateNumber);
+  const duplicate = await findGarageVehicleByNormalizedPlate(
+    garage.id,
+    parsed.data.plateNumber
+  );
 
   if (duplicate) {
-    return response({ success: false, error: 'Plate number already exists.' }, 409);
+    return response(
+      { success: false, error: 'Plate number already exists.' },
+      409
+    );
   }
 
-  const now = new Date().toISOString();
-  const created: Vehicle = {
-    id: crypto.randomUUID(),
+  const created = await createGarageVehicle(garage.id, {
     plateNumber: toPlateDisplay(parsed.data.plateNumber),
     brand: parsed.data.brand,
     model: parsed.data.model,
     year: parsed.data.year,
     color: parsed.data.color,
     vin: parsed.data.vin,
-    customerId: parsed.data.customerId || `cus-${parsed.data.customerPhone.replace(/\D/g, '').slice(-6)}`,
+    customerId:
+      parsed.data.customerId ||
+      `cus-${parsed.data.customerPhone.replace(/\D/g, '').slice(-6)}`,
     customerName: parsed.data.customerName,
     customerPhone: parsed.data.customerPhone,
     status: parsed.data.status,
     totalVisits: 0,
     totalSpent: 0,
     lastServiceDate: undefined,
-    notes: parsed.data.notes,
-    createdAt: now,
-    updatedAt: now
-  };
-
-  vehiclesDB.unshift(created);
-  vehicleServicesDB[created.id] = [];
+    notes: parsed.data.notes
+  });
 
   return response({ success: true, data: created }, 201);
 }

@@ -12,6 +12,7 @@ import { VehiclesFilters } from '@/features/vehicles/components/vehicles-filters
 import { VehiclesKpiRow } from '@/features/vehicles/components/vehicles-kpi-row';
 import { VehiclesSkeleton } from '@/features/vehicles/components/vehicles-skeleton';
 import { VehiclesTable } from '@/features/vehicles/components/vehicles-table';
+import { useCustomers } from '@/features/customers/hooks';
 import {
   useCreateVehicle,
   useDeleteVehicle,
@@ -47,7 +48,11 @@ export function VehiclesManagementPage(): JSX.Element {
   const [brand, setBrand] = useState<BrandFilter | undefined>();
   const [status, setStatus] = useState<VehicleStatus | undefined>();
   const [page, setPage] = useState(1);
-  const [drawerState, setDrawerState] = useState<DrawerState>({ open: false, mode: 'view', vehicle: null });
+  const [drawerState, setDrawerState] = useState<DrawerState>({
+    open: false,
+    mode: 'view',
+    vehicle: null
+  });
   const [deleteTarget, setDeleteTarget] = useState<Vehicle | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
@@ -71,10 +76,17 @@ export function VehiclesManagementPage(): JSX.Element {
 
   const listParams = { search, brand, status, page, pageSize } as const;
   const listQuery = useVehicles(listParams);
-  const kpiQuery = useVehicles({ search, brand, status, page: 1, pageSize: 100 });
+  const kpiQuery = useVehicles({
+    search,
+    brand,
+    status,
+    page: 1,
+    pageSize: 100
+  });
 
   const detailQuery = useVehicleDetail(drawerState.vehicle?.id);
   const servicesQuery = useVehicleServices(drawerState.vehicle?.id);
+  const customersQuery = useCustomers({ page: 1, pageSize: 100 });
 
   const createMutation = useCreateVehicle();
   const updateMutation = useUpdateVehicle();
@@ -83,15 +95,25 @@ export function VehiclesManagementPage(): JSX.Element {
   const listItems = listQuery.data?.items ?? [];
   const meta = listQuery.data?.meta;
   const kpis = useVehicleKpis(kpiQuery.data?.items ?? []);
+  const isTableUpdating =
+    (listQuery.isFetching && !listQuery.isLoading) ||
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending;
 
-  const openCreate = () => setDrawerState({ open: true, mode: 'create', vehicle: null });
-  const openView = (vehicle: Vehicle) => setDrawerState({ open: true, mode: 'view', vehicle });
-  const openEdit = (vehicle: Vehicle) => setDrawerState({ open: true, mode: 'edit', vehicle });
-  const closeDrawer = () => setDrawerState((prev) => ({ ...prev, open: false, vehicle: null }));
+  const openCreate = () =>
+    setDrawerState({ open: true, mode: 'create', vehicle: null });
+  const openView = (vehicle: Vehicle) =>
+    setDrawerState({ open: true, mode: 'view', vehicle });
+  const openEdit = (vehicle: Vehicle) =>
+    setDrawerState({ open: true, mode: 'edit', vehicle });
+  const closeDrawer = () =>
+    setDrawerState((prev) => ({ ...prev, open: false, vehicle: null }));
 
   const handleSave = async (payload: CreateVehicleInput) => {
     if (drawerState.mode === 'create') {
       const created = await createMutation.mutateAsync(payload);
+      await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
       setHighlightedId(created.id);
       closeDrawer();
       toast.success('Vehicle added successfully.');
@@ -102,7 +124,11 @@ export function VehiclesManagementPage(): JSX.Element {
       return;
     }
 
-    const updated = await updateMutation.mutateAsync({ id: drawerState.vehicle.id, payload });
+    const updated = await updateMutation.mutateAsync({
+      id: drawerState.vehicle.id,
+      payload
+    });
+    await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
     setHighlightedId(updated.id);
     closeDrawer();
     toast.success('Vehicle updated successfully.');
@@ -110,6 +136,7 @@ export function VehiclesManagementPage(): JSX.Element {
 
   const handleDelete = async (id: string) => {
     await deleteMutation.mutateAsync(id);
+    await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
     setDeleteTarget(null);
     toast.success('Vehicle deleted successfully.');
   };
@@ -121,7 +148,9 @@ export function VehiclesManagementPage(): JSX.Element {
   if (listQuery.isError || kpiQuery.isError) {
     return (
       <Card className="m-s8 p-s6">
-        <p className="text-small text-state-error">Could not load vehicles data.</p>
+        <p className="text-small text-state-error">
+          Could not load vehicles data.
+        </p>
       </Card>
     );
   }
@@ -131,7 +160,9 @@ export function VehiclesManagementPage(): JSX.Element {
       <header className="flex flex-col items-start justify-between gap-s3 md:flex-row md:items-center">
         <div>
           <h1 className="text-h1">Vehicles</h1>
-          <p className="text-small text-text-muted">Manage vehicle records and service history.</p>
+          <p className="text-small text-text-muted">
+            Manage vehicle records and service history.
+          </p>
         </div>
 
         <Button onClick={openCreate}>
@@ -165,6 +196,7 @@ export function VehiclesManagementPage(): JSX.Element {
       />
 
       <VehiclesTable
+        loading={isTableUpdating}
         vehicles={listItems}
         hasQuery={Boolean(search || brand || status)}
         currentUserRole={currentUserRole}
@@ -182,7 +214,12 @@ export function VehiclesManagementPage(): JSX.Element {
           </p>
 
           <div className="flex items-center gap-s2">
-            <Button variant="secondary" size="sm" disabled={meta.page <= 1} onClick={() => setPage((prev) => Math.max(prev - 1, 1))}>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={meta.page <= 1}
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            >
               Previous
             </Button>
             <Badge variant="default">{meta.page}</Badge>
@@ -190,7 +227,9 @@ export function VehiclesManagementPage(): JSX.Element {
               variant="secondary"
               size="sm"
               disabled={meta.page >= meta.totalPages}
-              onClick={() => setPage((prev) => Math.min(prev + 1, meta.totalPages))}
+              onClick={() =>
+                setPage((prev) => Math.min(prev + 1, meta.totalPages))
+              }
             >
               Next
             </Button>
@@ -205,6 +244,7 @@ export function VehiclesManagementPage(): JSX.Element {
         detail={detailQuery.data}
         services={servicesQuery.data}
         loadingDetail={detailQuery.isLoading || servicesQuery.isLoading}
+        customers={customersQuery.data?.items ?? []}
         onClose={closeDrawer}
         onSubmit={handleSave}
       />

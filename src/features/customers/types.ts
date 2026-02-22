@@ -6,6 +6,9 @@ export interface Vehicle {
   id: string;
   plate: string;
   brand: string;
+  model?: string;
+  year?: number;
+  color?: string;
   lastServiceDate?: string;
 }
 
@@ -27,7 +30,7 @@ export interface Customer {
   vehicles: Vehicle[];
   totalVisits: number;
   totalSpent: number;
-  lastVisit?: string;
+  lastVisit?: string | null;
   notes?: string;
   createdAt: string;
   updatedAt: string;

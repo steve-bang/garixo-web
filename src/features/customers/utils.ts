@@ -16,7 +16,7 @@ export function formatCurrencyVnd(value: number): string {
   return `${new Intl.NumberFormat('vi-VN').format(value)} đ`;
 }
 
-export function formatDate(value?: string): string {
+export function formatDate(value?: string | null): string {
   if (!value) {
     return '-';
   }
@@ -26,7 +26,11 @@ export function formatDate(value?: string): string {
     return '-';
   }
 
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).format(date);
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric'
+  }).format(date);
 }
 
 export function calculateAverageTicket(customer: Customer): number {

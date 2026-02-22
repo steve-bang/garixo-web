@@ -1,11 +1,27 @@
 import { NextResponse } from 'next/server';
 
-import { customerHistoryDB, customersDB } from '@/app/api/customers/customers-db';
-import { createCustomerSchema, customerListQuerySchema, matchesSpendingTier } from '@/features/customers/schema';
-import type { Customer, CustomerListResponse } from '@/features/customers/types';
+import {
+  createCustomerSchema,
+  customerListQuerySchema,
+  matchesSpendingTier
+} from '@/features/customers/schema';
+import type {
+  Customer,
+  CustomerListResponse
+} from '@/features/customers/types';
+import { auth } from '@/lib/auth';
+import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import {
+  createGarageCustomer,
+  isGarageCustomerPhoneExists,
+  listGarageCustomers
+} from '@/services/firebase/customers-service';
 import type { ApiResponse } from '@/types/api';
 
-function response<T>(payload: ApiResponse<T>, status = 200): NextResponse<ApiResponse<T>> {
+function response<T>(
+  payload: ApiResponse<T>,
+  status = 200
+): NextResponse<ApiResponse<T>> {
   return NextResponse.json(payload, { status });
 }
 
@@ -36,7 +52,19 @@ function sortByLastVisitDesc(items: Customer[]): Customer[] {
   });
 }
 
-export async function GET(request: Request): Promise<NextResponse<ApiResponse<CustomerListResponse>>> {
+export async function GET(
+  request: Request
+): Promise<NextResponse<ApiResponse<CustomerListResponse>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const url = new URL(request.url);
 
   const parsedQuery = customerListQuerySchema.safeParse({
@@ -48,18 +76,30 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Cu
   });
 
   if (!parsedQuery.success) {
-    return response({ success: false, error: parsedQuery.error.issues[0]?.message ?? 'Invalid query.' }, 400);
+    return response(
+      {
+        success: false,
+        error: parsedQuery.error.issues[0]?.message ?? 'Invalid query.'
+      },
+      400
+    );
   }
 
   const { search, status, spendingTier, page, pageSize } = parsedQuery.data;
 
-  let filtered = [...customersDB];
+  let filtered = await listGarageCustomers(garage.id);
 
   if (search) {
     const needle = search.toLowerCase();
     filtered = filtered.filter((customer) => {
-      const plateMatch = customer.vehicles.some((vehicle) => vehicle.plate.toLowerCase().includes(needle));
-      return customer.name.toLowerCase().includes(needle) || customer.phone.toLowerCase().includes(needle) || plateMatch;
+      const plateMatch = customer.vehicles.some((vehicle) =>
+        vehicle.plate.toLowerCase().includes(needle)
+      );
+      return (
+        customer.name.toLowerCase().includes(needle) ||
+        customer.phone.toLowerCase().includes(needle) ||
+        plateMatch
+      );
     });
 
     filtered = [...filtered].sort((a, b) => {
@@ -70,7 +110,10 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Cu
         return scoreA - scoreB;
       }
 
-      return (b.lastVisit ? new Date(b.lastVisit).getTime() : 0) - (a.lastVisit ? new Date(a.lastVisit).getTime() : 0);
+      return (
+        (b.lastVisit ? new Date(b.lastVisit).getTime() : 0) -
+        (a.lastVisit ? new Date(a.lastVisit).getTime() : 0)
+      );
     });
   } else {
     filtered = sortByLastVisitDesc(filtered);
@@ -81,7 +124,9 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Cu
   }
 
   if (spendingTier) {
-    filtered = filtered.filter((customer) => matchesSpendingTier(customer.totalSpent, spendingTier));
+    filtered = filtered.filter((customer) =>
+      matchesSpendingTier(customer.totalSpent, spendingTier)
+    );
   }
 
   const total = filtered.length;
@@ -104,23 +149,42 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Cu
   });
 }
 
-export async function POST(request: Request): Promise<NextResponse<ApiResponse<Customer>>> {
+export async function POST(
+  request: Request
+): Promise<NextResponse<ApiResponse<Customer>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = createCustomerSchema.safeParse(body);
 
   if (!parsed.success) {
-    return response({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid payload.' }, 400);
+    return response(
+      {
+        success: false,
+        error: parsed.error.issues[0]?.message ?? 'Invalid payload.'
+      },
+      400
+    );
   }
 
-  const duplicatePhone = customersDB.find((item) => item.phone.replace(/\D/g, '') === parsed.data.phone.replace(/\D/g, ''));
+  const duplicatePhone = await isGarageCustomerPhoneExists(
+    garage.id,
+    parsed.data.phone
+  );
 
   if (duplicatePhone) {
     return response({ success: false, error: 'Phone already exists.' }, 409);
   }
 
-  const now = new Date().toISOString();
-  const created: Customer = {
-    id: crypto.randomUUID(),
+  const created = await createGarageCustomer(garage.id, {
     name: parsed.data.name,
     phone: parsed.data.phone,
     email: parsed.data.email,
@@ -129,14 +193,9 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<C
     vehicles: [],
     totalVisits: 0,
     totalSpent: 0,
-    lastVisit: undefined,
-    notes: parsed.data.notes,
-    createdAt: now,
-    updatedAt: now
-  };
-
-  customersDB.unshift(created);
-  customerHistoryDB[created.id] = [];
+    lastVisit: null,
+    notes: parsed.data.notes
+  });
 
   return response({ success: true, data: created }, 201);
 }

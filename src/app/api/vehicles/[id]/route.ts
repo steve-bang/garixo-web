@@ -1,12 +1,22 @@
 import { NextResponse } from 'next/server';
 
-import { vehiclesDB, vehicleServicesDB, findVehicleByNormalizedPlate } from '@/app/api/vehicles/vehicles-db';
 import { updateVehicleSchema } from '@/features/vehicles/schema';
 import type { Vehicle } from '@/features/vehicles/types';
 import { toPlateDisplay } from '@/features/vehicles/utils';
+import { auth } from '@/lib/auth';
+import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import {
+  deleteGarageVehicle,
+  findGarageVehicleById,
+  findGarageVehicleByNormalizedPlate,
+  updateGarageVehicle
+} from '@/services/firebase/vehicles-service';
 import type { ApiResponse } from '@/types/api';
 
-function response<T>(payload: ApiResponse<T>, status = 200): NextResponse<ApiResponse<T>> {
+function response<T>(
+  payload: ApiResponse<T>,
+  status = 200
+): NextResponse<ApiResponse<T>> {
   return NextResponse.json(payload, { status });
 }
 
@@ -14,13 +24,22 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-function findById(id: string): Vehicle | undefined {
-  return vehiclesDB.find((item) => item.id === id);
-}
+export async function GET(
+  _request: Request,
+  context: RouteContext
+): Promise<NextResponse<ApiResponse<Vehicle>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
 
-export async function GET(_request: Request, context: RouteContext): Promise<NextResponse<ApiResponse<Vehicle>>> {
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const { id } = await context.params;
-  const vehicle = findById(id);
+  const vehicle = await findGarageVehicleById(garage.id, id);
 
   if (!vehicle) {
     return response({ success: false, error: 'Vehicle not found.' }, 404);
@@ -29,9 +48,22 @@ export async function GET(_request: Request, context: RouteContext): Promise<Nex
   return response({ success: true, data: vehicle });
 }
 
-export async function PUT(request: Request, context: RouteContext): Promise<NextResponse<ApiResponse<Vehicle>>> {
+export async function PUT(
+  request: Request,
+  context: RouteContext
+): Promise<NextResponse<ApiResponse<Vehicle>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const { id } = await context.params;
-  const current = findById(id);
+  const current = await findGarageVehicleById(garage.id, id);
 
   if (!current) {
     return response({ success: false, error: 'Vehicle not found.' }, 404);
@@ -41,45 +73,76 @@ export async function PUT(request: Request, context: RouteContext): Promise<Next
   const parsed = updateVehicleSchema.safeParse({ ...body, id });
 
   if (!parsed.success) {
-    return response({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid payload.' }, 400);
+    return response(
+      {
+        success: false,
+        error: parsed.error.issues[0]?.message ?? 'Invalid payload.'
+      },
+      400
+    );
   }
 
   if (parsed.data.plateNumber) {
-    const duplicate = findVehicleByNormalizedPlate(parsed.data.plateNumber);
+    const duplicate = await findGarageVehicleByNormalizedPlate(
+      garage.id,
+      parsed.data.plateNumber
+    );
     if (duplicate && duplicate.id !== id) {
-      return response({ success: false, error: 'Plate number already exists.' }, 409);
+      return response(
+        { success: false, error: 'Plate number already exists.' },
+        409
+      );
     }
   }
 
-  const updated: Vehicle = {
-    ...current,
+  const updated = await updateGarageVehicle(garage.id, id, {
     ...parsed.data,
-    id,
-    plateNumber: parsed.data.plateNumber ? toPlateDisplay(parsed.data.plateNumber) : current.plateNumber,
-    updatedAt: new Date().toISOString()
-  };
-
-  const index = vehiclesDB.findIndex((item) => item.id === id);
-  vehiclesDB[index] = updated;
+    plateNumber: parsed.data.plateNumber
+      ? toPlateDisplay(parsed.data.plateNumber)
+      : undefined
+  });
+  if (!updated) {
+    return response({ success: false, error: 'Vehicle not found.' }, 404);
+  }
 
   return response({ success: true, data: updated });
 }
 
-export async function DELETE(_request: Request, context: RouteContext): Promise<NextResponse<ApiResponse<Vehicle>>> {
+export async function DELETE(
+  _request: Request,
+  context: RouteContext
+): Promise<NextResponse<ApiResponse<Vehicle>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const { id } = await context.params;
-  const current = findById(id);
+  const current = await findGarageVehicleById(garage.id, id);
 
   if (!current) {
     return response({ success: false, error: 'Vehicle not found.' }, 404);
   }
 
   if (current.totalVisits > 0) {
-    return response({ success: false, error: 'Vehicle has service history. Set to Inactive instead.' }, 400);
+    return response(
+      {
+        success: false,
+        error: 'Vehicle has service history. Set to Inactive instead.'
+      },
+      400
+    );
   }
 
-  const index = vehiclesDB.findIndex((item) => item.id === id);
-  vehiclesDB.splice(index, 1);
-  delete vehicleServicesDB[id];
+  const deleted = await deleteGarageVehicle(garage.id, id);
+  if (!deleted) {
+    return response({ success: false, error: 'Vehicle not found.' }, 404);
+  }
 
-  return response({ success: true, data: current });
+  return response({ success: true, data: deleted });
 }

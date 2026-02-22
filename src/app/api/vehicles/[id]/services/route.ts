@@ -1,11 +1,18 @@
 import { NextResponse } from 'next/server';
 
-import { vehicleServicesDB, vehiclesDB } from '@/app/api/vehicles/vehicles-db';
 import type { ServiceRecord } from '@/features/vehicles/types';
-import { latestService } from '@/features/vehicles/utils';
+import { auth } from '@/lib/auth';
+import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import {
+  findGarageVehicleById,
+  listGarageVehicleServices
+} from '@/services/firebase/vehicles-service';
 import type { ApiResponse } from '@/types/api';
 
-function response<T>(payload: ApiResponse<T>, status = 200): NextResponse<ApiResponse<T>> {
+function response<T>(
+  payload: ApiResponse<T>,
+  status = 200
+): NextResponse<ApiResponse<T>> {
   return NextResponse.json(payload, { status });
 }
 
@@ -13,14 +20,27 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-export async function GET(_request: Request, context: RouteContext): Promise<NextResponse<ApiResponse<ServiceRecord[]>>> {
+export async function GET(
+  _request: Request,
+  context: RouteContext
+): Promise<NextResponse<ApiResponse<ServiceRecord[]>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const { id } = await context.params;
-  const vehicle = vehiclesDB.find((item) => item.id === id);
+  const vehicle = await findGarageVehicleById(garage.id, id);
 
   if (!vehicle) {
     return response({ success: false, error: 'Vehicle not found.' }, 404);
   }
 
-  const services = latestService(vehicleServicesDB[id] ?? []);
+  const services = await listGarageVehicleServices(garage.id, id);
   return response({ success: true, data: services });
 }

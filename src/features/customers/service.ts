@@ -1,4 +1,7 @@
-import type { CreateCustomerInput, UpdateCustomerInput } from '@/features/customers/schema';
+import type {
+  CreateCustomerInput,
+  UpdateCustomerInput
+} from '@/features/customers/schema';
 import type {
   Customer,
   CustomerDetailResponse,
@@ -40,20 +43,28 @@ function toQuery(params: GetCustomersParams): string {
   return search.toString();
 }
 
-export async function getCustomers(params: GetCustomersParams): Promise<CustomerListResponse> {
+export async function getCustomers(
+  params: GetCustomersParams
+): Promise<CustomerListResponse> {
   const query = toQuery(params);
-  const response = await fetch(`/api/customers${query ? `?${query}` : ''}`, { method: 'GET' });
+  const response = await fetch(`/api/customers${query ? `?${query}` : ''}`, {
+    method: 'GET'
+  });
   const payload = await readJson<CustomerListResponse>(response);
   return ensureSuccess(payload);
 }
 
-export async function getCustomerById(id: string): Promise<CustomerDetailResponse> {
+export async function getCustomerById(
+  id: string
+): Promise<CustomerDetailResponse> {
   const response = await fetch(`/api/customers/${id}`, { method: 'GET' });
   const payload = await readJson<CustomerDetailResponse>(response);
   return ensureSuccess(payload);
 }
 
-export async function createCustomer(input: CreateCustomerInput): Promise<Customer> {
+export async function createCustomer(
+  input: CreateCustomerInput
+): Promise<Customer> {
   const response = await fetch('/api/customers', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -64,7 +75,10 @@ export async function createCustomer(input: CreateCustomerInput): Promise<Custom
   return ensureSuccess(payload);
 }
 
-export async function updateCustomer(id: string, input: Omit<UpdateCustomerInput, 'id'>): Promise<Customer> {
+export async function updateCustomer(
+  id: string,
+  input: Omit<UpdateCustomerInput, 'id'>
+): Promise<Customer> {
   const response = await fetch(`/api/customers/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -81,5 +95,73 @@ export async function deleteCustomer(id: string): Promise<Customer> {
   });
 
   const payload = await readJson<Customer>(response);
+  return ensureSuccess(payload);
+}
+
+export async function getCustomerVehicles(
+  customerId: string
+): Promise<Customer['vehicles']> {
+  const response = await fetch(`/api/customers/${customerId}/vehicles`, {
+    method: 'GET'
+  });
+  const payload = await readJson<Customer['vehicles']>(response);
+  return ensureSuccess(payload);
+}
+
+export async function createCustomerVehicle(
+  customerId: string,
+  input: {
+    plate: string;
+    brand: string;
+    model?: string;
+    year?: number;
+    color?: string;
+    lastServiceDate?: string;
+  }
+): Promise<Customer['vehicles'][number]> {
+  const response = await fetch(`/api/customers/${customerId}/vehicles`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input)
+  });
+  const payload = await readJson<Customer['vehicles'][number]>(response);
+  return ensureSuccess(payload);
+}
+
+export async function updateCustomerVehicle(
+  customerId: string,
+  vehicleId: string,
+  input: {
+    plate?: string;
+    brand?: string;
+    model?: string;
+    year?: number;
+    color?: string;
+    lastServiceDate?: string;
+  }
+): Promise<Customer['vehicles'][number]> {
+  const response = await fetch(
+    `/api/customers/${customerId}/vehicles/${vehicleId}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input)
+    }
+  );
+  const payload = await readJson<Customer['vehicles'][number]>(response);
+  return ensureSuccess(payload);
+}
+
+export async function deleteCustomerVehicle(
+  customerId: string,
+  vehicleId: string
+): Promise<Customer['vehicles'][number]> {
+  const response = await fetch(
+    `/api/customers/${customerId}/vehicles/${vehicleId}`,
+    {
+      method: 'DELETE'
+    }
+  );
+  const payload = await readJson<Customer['vehicles'][number]>(response);
   return ensureSuccess(payload);
 }

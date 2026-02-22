@@ -1,11 +1,25 @@
 import { NextResponse } from 'next/server';
 
-import { customerHistoryDB, customersDB } from '@/app/api/customers/customers-db';
 import { updateCustomerSchema } from '@/features/customers/schema';
-import type { Customer, CustomerDetailResponse } from '@/features/customers/types';
+import type {
+  Customer,
+  CustomerDetailResponse
+} from '@/features/customers/types';
+import { auth } from '@/lib/auth';
+import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import {
+  deleteGarageCustomer,
+  findGarageCustomerById,
+  isGarageCustomerPhoneExists,
+  listGarageCustomerServiceHistory,
+  updateGarageCustomer
+} from '@/services/firebase/customers-service';
 import type { ApiResponse } from '@/types/api';
 
-function response<T>(payload: ApiResponse<T>, status = 200): NextResponse<ApiResponse<T>> {
+function response<T>(
+  payload: ApiResponse<T>,
+  status = 200
+): NextResponse<ApiResponse<T>> {
   return NextResponse.json(payload, { status });
 }
 
@@ -13,19 +27,28 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-function findById(id: string): Customer | undefined {
-  return customersDB.find((item) => item.id === id);
-}
+export async function GET(
+  _request: Request,
+  context: RouteContext
+): Promise<NextResponse<ApiResponse<CustomerDetailResponse>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
 
-export async function GET(_request: Request, context: RouteContext): Promise<NextResponse<ApiResponse<CustomerDetailResponse>>> {
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const { id } = await context.params;
-  const customer = findById(id);
+  const customer = await findGarageCustomerById(garage.id, id);
 
   if (!customer) {
     return response({ success: false, error: 'Customer not found.' }, 404);
   }
 
-  const serviceHistory = (customerHistoryDB[id] ?? []).slice(0, 10);
+  const serviceHistory = await listGarageCustomerServiceHistory(garage.id, id);
 
   return response({
     success: true,
@@ -36,9 +59,22 @@ export async function GET(_request: Request, context: RouteContext): Promise<Nex
   });
 }
 
-export async function PUT(request: Request, context: RouteContext): Promise<NextResponse<ApiResponse<Customer>>> {
+export async function PUT(
+  request: Request,
+  context: RouteContext
+): Promise<NextResponse<ApiResponse<Customer>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const { id } = await context.params;
-  const current = findById(id);
+  const current = await findGarageCustomerById(garage.id, id);
 
   if (!current) {
     return response({ success: false, error: 'Customer not found.' }, 404);
@@ -48,12 +84,20 @@ export async function PUT(request: Request, context: RouteContext): Promise<Next
   const parsed = updateCustomerSchema.safeParse({ ...body, id });
 
   if (!parsed.success) {
-    return response({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid payload.' }, 400);
+    return response(
+      {
+        success: false,
+        error: parsed.error.issues[0]?.message ?? 'Invalid payload.'
+      },
+      400
+    );
   }
 
   if (parsed.data.phone) {
-    const duplicate = customersDB.find(
-      (item) => item.id !== id && item.phone.replace(/\D/g, '') === parsed.data.phone?.replace(/\D/g, '')
+    const duplicate = await isGarageCustomerPhoneExists(
+      garage.id,
+      parsed.data.phone,
+      id
     );
 
     if (duplicate) {
@@ -61,34 +105,46 @@ export async function PUT(request: Request, context: RouteContext): Promise<Next
     }
   }
 
-  const updated: Customer = {
-    ...current,
-    ...parsed.data,
-    id,
-    updatedAt: new Date().toISOString()
-  };
-
-  const index = customersDB.findIndex((item) => item.id === id);
-  customersDB[index] = updated;
+  const updated = await updateGarageCustomer(garage.id, id, parsed.data);
+  if (!updated) {
+    return response({ success: false, error: 'Customer not found.' }, 404);
+  }
 
   return response({ success: true, data: updated });
 }
 
-export async function DELETE(_request: Request, context: RouteContext): Promise<NextResponse<ApiResponse<Customer>>> {
+export async function DELETE(
+  _request: Request,
+  context: RouteContext
+): Promise<NextResponse<ApiResponse<Customer>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const { id } = await context.params;
-  const current = findById(id);
+  const current = await findGarageCustomerById(garage.id, id);
 
   if (!current) {
     return response({ success: false, error: 'Customer not found.' }, 404);
   }
 
   if (current.totalVisits > 0) {
-    return response({ success: false, error: 'Customer has service history. Cannot delete.' }, 400);
+    return response(
+      { success: false, error: 'Customer has service history. Cannot delete.' },
+      400
+    );
   }
 
-  const index = customersDB.findIndex((item) => item.id === id);
-  customersDB.splice(index, 1);
-  delete customerHistoryDB[id];
+  const deleted = await deleteGarageCustomer(garage.id, id);
+  if (!deleted) {
+    return response({ success: false, error: 'Customer not found.' }, 404);
+  }
 
-  return response({ success: true, data: current });
+  return response({ success: true, data: deleted });
 }

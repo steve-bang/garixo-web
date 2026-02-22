@@ -27,6 +27,21 @@ declare module 'firebase-admin/firestore' {
               data: () => unknown;
             }>;
             delete: () => Promise<void>;
+            collection: (name: string) => {
+              doc: (id?: string) => {
+                id: string;
+                set: (data: unknown, options?: unknown) => Promise<void>;
+                get: () => Promise<{
+                  exists: boolean;
+                  id: string;
+                  data: () => unknown;
+                }>;
+                delete: () => Promise<void>;
+              };
+              get: () => Promise<{
+                docs: Array<{ id: string; data: () => unknown }>;
+              }>;
+            };
           };
           where: (
             field: string,

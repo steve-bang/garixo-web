@@ -21,7 +21,11 @@ import {
   useUpdateCustomer
 } from '@/features/customers/hooks';
 import type { CreateCustomerInput } from '@/features/customers/schema';
-import type { Customer, CustomerStatus, SpendingTier } from '@/features/customers/types';
+import type {
+  Customer,
+  CustomerStatus,
+  SpendingTier
+} from '@/features/customers/types';
 import { useToast } from '@/hooks/use-toast';
 
 type UserRole = 'OWNER' | 'MANAGER' | 'STAFF';
@@ -45,7 +49,11 @@ export function CustomersManagementPage(): JSX.Element {
   const [spendingTier, setSpendingTier] = useState<SpendingTier | undefined>();
   const [page, setPage] = useState(1);
 
-  const [drawerState, setDrawerState] = useState<DrawerState>({ open: false, mode: 'view', customer: null });
+  const [drawerState, setDrawerState] = useState<DrawerState>({
+    open: false,
+    mode: 'view',
+    customer: null
+  });
   const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
@@ -79,12 +87,24 @@ export function CustomersManagementPage(): JSX.Element {
 
   const listItems = listQuery.data?.items ?? [];
   const meta = listQuery.data?.meta;
-  const kpis = useMemo(() => toCustomerKpis(kpiQuery.data?.items ?? []), [kpiQuery.data?.items]);
+  const kpis = useMemo(
+    () => toCustomerKpis(kpiQuery.data?.items ?? []),
+    [kpiQuery.data?.items]
+  );
+  const isTableUpdating =
+    (listQuery.isFetching && !listQuery.isLoading) ||
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending;
 
-  const openCreate = () => setDrawerState({ open: true, mode: 'create', customer: null });
-  const openView = (customer: Customer) => setDrawerState({ open: true, mode: 'view', customer });
-  const openEdit = (customer: Customer) => setDrawerState({ open: true, mode: 'edit', customer });
-  const closeDrawer = () => setDrawerState((prev) => ({ ...prev, open: false, customer: null }));
+  const openCreate = () =>
+    setDrawerState({ open: true, mode: 'create', customer: null });
+  const openView = (customer: Customer) =>
+    setDrawerState({ open: true, mode: 'view', customer });
+  const openEdit = (customer: Customer) =>
+    setDrawerState({ open: true, mode: 'edit', customer });
+  const closeDrawer = () =>
+    setDrawerState((prev) => ({ ...prev, open: false, customer: null }));
 
   const handleCopyPhone = async (phone: string) => {
     try {
@@ -98,6 +118,7 @@ export function CustomersManagementPage(): JSX.Element {
   const handleDrawerSubmit = async (payload: CreateCustomerInput) => {
     if (drawerState.mode === 'create') {
       const created = await createMutation.mutateAsync(payload);
+      await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
       setHighlightedId(created.id);
       closeDrawer();
       toast.success('Customer added successfully.');
@@ -108,7 +129,11 @@ export function CustomersManagementPage(): JSX.Element {
       return;
     }
 
-    const updated = await updateMutation.mutateAsync({ id: drawerState.customer.id, payload });
+    const updated = await updateMutation.mutateAsync({
+      id: drawerState.customer.id,
+      payload
+    });
+    await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
     setHighlightedId(updated.id);
     closeDrawer();
     toast.success('Information updated.');
@@ -116,6 +141,7 @@ export function CustomersManagementPage(): JSX.Element {
 
   const handleDelete = async (id: string) => {
     await deleteMutation.mutateAsync(id);
+    await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
     setDeleteTarget(null);
     toast.success('Customer deleted successfully.');
   };
@@ -127,7 +153,9 @@ export function CustomersManagementPage(): JSX.Element {
   if (listQuery.isError || kpiQuery.isError) {
     return (
       <Card className="m-s8 p-s6">
-        <p className="text-small text-state-error">Could not load customer data.</p>
+        <p className="text-small text-state-error">
+          Could not load customer data.
+        </p>
       </Card>
     );
   }
@@ -137,7 +165,9 @@ export function CustomersManagementPage(): JSX.Element {
       <header className="flex flex-col items-start justify-between gap-s3 md:flex-row md:items-center">
         <div>
           <h1 className="text-h1">Customers</h1>
-          <p className="text-small text-text-muted">Manage customer information and service history.</p>
+          <p className="text-small text-text-muted">
+            Manage customer information and service history.
+          </p>
         </div>
 
         <Button onClick={openCreate}>
@@ -179,6 +209,7 @@ export function CustomersManagementPage(): JSX.Element {
       />
 
       <CustomersTable
+        loading={isTableUpdating}
         customers={listItems}
         currentUserRole={currentUserRole}
         highlightedId={highlightedId}
@@ -196,7 +227,12 @@ export function CustomersManagementPage(): JSX.Element {
           </p>
 
           <div className="flex items-center gap-s2">
-            <Button variant="secondary" size="sm" disabled={meta.page <= 1} onClick={() => setPage((prev) => Math.max(prev - 1, 1))}>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={meta.page <= 1}
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            >
               Previous
             </Button>
             <Badge variant="default">{meta.page}</Badge>
@@ -204,7 +240,9 @@ export function CustomersManagementPage(): JSX.Element {
               variant="secondary"
               size="sm"
               disabled={meta.page >= meta.totalPages}
-              onClick={() => setPage((prev) => Math.min(prev + 1, meta.totalPages))}
+              onClick={() =>
+                setPage((prev) => Math.min(prev + 1, meta.totalPages))
+              }
             >
               Next
             </Button>
