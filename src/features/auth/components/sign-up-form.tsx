@@ -1,6 +1,13 @@
 'use client';
 
-import { CheckCircle2, Eye, EyeOff, LockKeyhole, Phone, Store } from 'lucide-react';
+import {
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+  Store
+} from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -17,7 +24,10 @@ export function SignUpForm(): JSX.Element {
 
   const formError = form.formState.errors.root?.message;
   const hasFormValue = Boolean(
-    form.watch('garageName') && form.watch('phone') && form.watch('password') && form.watch('confirmPassword')
+    form.watch('garageName') &&
+    form.watch('email') &&
+    form.watch('password') &&
+    form.watch('confirmPassword')
   );
 
   return (
@@ -34,13 +44,15 @@ export function SignUpForm(): JSX.Element {
         <p className="text-h2 text-text-inverse">Garixo</p>
 
         <div className="max-w-[460px] space-y-s4 text-text-inverse">
-          <h1 className="text-[2rem] font-semibold leading-tight tracking-[-0.02em] lg:text-[2.5rem] text-white">
+          <h1 className="text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-white lg:text-[2.5rem]">
             Manage your garage.
             <br />
             Without the stress.
           </h1>
 
-          <p className="text-small text-slate-100">Simple tools. Clear reports. More profit.</p>
+          <p className="text-small text-slate-100">
+            Simple tools. Clear reports. More profit.
+          </p>
 
           <ul className="space-y-s2 text-small">
             <li className="flex items-center gap-s2">
@@ -80,11 +92,16 @@ export function SignUpForm(): JSX.Element {
 
         <Card className="mx-auto w-full max-w-[420px] rounded-lg border border-border bg-surface-default p-s8 shadow-sm">
           <h1 className="text-h2">Create your account</h1>
-          <p className="mt-s1 text-small text-text-muted">Start managing your garage today.</p>
+          <p className="mt-s1 text-small text-text-muted">
+            Start managing your garage today.
+          </p>
 
           <form className="mt-s6 space-y-s4" onSubmit={onSubmit}>
             <div className="space-y-s1">
-              <label htmlFor="garageName" className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="garageName"
+                className="text-small font-medium text-text-secondary"
+              >
                 Garage Name
               </label>
               <div className="relative">
@@ -92,40 +109,60 @@ export function SignUpForm(): JSX.Element {
                 <Input
                   id="garageName"
                   type="text"
-                  placeholder="Minh Phat Garage"
+                  autoComplete="organization"
+                  placeholder="Garage Auto Pro"
                   className={cn(
                     'h-12 pl-9',
-                    form.formState.errors.garageName ? 'border-error-600 focus-visible:ring-error-300' : ''
+                    form.formState.errors.garageName
+                      ? 'border-error-600 focus-visible:ring-error-300'
+                      : ''
                   )}
                   {...form.register('garageName')}
                 />
               </div>
               {form.formState.errors.garageName ? (
-                <p className="text-caption text-state-error">{form.formState.errors.garageName.message}</p>
+                <p className="text-caption text-state-error">
+                  {form.formState.errors.garageName.message}
+                </p>
               ) : null}
             </div>
 
             <div className="space-y-s1">
-              <label htmlFor="phone" className="text-small font-medium text-text-secondary">
-                Phone Number
+              <label
+                htmlFor="email"
+                className="text-small font-medium text-text-secondary"
+              >
+                Email Address
               </label>
               <div className="relative">
-                <Phone className="pointer-events-none absolute left-s3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
+                <Mail className="pointer-events-none absolute left-s3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
                 <Input
-                  id="phone"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="tel"
-                  placeholder="0901234567"
-                  className={cn('h-12 pl-9', form.formState.errors.phone ? 'border-error-600 focus-visible:ring-error-300' : '')}
-                  {...form.register('phone')}
+                  id="email"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  placeholder="example@gmail.com"
+                  className={cn(
+                    'h-12 pl-9',
+                    form.formState.errors.email
+                      ? 'border-error-600 focus-visible:ring-error-300'
+                      : ''
+                  )}
+                  {...form.register('email')}
                 />
               </div>
-              {form.formState.errors.phone ? <p className="text-caption text-state-error">{form.formState.errors.phone.message}</p> : null}
+              {form.formState.errors.email ? (
+                <p className="text-caption text-state-error">
+                  {form.formState.errors.email.message}
+                </p>
+              ) : null}
             </div>
 
             <div className="space-y-s1">
-              <label htmlFor="password" className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="password"
+                className="text-small font-medium text-text-secondary"
+              >
                 Password
               </label>
               <div className="relative">
@@ -134,7 +171,13 @@ export function SignUpForm(): JSX.Element {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
-                  className={cn('h-12 pl-9 pr-11', form.formState.errors.password ? 'border-error-600 focus-visible:ring-error-300' : '')}
+                  placeholder="Enter your password"
+                  className={cn(
+                    'h-12 pl-9 pr-11',
+                    form.formState.errors.password
+                      ? 'border-error-600 focus-visible:ring-error-300'
+                      : ''
+                  )}
                   {...form.register('password')}
                 />
                 <button
@@ -143,14 +186,25 @@ export function SignUpForm(): JSX.Element {
                   className="absolute right-s3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
                   onClick={() => setShowPassword((prev) => !prev)}
                 >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  {showPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
                 </button>
               </div>
-              {form.formState.errors.password ? <p className="text-caption text-state-error">{form.formState.errors.password.message}</p> : null}
+              {form.formState.errors.password ? (
+                <p className="text-caption text-state-error">
+                  {form.formState.errors.password.message}
+                </p>
+              ) : null}
             </div>
 
             <div className="space-y-s1">
-              <label htmlFor="confirmPassword" className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="confirmPassword"
+                className="text-small font-medium text-text-secondary"
+              >
                 Confirm Password
               </label>
               <div className="relative">
@@ -159,35 +213,59 @@ export function SignUpForm(): JSX.Element {
                   id="confirmPassword"
                   type={showConfirm ? 'text' : 'password'}
                   autoComplete="new-password"
+                  placeholder="Confirm your password"
                   className={cn(
                     'h-12 pl-9 pr-11',
-                    form.formState.errors.confirmPassword ? 'border-error-600 focus-visible:ring-error-300' : ''
+                    form.formState.errors.confirmPassword
+                      ? 'border-error-600 focus-visible:ring-error-300'
+                      : ''
                   )}
                   {...form.register('confirmPassword')}
                 />
                 <button
                   type="button"
-                  aria-label={showConfirm ? 'Hide password confirmation' : 'Show password confirmation'}
+                  aria-label={
+                    showConfirm
+                      ? 'Hide password confirmation'
+                      : 'Show password confirmation'
+                  }
                   className="absolute right-s3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
                   onClick={() => setShowConfirm((prev) => !prev)}
                 >
-                  {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  {showConfirm ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
                 </button>
               </div>
               {form.formState.errors.confirmPassword ? (
-                <p className="text-caption text-state-error">{form.formState.errors.confirmPassword.message}</p>
+                <p className="text-caption text-state-error">
+                  {form.formState.errors.confirmPassword.message}
+                </p>
               ) : null}
             </div>
 
-            {formError ? <p className="rounded-md bg-error-50 px-s3 py-s2 text-small text-state-error">{formError}</p> : null}
+            {formError ? (
+              <p className="rounded-md bg-error-50 px-s3 py-s2 text-small text-state-error">
+                {formError}
+              </p>
+            ) : null}
 
-            <Button type="submit" className="h-12 w-full" disabled={!hasFormValue || mutation.isPending}>
+            <Button
+              type="submit"
+              className="h-12 w-full"
+              disabled={!hasFormValue || mutation.isPending}
+            >
               {mutation.isPending ? 'Creating account...' : 'Create Account'}
             </Button>
 
             <p className="text-small text-text-secondary">
               Already have an account?{' '}
-              <Link href="/auth/login" className="font-medium text-primary-700 hover:underline">
+              <Link
+                href="/auth/login"
+                className="font-medium text-primary-700 hover:underline"
+              >
                 Sign in
               </Link>
             </p>

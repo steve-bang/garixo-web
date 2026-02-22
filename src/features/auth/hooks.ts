@@ -6,7 +6,13 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
-import { forgotPassword, login, logout, register, resetPassword } from '@/features/auth/api';
+import {
+  forgotPassword,
+  login,
+  logout,
+  register,
+  resetPassword
+} from '@/features/auth/api';
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -36,7 +42,9 @@ export function useLoginForm() {
     mutationFn: login,
     onSuccess: (result) => {
       if (!result.success) {
-        form.setError('root', { message: result.error ?? 'Incorrect email or password.' });
+        form.setError('root', {
+          message: result.error ?? 'Incorrect email or password.'
+        });
         return;
       }
 
@@ -79,7 +87,7 @@ export function useSignUpForm() {
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       garageName: '',
-      phone: '',
+      email: '',
       password: '',
       confirmPassword: ''
     }
@@ -88,13 +96,16 @@ export function useSignUpForm() {
   const mutation = useMutation({
     mutationFn: async (values: SignUpSchema) => {
       const registerResult = await register({
-        garageName: values.garageName,
-        phone: values.phone,
+        garageName: values.garageName.trim(),
+        email: values.email.trim().toLowerCase(),
         password: values.password
       });
 
       if (!registerResult.success || !registerResult.data) {
-        return { success: false as const, error: registerResult.error ?? 'Could not create account.' };
+        return {
+          success: false as const,
+          error: registerResult.error ?? 'Could not create account.'
+        };
       }
 
       const loginResult = await login({
@@ -103,7 +114,10 @@ export function useSignUpForm() {
       });
 
       if (!loginResult.success) {
-        return { success: false as const, error: loginResult.error ?? 'Account created, but sign in failed.' };
+        return {
+          success: false as const,
+          error: loginResult.error ?? 'Account created, but sign in failed.'
+        };
       }
 
       return { success: true as const };
@@ -115,7 +129,7 @@ export function useSignUpForm() {
       }
 
       toast.success('Account created successfully.');
-      router.push('/dashboard?verify=phone');
+      router.push('/dashboard');
       router.refresh();
     }
   });
@@ -143,7 +157,10 @@ export function useForgotPasswordForm(options?: { onSuccess?: () => void }) {
       const result = await forgotPassword({ identifier: values.identifier });
 
       if (!result.success) {
-        return { success: false as const, error: result.error ?? 'Could not send reset instructions.' };
+        return {
+          success: false as const,
+          error: result.error ?? 'Could not send reset instructions.'
+        };
       }
 
       return { success: true as const };
@@ -168,7 +185,10 @@ export function useForgotPasswordForm(options?: { onSuccess?: () => void }) {
   };
 }
 
-export function useResetPasswordForm(options?: { onSuccess?: () => void; token?: string }) {
+export function useResetPasswordForm(options?: {
+  onSuccess?: () => void;
+  token?: string;
+}) {
   const form = useForm<ResetPasswordSchema>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
@@ -186,7 +206,10 @@ export function useResetPasswordForm(options?: { onSuccess?: () => void; token?:
       });
 
       if (!result.success) {
-        return { success: false as const, error: result.error ?? 'Could not reset password.' };
+        return {
+          success: false as const,
+          error: result.error ?? 'Could not reset password.'
+        };
       }
 
       return { success: true as const };

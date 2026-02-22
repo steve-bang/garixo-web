@@ -6,11 +6,15 @@ import type { ApiResponse } from '@/types/api';
 
 const registerSchema = z.object({
   garageName: z.string().trim().min(2, 'Garage name is required.'),
-  phone: z
+  email: z
     .string()
     .trim()
-    .min(9, 'Phone number must be at least 9 digits.')
-    .regex(/^\+?[\d\s-]{9,}$/, 'Enter a valid phone number.'),
+    .min(1, 'Please enter your email address.')
+    .max(254, 'Email address is too long.')
+    .regex(
+      /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+      'Please enter a valid email address.'
+    ),
   password: z.string().min(6, 'Password must be at least 6 characters.')
 });
 
@@ -30,14 +34,8 @@ function response<T>(
   return NextResponse.json(payload, { status });
 }
 
-function buildGeneratedEmail(garageName: string, phone: string): string {
-  const slug = garageName
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '.');
-  const phoneSuffix = phone.slice(-4);
-  return `${slug || 'garage'}.${phoneSuffix}@garixo.local`;
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
 }
 
 export async function POST(
@@ -56,27 +54,11 @@ export async function POST(
     );
   }
 
-  const normalizedPhone = parsed.data.phone.replace(/\D/g, '');
+  const normalizedEmail = normalizeEmail(parsed.data.email);
   const usersCollection = firebaseAdmin.db.collection('users');
 
-  const existingByPhone = await usersCollection
-    .where('phoneNormalized', '==', normalizedPhone)
-    .limit(1)
-    .get();
-  if (!existingByPhone.empty) {
-    return response(
-      { success: false, error: 'Phone number already exists.' },
-      409
-    );
-  }
-
-  const generatedEmail = buildGeneratedEmail(
-    parsed.data.garageName,
-    normalizedPhone
-  );
-
   try {
-    await firebaseAdmin.auth.getUserByEmail(generatedEmail);
+    await firebaseAdmin.auth.getUserByEmail(normalizedEmail);
     return response(
       { success: false, error: 'Account already exists. Please sign in.' },
       409
@@ -87,7 +69,7 @@ export async function POST(
 
   try {
     const authUser = await firebaseAdmin.auth.createUser({
-      email: generatedEmail,
+      email: normalizedEmail,
       password: parsed.data.password,
       displayName: parsed.data.garageName
     });
@@ -96,11 +78,9 @@ export async function POST(
     await usersCollection.doc(authUser.uid).set(
       {
         id: authUser.uid,
-        email: generatedEmail,
+        email: normalizedEmail,
         name: parsed.data.garageName,
         role: 'owner',
-        phone: parsed.data.phone,
-        phoneNormalized: normalizedPhone,
         createdAt: now
       },
       { merge: true }
@@ -110,7 +90,7 @@ export async function POST(
       {
         success: true,
         data: {
-          email: generatedEmail
+          email: normalizedEmail
         }
       },
       201

@@ -15,7 +15,7 @@ export type LoginPayload = {
 
 export type RegisterPayload = {
   garageName: string;
-  phone: string;
+  email: string;
   password: string;
 };
 

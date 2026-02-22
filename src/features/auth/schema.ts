@@ -21,11 +21,12 @@ export const loginSchema = z.object({
 export const signUpSchema = z
   .object({
     garageName: z.string().trim().min(2, 'Garage name is required.'),
-    phone: z
+    email: z
       .string()
       .trim()
-      .min(9, 'Phone number must be at least 9 digits.')
-      .regex(phonePattern, 'Enter a valid phone number.'),
+      .min(1, 'Please enter your email address.')
+      .max(254, 'Email address is too long.')
+      .regex(emailPattern, 'Please enter a valid email address.'),
     password: z.string().min(6, 'Password must be at least 6 characters.'),
     confirmPassword: z.string().min(6, 'Please confirm your password.')
   })
@@ -39,7 +40,10 @@ export const forgotPasswordSchema = z.object({
     .string()
     .trim()
     .min(1, 'Phone number or email is required.')
-    .refine((value) => emailPattern.test(value) || phonePattern.test(value), 'Enter a valid phone number or email.')
+    .refine(
+      (value) => emailPattern.test(value) || phonePattern.test(value),
+      'Enter a valid phone number or email.'
+    )
 });
 
 export const resetPasswordSchema = z
