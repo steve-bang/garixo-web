@@ -56,7 +56,7 @@ export function WorkOrdersManagementPage(): JSX.Element {
   const [workerId, setWorkerId] = useState<string | undefined>();
   const [status, setStatus] = useState<WorkOrderStatus | undefined>();
   const [dateFilter, setDateFilter] = useState<
-    'all' | 'today' | 'this_week' | 'custom'
+    'all' | 'today' | 'this_week' | 'this_month' | 'custom'
   >('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');

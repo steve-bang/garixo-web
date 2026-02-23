@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 
 import { auth } from '@/lib/auth';
+import { getRequestGarage } from '@/lib/auth/garage-context';
 import type { OnboardingState } from '@/features/onboarding/types';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
 import { listGarageWorkOrders } from '@/services/firebase/work-orders-service';
 import type { ApiResponse } from '@/types/api';
 
@@ -21,7 +21,7 @@ export async function GET(): Promise<
     return json({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
+  const garage = await getRequestGarage(session);
   const workOrders = garage
     ? (await listGarageWorkOrders(garage.id)).map((order) => ({
         id: order.id,

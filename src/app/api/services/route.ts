@@ -11,7 +11,7 @@ import {
 } from '@/features/services/schema';
 import type { Service, ServiceListResponse } from '@/features/services/types';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -29,8 +29,8 @@ export async function GET(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
@@ -56,7 +56,7 @@ export async function GET(
   }
 
   const { search, category, status, page, pageSize, sort } = parsedQuery.data;
-  const result = await listGarageServicesWithQuery(garage.id, {
+  const result = await listGarageServicesWithQuery(garageId, {
     search,
     category,
     status,
@@ -82,8 +82,8 @@ export async function POST(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
@@ -100,7 +100,7 @@ export async function POST(
     );
   }
 
-  const duplicate = await hasDuplicateServiceName(garage.id, parsed.data.name);
+  const duplicate = await hasDuplicateServiceName(garageId, parsed.data.name);
 
   if (duplicate) {
     return response(
@@ -109,7 +109,7 @@ export async function POST(
     );
   }
 
-  const created = await createGarageService(garage.id, parsed.data);
+  const created = await createGarageService(garageId, parsed.data);
 
   return response({ success: true, data: created }, 201);
 }

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { auth } from '@/lib/auth';
 import type { ServiceConfigurationItem } from '@/features/settings/service-configuration.types';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
   createGarageService,
   listGarageServices
@@ -27,11 +27,11 @@ export async function GET(): Promise<
   if (!session?.user?.id)
     return response({ success: false, error: 'Unauthorized' }, 401);
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage)
+  const garageId = await getRequestGarageId(session);
+  if (!garageId)
     return response({ success: false, error: 'Garage not found.' }, 404);
 
-  const services = await listGarageServices(garage.id);
+  const services = await listGarageServices(garageId);
   return response({
     success: true,
     data: services.map((item) => ({
@@ -53,8 +53,8 @@ export async function POST(
   if (!session?.user?.id)
     return response({ success: false, error: 'Unauthorized' }, 401);
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage)
+  const garageId = await getRequestGarageId(session);
+  if (!garageId)
     return response({ success: false, error: 'Garage not found.' }, 404);
 
   const body = (await request.json()) as {
@@ -83,7 +83,7 @@ export async function POST(
     );
   }
 
-  const services = (await listGarageServices(garage.id)).map((item) => ({
+  const services = (await listGarageServices(garageId)).map((item) => ({
     ...item,
     standardTimeMinutes: item.standardDuration
   }));
@@ -97,7 +97,7 @@ export async function POST(
     );
   }
 
-  const created = await createGarageService(garage.id, {
+  const created = await createGarageService(garageId, {
     name,
     description,
     defaultPrice,

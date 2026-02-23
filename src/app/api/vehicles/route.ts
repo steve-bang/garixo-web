@@ -7,7 +7,7 @@ import {
 import type { Vehicle, VehicleListResponse } from '@/features/vehicles/types';
 import { normalizePlate, toPlateDisplay } from '@/features/vehicles/utils';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
   createGarageVehicle,
   findGarageVehicleByNormalizedPlate,
@@ -54,8 +54,8 @@ export async function GET(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
@@ -81,7 +81,7 @@ export async function GET(
 
   const { search, brand, status, page, pageSize } = parsed.data;
 
-  let filtered = await listGarageVehicles(garage.id);
+  let filtered = await listGarageVehicles(garageId);
 
   if (search) {
     const needle = search.toLowerCase().trim();
@@ -170,8 +170,8 @@ export async function POST(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
@@ -189,7 +189,7 @@ export async function POST(
   }
 
   const duplicate = await findGarageVehicleByNormalizedPlate(
-    garage.id,
+    garageId,
     parsed.data.plateNumber
   );
 
@@ -200,7 +200,7 @@ export async function POST(
     );
   }
 
-  const created = await createGarageVehicle(garage.id, {
+  const created = await createGarageVehicle(garageId, {
     plateNumber: toPlateDisplay(parsed.data.plateNumber),
     brand: parsed.data.brand,
     model: parsed.data.model,

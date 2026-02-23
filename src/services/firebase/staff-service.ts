@@ -132,6 +132,27 @@ export async function updateGarageStaff(
   return mapDoc(updated.id, updated.data() as StaffFirestoreDoc);
 }
 
+export async function incrementGarageStaffCurrentJobs(
+  garageId: string,
+  staffId: string,
+  delta: number
+): Promise<Staff | null> {
+  const ref = staffCollection(garageId).doc(staffId);
+  const existing = await ref.get();
+  if (!existing.exists) {
+    return null;
+  }
+
+  const data = existing.data() as StaffFirestoreDoc;
+  const next: StaffFirestoreDoc = {
+    currentJobs: Math.max(0, (data.currentJobs ?? 0) + delta),
+    updatedAt: new Date().toISOString()
+  };
+
+  await ref.set(next, { merge: true });
+  return mapDoc(existing.id, { ...data, ...next });
+}
+
 export async function deleteGarageStaff(
   garageId: string,
   staffId: string

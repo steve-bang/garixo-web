@@ -6,7 +6,7 @@ import type {
   CustomerDetailResponse
 } from '@/features/customers/types';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
   deleteGarageCustomer,
   findGarageCustomerById,
@@ -36,19 +36,19 @@ export async function GET(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const customer = await findGarageCustomerById(garage.id, id);
+  const customer = await findGarageCustomerById(garageId, id);
 
   if (!customer) {
     return response({ success: false, error: 'Customer not found.' }, 404);
   }
 
-  const serviceHistory = await listGarageCustomerServiceHistory(garage.id, id);
+  const serviceHistory = await listGarageCustomerServiceHistory(garageId, id);
 
   return response({
     success: true,
@@ -68,13 +68,13 @@ export async function PUT(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const current = await findGarageCustomerById(garage.id, id);
+  const current = await findGarageCustomerById(garageId, id);
 
   if (!current) {
     return response({ success: false, error: 'Customer not found.' }, 404);
@@ -95,7 +95,7 @@ export async function PUT(
 
   if (parsed.data.phone) {
     const duplicate = await isGarageCustomerPhoneExists(
-      garage.id,
+      garageId,
       parsed.data.phone,
       id
     );
@@ -105,7 +105,7 @@ export async function PUT(
     }
   }
 
-  const updated = await updateGarageCustomer(garage.id, id, parsed.data);
+  const updated = await updateGarageCustomer(garageId, id, parsed.data);
   if (!updated) {
     return response({ success: false, error: 'Customer not found.' }, 404);
   }
@@ -122,13 +122,13 @@ export async function DELETE(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const current = await findGarageCustomerById(garage.id, id);
+  const current = await findGarageCustomerById(garageId, id);
 
   if (!current) {
     return response({ success: false, error: 'Customer not found.' }, 404);
@@ -141,7 +141,7 @@ export async function DELETE(
     );
   }
 
-  const deleted = await deleteGarageCustomer(garage.id, id);
+  const deleted = await deleteGarageCustomer(garageId, id);
   if (!deleted) {
     return response({ success: false, error: 'Customer not found.' }, 404);
   }

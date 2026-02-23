@@ -4,7 +4,7 @@ import { bulkUpdateGarageServices } from '@/app/api/services/services-db';
 import { bulkUpdateSchema } from '@/features/services/schema';
 import type { Service } from '@/features/services/types';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -22,8 +22,8 @@ export async function POST(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
@@ -41,7 +41,7 @@ export async function POST(
   }
 
   const updated = await bulkUpdateGarageServices(
-    garage.id,
+    garageId,
     parsed.data.percentage
   );
 

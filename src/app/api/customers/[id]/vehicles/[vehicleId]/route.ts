@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import type { Customer } from '@/features/customers/types';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
   deleteGarageCustomerVehicle,
   findGarageCustomerById,
@@ -40,13 +40,13 @@ export async function PUT(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id, vehicleId } = await context.params;
-  const customer = await findGarageCustomerById(garage.id, id);
+  const customer = await findGarageCustomerById(garageId, id);
   if (!customer) {
     return response({ success: false, error: 'Customer not found.' }, 404);
   }
@@ -79,7 +79,7 @@ export async function PUT(
   }
 
   const updated = await updateGarageCustomerVehicle(
-    garage.id,
+    garageId,
     id,
     vehicleId,
     parsed.data
@@ -100,18 +100,18 @@ export async function DELETE(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id, vehicleId } = await context.params;
-  const customer = await findGarageCustomerById(garage.id, id);
+  const customer = await findGarageCustomerById(garageId, id);
   if (!customer) {
     return response({ success: false, error: 'Customer not found.' }, 404);
   }
 
-  const deleted = await deleteGarageCustomerVehicle(garage.id, id, vehicleId);
+  const deleted = await deleteGarageCustomerVehicle(garageId, id, vehicleId);
   if (!deleted) {
     return response({ success: false, error: 'Vehicle not found.' }, 404);
   }

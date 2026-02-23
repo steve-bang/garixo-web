@@ -22,7 +22,11 @@ import {
   toPlateDisplay
 } from '@/features/work-orders/utils';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
+import {
+  findGarageStaffById,
+  incrementGarageStaffCurrentJobs
+} from '@/services/firebase/staff-service';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -48,7 +52,7 @@ function statusOrder(status: WorkOrder['status']): number {
 
 function inDateFilter(
   value: string,
-  filter: 'all' | 'today' | 'this_week' | 'custom',
+  filter: 'all' | 'today' | 'this_week' | 'this_month' | 'custom',
   from?: string,
   to?: string
 ): boolean {
@@ -68,6 +72,13 @@ function inDateFilter(
     return date.getTime() >= start.getTime();
   }
 
+  if (filter === 'this_month') {
+    return (
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth()
+    );
+  }
+
   if (filter === 'custom') {
     const fromDate = from ? new Date(from).getTime() : Number.NEGATIVE_INFINITY;
     const toDate = to ? new Date(to).getTime() : Number.POSITIVE_INFINITY;
@@ -85,8 +96,8 @@ export async function GET(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
@@ -124,7 +135,7 @@ export async function GET(
     pageSize
   } = parsed.data;
 
-  const all = await listGarageWorkOrders(garage.id);
+  const all = await listGarageWorkOrders(garageId);
   let filtered = [...all];
 
   if (search) {
@@ -185,7 +196,7 @@ export async function GET(
   const start = (safePage - 1) * pageSize;
   const items = filtered.slice(start, start + pageSize);
 
-  const workers = await listGarageWorkers(garage.id);
+  const workers = await listGarageWorkers(garageId);
 
   return response({
     success: true,
@@ -211,8 +222,8 @@ export async function POST(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
@@ -230,13 +241,30 @@ export async function POST(
   }
 
   const now = new Date().toISOString();
+  let assignedStaffName = parsed.data.workerName;
+
+  if (parsed.data.workerId) {
+    const assignedStaff = await findGarageStaffById(
+      garageId,
+      parsed.data.workerId
+    );
+    if (!assignedStaff) {
+      return response(
+        { success: false, error: 'Assigned staff member was not found.' },
+        400
+      );
+    }
+
+    assignedStaffName = assignedStaff.fullName;
+  }
+
   const totalAmount = computeTotalAmount(
     parsed.data.services,
     parsed.data.parts ?? []
   );
 
   const createdPayload: Omit<WorkOrder, 'id'> = {
-    orderCode: await nextOrderCode(garage.id),
+    orderCode: await nextOrderCode(garageId),
     plateNumber: toPlateDisplay(parsed.data.plateNumber),
     customerId: parsed.data.customerId,
     customerName: parsed.data.customerName,
@@ -244,7 +272,7 @@ export async function POST(
     vehicleId: parsed.data.vehicleId,
     vehicleModel: parsed.data.vehicleModel,
     workerId: parsed.data.workerId,
-    workerName: parsed.data.workerName,
+    workerName: assignedStaffName,
     services: parsed.data.services,
     parts: parsed.data.parts ?? [],
     status: WorkOrderStatusEnum.Draft,
@@ -263,7 +291,10 @@ export async function POST(
     updatedAt: now
   };
 
-  const created = await createGarageWorkOrder(garage.id, createdPayload);
+  const created = await createGarageWorkOrder(garageId, createdPayload);
+  if (created.workerId) {
+    await incrementGarageStaffCurrentJobs(garageId, created.workerId, 1);
+  }
 
   return response({ success: true, data: created }, 201);
 }

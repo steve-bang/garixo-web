@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 
 import { auth } from '@/lib/auth';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import type {
   CreateQuickWorkOrderInput,
   QuickWorkOrder
 } from '@/features/onboarding/types';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
 import {
   createGarageWorkOrder,
   listGarageWorkOrders
@@ -27,12 +27,12 @@ export async function GET(): Promise<
     return json({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return json({ success: true, data: [] });
   }
 
-  const items = (await listGarageWorkOrders(garage.id)).map((order) => ({
+  const items = (await listGarageWorkOrders(garageId)).map((order) => ({
     id: order.id,
     customerName: order.customerName,
     licensePlate: order.licensePlate,
@@ -61,15 +61,15 @@ export async function POST(
     return json({ success: false, error: 'License plate is required.' }, 400);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return json(
       { success: false, error: 'Garage setup is required first.' },
       400
     );
   }
 
-  const order = await createGarageWorkOrder(garage.id, {
+  const order = await createGarageWorkOrder(garageId, {
     customerName: body.customerName,
     licensePlate: body.licensePlate,
     service: body.service,

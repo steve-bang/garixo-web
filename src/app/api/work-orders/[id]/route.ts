@@ -11,7 +11,7 @@ import {
   toPlateDisplay
 } from '@/features/work-orders/utils';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -34,13 +34,13 @@ export async function GET(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const order = await findGarageWorkOrderById(garage.id, id);
+  const order = await findGarageWorkOrderById(garageId, id);
 
   if (!order) {
     return response({ success: false, error: 'Work order not found.' }, 404);
@@ -58,13 +58,13 @@ export async function PUT(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const current = await findGarageWorkOrderById(garage.id, id);
+  const current = await findGarageWorkOrderById(garageId, id);
 
   if (!current) {
     return response({ success: false, error: 'Work order not found.' }, 404);
@@ -113,7 +113,7 @@ export async function PUT(
     parts
   };
 
-  const updated = await updateGarageWorkOrder(garage.id, id, patch);
+  const updated = await updateGarageWorkOrder(garageId, id, patch);
   if (!updated) {
     return response({ success: false, error: 'Work order not found.' }, 404);
   }

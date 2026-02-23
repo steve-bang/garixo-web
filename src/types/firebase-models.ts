@@ -5,6 +5,7 @@ export interface UserDocument {
   email: string;
   name: string;
   role: FirebaseRole;
+  garageId?: string;
   avatarUrl?: string;
   createdAt: string;
   updatedAt?: string;

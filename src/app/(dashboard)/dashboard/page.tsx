@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { DashboardOnboardingState } from '@/features/onboarding/components/dashboard-onboarding-state';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarage } from '@/lib/auth/garage-context';
 import { listGarageWorkOrders } from '@/services/firebase/work-orders-service';
 
 export default async function DashboardPage(): Promise<JSX.Element> {
@@ -12,7 +12,7 @@ export default async function DashboardPage(): Promise<JSX.Element> {
     redirect('/auth/login');
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
+  const garage = await getRequestGarage(session);
   if (!garage) {
     redirect('/onboarding/setup-garage');
   }

@@ -10,7 +10,7 @@ import {
 import { updateServiceSchema } from '@/features/services/schema';
 import type { Service } from '@/features/services/types';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -33,13 +33,13 @@ export async function PUT(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const existing = await findGarageServiceById(garage.id, id);
+  const existing = await findGarageServiceById(garageId, id);
 
   if (!existing) {
     return response({ success: false, error: 'Service not found.' }, 404);
@@ -60,7 +60,7 @@ export async function PUT(
 
   const duplicate =
     parsed.data.name &&
-    (await hasDuplicateServiceName(garage.id, parsed.data.name, id));
+    (await hasDuplicateServiceName(garageId, parsed.data.name, id));
 
   if (duplicate) {
     return response(
@@ -69,7 +69,7 @@ export async function PUT(
     );
   }
 
-  const updated = await updateGarageService(garage.id, id, parsed.data);
+  const updated = await updateGarageService(garageId, id, parsed.data);
   if (!updated) {
     return response({ success: false, error: 'Service not found.' }, 404);
   }
@@ -86,19 +86,19 @@ export async function DELETE(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const existing = await findGarageServiceById(garage.id, id);
+  const existing = await findGarageServiceById(garageId, id);
 
   if (!existing) {
     return response({ success: false, error: 'Service not found.' }, 404);
   }
 
-  const usedInWorkOrder = await isServiceUsedInWorkOrders(garage.id, {
+  const usedInWorkOrder = await isServiceUsedInWorkOrders(garageId, {
     id: existing.id,
     name: existing.name
   });
@@ -112,7 +112,7 @@ export async function DELETE(
     );
   }
 
-  const deleted = await deleteGarageService(garage.id, id);
+  const deleted = await deleteGarageService(garageId, id);
   if (!deleted) {
     return response({ success: false, error: 'Service not found.' }, 404);
   }

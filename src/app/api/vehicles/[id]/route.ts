@@ -4,7 +4,7 @@ import { updateVehicleSchema } from '@/features/vehicles/schema';
 import type { Vehicle } from '@/features/vehicles/types';
 import { toPlateDisplay } from '@/features/vehicles/utils';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
   deleteGarageVehicle,
   findGarageVehicleById,
@@ -33,13 +33,13 @@ export async function GET(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const vehicle = await findGarageVehicleById(garage.id, id);
+  const vehicle = await findGarageVehicleById(garageId, id);
 
   if (!vehicle) {
     return response({ success: false, error: 'Vehicle not found.' }, 404);
@@ -57,13 +57,13 @@ export async function PUT(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const current = await findGarageVehicleById(garage.id, id);
+  const current = await findGarageVehicleById(garageId, id);
 
   if (!current) {
     return response({ success: false, error: 'Vehicle not found.' }, 404);
@@ -84,7 +84,7 @@ export async function PUT(
 
   if (parsed.data.plateNumber) {
     const duplicate = await findGarageVehicleByNormalizedPlate(
-      garage.id,
+      garageId,
       parsed.data.plateNumber
     );
     if (duplicate && duplicate.id !== id) {
@@ -95,7 +95,7 @@ export async function PUT(
     }
   }
 
-  const updated = await updateGarageVehicle(garage.id, id, {
+  const updated = await updateGarageVehicle(garageId, id, {
     ...parsed.data,
     plateNumber: parsed.data.plateNumber
       ? toPlateDisplay(parsed.data.plateNumber)
@@ -117,13 +117,13 @@ export async function DELETE(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const current = await findGarageVehicleById(garage.id, id);
+  const current = await findGarageVehicleById(garageId, id);
 
   if (!current) {
     return response({ success: false, error: 'Vehicle not found.' }, 404);
@@ -139,7 +139,7 @@ export async function DELETE(
     );
   }
 
-  const deleted = await deleteGarageVehicle(garage.id, id);
+  const deleted = await deleteGarageVehicle(garageId, id);
   if (!deleted) {
     return response({ success: false, error: 'Vehicle not found.' }, 404);
   }

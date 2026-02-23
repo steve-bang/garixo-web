@@ -1,3 +1,5 @@
+import { cache } from 'react';
+
 import { firebaseAdmin } from '@/lib/firebase-admin';
 import type { GarageDocument } from '@/types/firebase-models';
 
@@ -17,6 +19,17 @@ export async function getGarageByOwnerId(
   const doc = snap.docs[0];
   return mapDoc(doc.id, doc.data() as Omit<GarageDocument, 'id'>);
 }
+
+export async function getGarageById(
+  garageId: string
+): Promise<GarageDocument | null> {
+  const snap = await firebaseAdmin.db.collection('garages').doc(garageId).get();
+  if (!snap.exists) return null;
+  return mapDoc(snap.id, snap.data() as Omit<GarageDocument, 'id'>);
+}
+
+export const getGarageByOwnerIdCached = cache(getGarageByOwnerId);
+export const getGarageByIdCached = cache(getGarageById);
 
 export async function createGarageForOwner(input: {
   ownerId: string;

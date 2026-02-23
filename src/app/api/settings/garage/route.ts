@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
 
 import { auth } from '@/lib/auth';
+import { getRequestGarage } from '@/lib/auth/garage-context';
 import type { GarageSettings } from '@/features/settings/garage-information.types';
 import { firebaseAdmin } from '@/lib/firebase-admin';
-import {
-  getGarageByOwnerId,
-  updateGarage
-} from '@/services/firebase/garage-service';
+import { updateGarage } from '@/services/firebase/garage-service';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -29,7 +27,7 @@ export async function GET(): Promise<
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
+  const garage = await getRequestGarage(session);
   if (!garage) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
@@ -63,7 +61,7 @@ export async function PUT(
     return response({ success: false, error: 'Invalid payload format.' }, 400);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
+  const garage = await getRequestGarage(session);
   if (!garage) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }

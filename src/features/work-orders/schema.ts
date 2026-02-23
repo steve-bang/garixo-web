@@ -37,7 +37,9 @@ export const workOrdersQuerySchema = z.object({
   search: z.string().optional(),
   workerId: z.string().optional(),
   status: workOrderStatusSchema.optional(),
-  dateFilter: z.enum(['all', 'today', 'this_week', 'custom']).default('all'),
+  dateFilter: z
+    .enum(['all', 'today', 'this_week', 'this_month', 'custom'])
+    .default('all'),
   dateFrom: z.string().optional(),
   dateTo: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),

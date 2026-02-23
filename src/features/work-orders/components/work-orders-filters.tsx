@@ -10,14 +10,16 @@ type Props = {
   searchInput: string;
   workerId?: string;
   status?: WorkOrderStatus;
-  dateFilter: 'all' | 'today' | 'this_week' | 'custom';
+  dateFilter: 'all' | 'today' | 'this_week' | 'this_month' | 'custom';
   dateFrom: string;
   dateTo: string;
   workers: Worker[];
   onSearchInputChange: (value: string) => void;
   onWorkerChange: (value?: string) => void;
   onStatusChange: (value?: WorkOrderStatus) => void;
-  onDateFilterChange: (value: 'all' | 'today' | 'this_week' | 'custom') => void;
+  onDateFilterChange: (
+    value: 'all' | 'today' | 'this_week' | 'this_month' | 'custom'
+  ) => void;
   onDateFromChange: (value: string) => void;
   onDateToChange: (value: string) => void;
   onClear: () => void;
@@ -100,13 +102,19 @@ export function WorkOrdersFilters({
           value={dateFilter}
           onChange={(event) =>
             onDateFilterChange(
-              event.target.value as 'all' | 'today' | 'this_week' | 'custom'
+              event.target.value as
+                | 'all'
+                | 'today'
+                | 'this_week'
+                | 'this_month'
+                | 'custom'
             )
           }
         >
           <option value="all">All Dates</option>
           <option value="today">Today</option>
           <option value="this_week">This Week</option>
+          <option value="this_month">This Month</option>
           <option value="custom">Custom</option>
         </select>
 

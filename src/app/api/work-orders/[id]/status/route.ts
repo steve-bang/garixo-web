@@ -10,7 +10,8 @@ import type { WorkOrder } from '@/features/work-orders/types';
 import { canTransitionTo } from '@/features/work-orders/utils';
 import { auth } from '@/lib/auth';
 import { firebaseAdmin } from '@/lib/firebase-admin';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
+import { incrementGarageStaffCurrentJobs } from '@/services/firebase/staff-service';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -33,13 +34,13 @@ export async function PATCH(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const current = await findGarageWorkOrderById(garage.id, id);
+  const current = await findGarageWorkOrderById(garageId, id);
 
   if (!current) {
     return response({ success: false, error: 'Work order not found.' }, 404);
@@ -77,7 +78,7 @@ export async function PATCH(
         for (const part of current.parts) {
           const ref = db
             .collection('garages')
-            .doc(garage.id)
+            .doc(garageId)
             .collection('inventory')
             .doc(part.id);
 
@@ -117,7 +118,7 @@ export async function PATCH(
     }
   }
 
-  const updated = await updateGarageWorkOrder(garage.id, id, {
+  const updated = await updateGarageWorkOrder(garageId, id, {
     status: parsed.data.status,
     timeline: [
       ...current.timeline,
@@ -132,6 +133,21 @@ export async function PATCH(
   });
   if (!updated) {
     return response({ success: false, error: 'Work order not found.' }, 404);
+  }
+
+  if (
+    current.workerId &&
+    (parsed.data.status === WorkOrderStatusEnum.Completed ||
+      parsed.data.status === WorkOrderStatusEnum.Cancelled)
+  ) {
+    const wasAlreadyFinal =
+      current.status === WorkOrderStatusEnum.Completed ||
+      current.status === WorkOrderStatusEnum.Paid ||
+      current.status === WorkOrderStatusEnum.Cancelled;
+
+    if (!wasAlreadyFinal) {
+      await incrementGarageStaffCurrentJobs(garageId, current.workerId, -1);
+    }
   }
 
   return response({ success: true, data: updated });

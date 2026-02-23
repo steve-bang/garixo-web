@@ -8,7 +8,7 @@ import { cancelSchema } from '@/features/work-orders/schema';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { WorkOrder } from '@/features/work-orders/types';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -31,13 +31,13 @@ export async function PATCH(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const current = await findGarageWorkOrderById(garage.id, id);
+  const current = await findGarageWorkOrderById(garageId, id);
 
   if (!current) {
     return response({ success: false, error: 'Work order not found.' }, 404);
@@ -57,7 +57,7 @@ export async function PATCH(
   }
 
   const now = new Date().toISOString();
-  const updated = await updateGarageWorkOrder(garage.id, id, {
+  const updated = await updateGarageWorkOrder(garageId, id, {
     status: WorkOrderStatusEnum.Cancelled,
     cancellationReason: parsed.data.reason,
     timeline: [

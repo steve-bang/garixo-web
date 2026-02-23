@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
   createGarageCustomerVehicle,
   findGarageCustomerById,
@@ -40,18 +40,18 @@ export async function GET(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const customer = await findGarageCustomerById(garage.id, id);
+  const customer = await findGarageCustomerById(garageId, id);
   if (!customer) {
     return response({ success: false, error: 'Customer not found.' }, 404);
   }
 
-  const vehicles = await listGarageCustomerVehicles(garage.id, id);
+  const vehicles = await listGarageCustomerVehicles(garageId, id);
   return response({ success: true, data: vehicles });
 }
 
@@ -64,13 +64,13 @@ export async function POST(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
   const { id } = await context.params;
-  const customer = await findGarageCustomerById(garage.id, id);
+  const customer = await findGarageCustomerById(garageId, id);
   if (!customer) {
     return response({ success: false, error: 'Customer not found.' }, 404);
   }
@@ -99,6 +99,6 @@ export async function POST(
     );
   }
 
-  const created = await createGarageCustomerVehicle(garage.id, id, parsed.data);
+  const created = await createGarageCustomerVehicle(garageId, id, parsed.data);
   return response({ success: true, data: created }, 201);
 }

@@ -10,7 +10,7 @@ import type {
   CustomerListResponse
 } from '@/features/customers/types';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
   createGarageCustomer,
   isGarageCustomerPhoneExists,
@@ -60,8 +60,8 @@ export async function GET(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
@@ -87,7 +87,7 @@ export async function GET(
 
   const { search, status, spendingTier, page, pageSize } = parsedQuery.data;
 
-  let filtered = await listGarageCustomers(garage.id);
+  let filtered = await listGarageCustomers(garageId);
 
   if (search) {
     const needle = search.toLowerCase();
@@ -157,8 +157,8 @@ export async function POST(
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage) {
+  const garageId = await getRequestGarageId(session);
+  if (!garageId) {
     return response({ success: false, error: 'Garage not found.' }, 404);
   }
 
@@ -176,7 +176,7 @@ export async function POST(
   }
 
   const duplicatePhone = await isGarageCustomerPhoneExists(
-    garage.id,
+    garageId,
     parsed.data.phone
   );
 
@@ -184,7 +184,7 @@ export async function POST(
     return response({ success: false, error: 'Phone already exists.' }, 409);
   }
 
-  const created = await createGarageCustomer(garage.id, {
+  const created = await createGarageCustomer(garageId, {
     name: parsed.data.name,
     phone: parsed.data.phone,
     email: parsed.data.email,

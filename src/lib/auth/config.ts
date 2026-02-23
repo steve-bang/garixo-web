@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { env } from '@/config/env';
 import { loginSchema } from '@/features/auth/schema';
 import { firebaseAdmin } from '@/lib/firebase-admin';
+import { getGarageByOwnerIdCached } from '@/services/firebase/garage-service';
 import {
   getUserDocument,
   syncUserDocument
@@ -142,6 +143,7 @@ export const authOptions: NextAuthOptions = {
             firebaseSession.displayName ??
             firebaseSession.email,
           role: userDoc?.role ?? 'owner',
+          garageId: userDoc?.garageId,
           accessToken: firebaseSession.idToken
         };
       }
@@ -167,6 +169,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
+        token.garageId = (user as { garageId?: string }).garageId;
         token.accessToken =
           (user as { accessToken?: string }).accessToken ??
           (token.sub
@@ -174,17 +177,31 @@ export const authOptions: NextAuthOptions = {
             : token.accessToken);
       }
 
+      if (token.sub && !token.garageId) {
+        const firestoreUser = await getUserDocument(token.sub);
+        token.garageId =
+          firestoreUser?.garageId ??
+          (await getGarageByOwnerIdCached(token.sub))?.id ??
+          undefined;
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        const firestoreUser = token.sub
-          ? await getUserDocument(token.sub)
-          : null;
+        const needsFreshUser = !token.role || !token.garageId;
+        const firestoreUser =
+          token.sub && needsFreshUser ? await getUserDocument(token.sub) : null;
         session.user.id = token.sub ?? '';
         session.user.role = z
           .enum(['owner', 'admin', 'staff', 'user'])
           .parse(firestoreUser?.role ?? token.role ?? 'owner');
+        session.user.garageId =
+          token.garageId ??
+          firestoreUser?.garageId ??
+          (token.sub
+            ? (await getGarageByOwnerIdCached(token.sub))?.id
+            : undefined);
         session.accessToken = token.accessToken;
       }
 

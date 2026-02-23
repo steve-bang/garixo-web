@@ -6,8 +6,7 @@ import {
   updateStaffSchema
 } from '@/features/staff/schema';
 import type { Staff } from '@/features/staff/types';
-import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
   createGarageStaff,
   deleteGarageStaff,
@@ -23,16 +22,6 @@ function response<T>(
   status = 200
 ): NextResponse<ApiResponse<T>> {
   return NextResponse.json(payload, { status });
-}
-
-async function getRequestGarageId(): Promise<string | null> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return null;
-  }
-
-  const garage = await getGarageByOwnerId(session.user.id);
-  return garage?.id ?? null;
 }
 
 export async function GET(): Promise<NextResponse<ApiResponse<Staff[]>>> {

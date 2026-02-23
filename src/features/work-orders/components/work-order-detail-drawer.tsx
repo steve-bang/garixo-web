@@ -55,7 +55,7 @@ export function WorkOrderDetailDrawer({
       open={open}
       onClose={onClose}
       title={order.orderCode}
-      description={order.plateNumber}
+      description={`${order.plateNumber} ${order.vehicleModel ? ' - ' + order.vehicleModel : ''}`}
       width="xl"
     >
       <div className="space-y-s4">

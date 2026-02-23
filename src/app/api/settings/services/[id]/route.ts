@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { auth } from '@/lib/auth';
 import type { ServiceConfigurationItem } from '@/features/settings/service-configuration.types';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
   deleteGarageService,
   listGarageServices,
@@ -32,8 +32,8 @@ export async function PUT(
     return response({ success: false, error: 'Unauthorized' }, 401);
 
   const { id } = await params;
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage)
+  const garageId = await getRequestGarageId(session);
+  if (!garageId)
     return response({ success: false, error: 'Garage not found.' }, 404);
 
   const body = (await request.json()) as {
@@ -62,7 +62,7 @@ export async function PUT(
     );
   }
 
-  const services = await listGarageServices(garage.id);
+  const services = await listGarageServices(garageId);
   const duplicate = services.some(
     (item) => item.id !== id && normalizeName(item.name) === normalizeName(name)
   );
@@ -73,7 +73,7 @@ export async function PUT(
     );
   }
 
-  const updated = await updateGarageService(garage.id, id, {
+  const updated = await updateGarageService(garageId, id, {
     name,
     description,
     defaultPrice,
@@ -103,10 +103,10 @@ export async function DELETE(
     return response({ success: false, error: 'Unauthorized' }, 401);
 
   const { id } = await params;
-  const garage = await getGarageByOwnerId(session.user.id);
-  if (!garage)
+  const garageId = await getRequestGarageId(session);
+  if (!garageId)
     return response({ success: false, error: 'Garage not found.' }, 404);
-  await deleteGarageService(garage.id, id);
+  await deleteGarageService(garageId, id);
 
   return response({ success: true, data: { id } });
 }

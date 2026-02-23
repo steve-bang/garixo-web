@@ -5,14 +5,18 @@ import type {
   UpdateStatusInput,
   UpdateWorkOrderInput
 } from '@/features/work-orders/schema';
-import type { WorkOrder, WorkOrdersResponse, WorkOrderStatus } from '@/features/work-orders/types';
+import type {
+  WorkOrder,
+  WorkOrdersResponse,
+  WorkOrderStatus
+} from '@/features/work-orders/types';
 import type { ApiResponse } from '@/types/api';
 
 export type GetWorkOrdersParams = {
   search?: string;
   workerId?: string;
   status?: WorkOrderStatus;
-  dateFilter?: 'all' | 'today' | 'this_week' | 'custom';
+  dateFilter?: 'all' | 'today' | 'this_week' | 'this_month' | 'custom';
   dateFrom?: string;
   dateTo?: string;
   page?: number;
@@ -43,7 +47,9 @@ function toQuery(params: GetWorkOrdersParams): string {
   return query.toString();
 }
 
-export async function getWorkOrders(params: GetWorkOrdersParams): Promise<WorkOrdersResponse> {
+export async function getWorkOrders(
+  params: GetWorkOrdersParams
+): Promise<WorkOrdersResponse> {
   const query = toQuery(params);
   const response = await fetch(`/api/work-orders${query ? `?${query}` : ''}`);
   const payload = await readJson<WorkOrdersResponse>(response);
@@ -56,7 +62,9 @@ export async function getWorkOrderById(id: string): Promise<WorkOrder> {
   return ensureSuccess(payload);
 }
 
-export async function createWorkOrder(input: CreateWorkOrderInput): Promise<WorkOrder> {
+export async function createWorkOrder(
+  input: CreateWorkOrderInput
+): Promise<WorkOrder> {
   const response = await fetch('/api/work-orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -67,7 +75,10 @@ export async function createWorkOrder(input: CreateWorkOrderInput): Promise<Work
   return ensureSuccess(payload);
 }
 
-export async function updateWorkOrder(id: string, input: Omit<UpdateWorkOrderInput, 'id'>): Promise<WorkOrder> {
+export async function updateWorkOrder(
+  id: string,
+  input: Omit<UpdateWorkOrderInput, 'id'>
+): Promise<WorkOrder> {
   const response = await fetch(`/api/work-orders/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -78,7 +89,10 @@ export async function updateWorkOrder(id: string, input: Omit<UpdateWorkOrderInp
   return ensureSuccess(payload);
 }
 
-export async function updateWorkOrderStatus(id: string, input: UpdateStatusInput): Promise<WorkOrder> {
+export async function updateWorkOrderStatus(
+  id: string,
+  input: UpdateStatusInput
+): Promise<WorkOrder> {
   const response = await fetch(`/api/work-orders/${id}/status`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -89,7 +103,10 @@ export async function updateWorkOrderStatus(id: string, input: UpdateStatusInput
   return ensureSuccess(payload);
 }
 
-export async function payWorkOrder(id: string, input: PaymentInput): Promise<WorkOrder> {
+export async function payWorkOrder(
+  id: string,
+  input: PaymentInput
+): Promise<WorkOrder> {
   const response = await fetch(`/api/work-orders/${id}/payment`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -100,7 +117,10 @@ export async function payWorkOrder(id: string, input: PaymentInput): Promise<Wor
   return ensureSuccess(payload);
 }
 
-export async function cancelWorkOrder(id: string, input: CancelInput): Promise<WorkOrder> {
+export async function cancelWorkOrder(
+  id: string,
+  input: CancelInput
+): Promise<WorkOrder> {
   const response = await fetch(`/api/work-orders/${id}/cancel`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },

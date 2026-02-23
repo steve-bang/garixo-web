@@ -3,7 +3,7 @@ import type { JSX, ReactNode } from 'react';
 
 import { DashboardLayoutShell } from '@/components/layout/dashboard-layout-shell';
 import { auth } from '@/lib/auth';
-import { getGarageByOwnerId } from '@/services/firebase/garage-service';
+import { getRequestGarage } from '@/lib/auth/garage-context';
 
 export default async function DashboardLayout({
   children
@@ -16,7 +16,7 @@ export default async function DashboardLayout({
     redirect('/auth/login');
   }
 
-  const garage = await getGarageByOwnerId(session.user.id);
+  const garage = await getRequestGarage(session);
   if (!garage) {
     redirect('/onboarding/setup-garage');
   }
