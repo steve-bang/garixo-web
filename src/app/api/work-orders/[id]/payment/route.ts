@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
 
-import { refreshWorkers, workOrdersDB } from '@/app/api/work-orders/work-orders-db';
+import {
+  findGarageWorkOrderById,
+  updateGarageWorkOrder
+} from '@/app/api/work-orders/work-orders-db';
 import { paymentSchema } from '@/features/work-orders/schema';
+import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { WorkOrder } from '@/features/work-orders/types';
+import { auth } from '@/lib/auth';
+import { getGarageByOwnerId } from '@/services/firebase/garage-service';
 import type { ApiResponse } from '@/types/api';
 
-function response<T>(payload: ApiResponse<T>, status = 200): NextResponse<ApiResponse<T>> {
+function response<T>(
+  payload: ApiResponse<T>,
+  status = 200
+): NextResponse<ApiResponse<T>> {
   return NextResponse.json(payload, { status });
 }
 
@@ -13,46 +22,67 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-function findById(id: string): WorkOrder | undefined {
-  return workOrdersDB.find((item) => item.id === id);
-}
+export async function PATCH(
+  request: Request,
+  context: RouteContext
+): Promise<NextResponse<ApiResponse<WorkOrder>>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
 
-export async function PATCH(request: Request, context: RouteContext): Promise<NextResponse<ApiResponse<WorkOrder>>> {
+  const garage = await getGarageByOwnerId(session.user.id);
+  if (!garage) {
+    return response({ success: false, error: 'Garage not found.' }, 404);
+  }
+
   const { id } = await context.params;
-  const current = findById(id);
+  const current = await findGarageWorkOrderById(garage.id, id);
 
   if (!current) {
     return response({ success: false, error: 'Work order not found.' }, 404);
   }
 
-  if (current.status !== 'READY_FOR_PAYMENT') {
-    return response({ success: false, error: 'Order must be Ready for Payment.' }, 400);
+  if (current.status !== WorkOrderStatusEnum.Completed) {
+    return response(
+      { success: false, error: 'Order must be Completed before payment.' },
+      400
+    );
   }
 
   if (current.totalAmount <= 0) {
-    return response({ success: false, error: 'Total amount must be greater than 0.' }, 400);
+    return response(
+      { success: false, error: 'Total amount must be greater than 0.' },
+      400
+    );
   }
 
   const body = await request.json().catch(() => null);
   const parsed = paymentSchema.safeParse(body);
 
   if (!parsed.success) {
-    return response({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid payload.' }, 400);
+    return response(
+      {
+        success: false,
+        error: parsed.error.issues[0]?.message ?? 'Invalid payload.'
+      },
+      400
+    );
   }
 
   const now = new Date().toISOString();
-  const updated: WorkOrder = {
-    ...current,
+  const updated = await updateGarageWorkOrder(garage.id, id, {
     paymentMethod: parsed.data.method,
-    status: 'COMPLETED',
-    timeline: [...current.timeline, { status: 'COMPLETED', timestamp: now }],
-    updatedAt: now,
+    status: WorkOrderStatusEnum.Paid,
+    timeline: [
+      ...current.timeline,
+      { status: WorkOrderStatusEnum.Paid, timestamp: now }
+    ],
     isOverdue: false
-  };
-
-  const index = workOrdersDB.findIndex((item) => item.id === id);
-  workOrdersDB[index] = updated;
-  refreshWorkers();
+  });
+  if (!updated) {
+    return response({ success: false, error: 'Work order not found.' }, 404);
+  }
 
   return response({ success: true, data: updated });
 }

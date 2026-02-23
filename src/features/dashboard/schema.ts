@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 
 export const dateRangeSchema = z.enum(['today', 'week', 'month', 'custom']);
 
@@ -23,10 +24,10 @@ export const revenuePointSchema = z.object({
 });
 
 export const orderStatusDistributionSchema = z.object({
-  assigned: z.number(),
+  draft: z.number(),
   inProgress: z.number(),
   completed: z.number(),
-  overdue: z.number()
+  paid: z.number()
 });
 
 export const todayOrderSchema = z.object({
@@ -34,7 +35,15 @@ export const todayOrderSchema = z.object({
   plate: z.string(),
   service: z.string(),
   worker: z.string(),
-  status: z.enum(['assigned', 'in_progress', 'completed', 'overdue'])
+  status: z.enum([
+    WorkOrderStatusEnum.Draft,
+    WorkOrderStatusEnum.WaitingForApproval,
+    WorkOrderStatusEnum.InProgress,
+    WorkOrderStatusEnum.WaitingForParts,
+    WorkOrderStatusEnum.Completed,
+    WorkOrderStatusEnum.Paid,
+    WorkOrderStatusEnum.Cancelled
+  ])
 });
 
 export const workerOverviewSchema = z.object({

@@ -1,3 +1,5 @@
+import type { WorkOrderStatus } from '@/features/work-orders/types';
+
 export type DateRange = 'today' | 'week' | 'month' | 'custom';
 
 export interface DashboardKPI {
@@ -21,10 +23,10 @@ export interface RevenuePoint {
 }
 
 export interface OrderStatusDistribution {
-  assigned: number;
+  draft: number;
   inProgress: number;
   completed: number;
-  overdue: number;
+  paid: number;
 }
 
 export interface TodayOrder {
@@ -32,7 +34,7 @@ export interface TodayOrder {
   plate: string;
   service: string;
   worker: string;
-  status: 'assigned' | 'in_progress' | 'completed' | 'overdue';
+  status: WorkOrderStatus;
 }
 
 export interface WorkerOverview {
@@ -57,14 +59,18 @@ export type TrendDirection = 'up' | 'down' | 'flat';
 
 export type KpiMetric = {
   id: 'revenue-today' | 'revenue-month' | 'orders-today' | 'pending-jobs';
-  label: 'Revenue Today' | 'Revenue This Month' | 'Orders Today' | 'Pending Jobs';
+  label:
+    | 'Revenue Today'
+    | 'Revenue This Month'
+    | 'Orders Today'
+    | 'Pending Jobs';
   value: string;
   delta: string;
   trend: TrendDirection;
   tone?: 'default' | 'warning';
 };
 
-export type WorkOrderStatusLegacy = 'new' | 'in_progress' | 'waiting_parts' | 'completed';
+export type WorkOrderStatusLegacy = WorkOrderStatus;
 
 export type WorkOrderRow = {
   id: string;

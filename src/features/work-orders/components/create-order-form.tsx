@@ -1,34 +1,72 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Check, PlusCircle, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import type { CreateWorkOrderInput } from '@/features/work-orders/schema';
-import type { OrderService, PriorityLevel, Worker } from '@/features/work-orders/types';
+import type { Customer } from '@/features/customers/types';
+import type {
+  OrderService,
+  PriorityLevel,
+  Worker
+} from '@/features/work-orders/types';
 import { formatCurrencyVnd } from '@/features/work-orders/utils';
+
+type AvailableService = OrderService & {
+  estimatedTime?: string;
+};
+
+type SelectedService = OrderService & {
+  estimatedTime?: string;
+};
 
 type CreateOrderFormProps = {
   workers: Worker[];
+  availableServices: AvailableService[];
   onSubmit: (payload: CreateWorkOrderInput) => Promise<void>;
   onCancel: () => void;
 };
 
-const serviceCatalog: OrderService[] = [
-  { id: 'svc-1', name: 'Oil Change', price: 800000 },
-  { id: 'svc-2', name: 'Brake Service', price: 1400000 },
-  { id: 'svc-3', name: 'Engine Diagnostic', price: 1100000 },
-  { id: 'svc-4', name: 'Battery Replacement', price: 2200000 },
-  { id: 'svc-5', name: 'AC Service', price: 900000 }
-];
+export function CreateOrderForm({
+  workers,
+  availableServices,
+  onSubmit,
+  onCancel
+}: CreateOrderFormProps): JSX.Element {
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [debouncedCustomerSearch, setDebouncedCustomerSearch] = useState('');
+  const [customerResults, setCustomerResults] = useState<Customer[]>([]);
+  const [loadingCustomers, setLoadingCustomers] = useState(false);
+  const [showCustomerResults, setShowCustomerResults] = useState(true);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null
+  );
+  const [selectedVehicleId, setSelectedVehicleId] = useState('');
+  const [showCreateCustomer, setShowCreateCustomer] = useState(false);
+  const [quickCustomerName, setQuickCustomerName] = useState('');
+  const [quickCustomerPhone, setQuickCustomerPhone] = useState('');
+  const [showCreateVehicle, setShowCreateVehicle] = useState(false);
+  const [quickVehiclePlate, setQuickVehiclePlate] = useState('');
+  const [quickVehicleModel, setQuickVehicleModel] = useState('');
 
-export function CreateOrderForm({ workers, onSubmit, onCancel }: CreateOrderFormProps): JSX.Element {
   const [step, setStep] = useState(1);
   const [plateNumber, setPlateNumber] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [services, setServices] = useState<OrderService[]>([]);
+  const [services, setServices] = useState<SelectedService[]>([]);
+  const [serviceSearch, setServiceSearch] = useState('');
+  const [serviceFilter, setServiceFilter] = useState<
+    'all' | 'selected' | 'not_selected'
+  >('all');
+  const [visibleServiceCount, setVisibleServiceCount] = useState(20);
+  const [showQuickAddService, setShowQuickAddService] = useState(false);
+  const [quickServiceName, setQuickServiceName] = useState('');
+  const [quickServicePrice, setQuickServicePrice] = useState('');
+  const [isSavingQuickService, setIsSavingQuickService] = useState(false);
+  const [localAddedServices, setLocalAddedServices] = useState<
+    AvailableService[]
+  >([]);
   const [workerId, setWorkerId] = useState('');
   const [priority, setPriority] = useState<PriorityLevel>('NORMAL');
   const [estimatedTimeMinutes, setEstimatedTimeMinutes] = useState('120');
@@ -36,20 +74,126 @@ export function CreateOrderForm({ workers, onSubmit, onCancel }: CreateOrderForm
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setSubmitting] = useState(false);
 
-  const total = useMemo(() => services.reduce((sum, item) => sum + item.price, 0), [services]);
-  const canStep1 = plateNumber.trim() && customerName.trim() && customerPhone.trim();
+  const total = useMemo(
+    () => services.reduce((sum, item) => sum + item.price, 0),
+    [services]
+  );
+  const canStep1 = Boolean(selectedCustomer && plateNumber.trim());
   const canStep2 = services.length > 0;
+  const serviceCatalog = useMemo(
+    () => [...availableServices, ...localAddedServices],
+    [availableServices, localAddedServices]
+  );
+  const selectedServiceIds = useMemo(
+    () => new Set(services.map((service) => service.id)),
+    [services]
+  );
+  const filteredServiceCatalog = useMemo(() => {
+    const normalizedSearch = serviceSearch.trim().toLowerCase();
+
+    const filtered = serviceCatalog.filter((service) => {
+      const isSelected = selectedServiceIds.has(service.id);
+      if (serviceFilter === 'selected' && !isSelected) {
+        return false;
+      }
+      if (serviceFilter === 'not_selected' && isSelected) {
+        return false;
+      }
+      if (!normalizedSearch) {
+        return true;
+      }
+      return service.name.toLowerCase().includes(normalizedSearch);
+    });
+
+    return [...filtered].sort((a, b) => {
+      const aSelected = selectedServiceIds.has(a.id);
+      const bSelected = selectedServiceIds.has(b.id);
+      if (aSelected === bSelected) {
+        return a.name.localeCompare(b.name);
+      }
+      return aSelected ? -1 : 1;
+    });
+  }, [serviceCatalog, serviceFilter, serviceSearch, selectedServiceIds]);
+  const visibleServiceCatalog = useMemo(
+    () => filteredServiceCatalog.slice(0, visibleServiceCount),
+    [filteredServiceCatalog, visibleServiceCount]
+  );
+  const hasMoreServices =
+    filteredServiceCatalog.length > visibleServiceCatalog.length;
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedCustomerSearch(customerSearch.trim());
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [customerSearch]);
+
+  useEffect(() => {
+    if (step !== 1) {
+      return;
+    }
+
+    setLoadingCustomers(true);
+
+    void fetch(
+      `/api/customers?search=${encodeURIComponent(
+        debouncedCustomerSearch
+      )}&page=1&pageSize=8`
+    )
+      .then(async (response) => {
+        const payload = (await response.json()) as {
+          success: boolean;
+          data?: { items: Customer[] };
+        };
+        if (!payload.success || !payload.data) {
+          setCustomerResults([]);
+          return;
+        }
+        setCustomerResults(payload.data.items);
+      })
+      .catch(() => {
+        setCustomerResults([]);
+      })
+      .finally(() => {
+        setLoadingCustomers(false);
+      });
+  }, [debouncedCustomerSearch, step]);
+
+  useEffect(() => {
+    if (step !== 2) {
+      return;
+    }
+    setVisibleServiceCount(20);
+  }, [serviceSearch, serviceFilter, step]);
 
   const reset = () => {
     setStep(1);
+    setCustomerSearch('');
+    setDebouncedCustomerSearch('');
+    setCustomerResults([]);
+    setLoadingCustomers(false);
+    setShowCustomerResults(true);
+    setSelectedCustomer(null);
+    setSelectedVehicleId('');
+    setShowCreateCustomer(false);
+    setQuickCustomerName('');
+    setQuickCustomerPhone('');
+    setShowCreateVehicle(false);
+    setQuickVehiclePlate('');
+    setQuickVehicleModel('');
     setPlateNumber('');
-    setCustomerName('');
-    setCustomerPhone('');
     setServices([]);
+    setServiceSearch('');
+    setServiceFilter('all');
+    setVisibleServiceCount(20);
     setWorkerId('');
     setPriority('NORMAL');
     setEstimatedTimeMinutes('120');
     setNotes('');
+    setShowQuickAddService(false);
+    setQuickServiceName('');
+    setQuickServicePrice('');
+    setLocalAddedServices([]);
     setSubmitError('');
   };
 
@@ -60,11 +204,29 @@ export function CreateOrderForm({ workers, onSubmit, onCancel }: CreateOrderForm
     try {
       const worker = workers.find((item) => item.id === workerId);
 
+      if (!selectedCustomer) {
+        throw new Error('Please select customer.');
+      }
+
+      const selectedVehicle =
+        selectedCustomer.vehicles.find(
+          (item) => item.id === selectedVehicleId
+        ) ?? undefined;
+      const vehicleModel =
+        selectedVehicle?.model || quickVehicleModel.trim() || undefined;
+
       await onSubmit({
         plateNumber,
-        customerName,
-        customerPhone,
-        services,
+        customerId: selectedCustomer.id,
+        customerName: selectedCustomer.name,
+        customerPhone: selectedCustomer.phone,
+        vehicleId: selectedVehicle?.id,
+        vehicleModel,
+        services: services.map((service) => ({
+          id: service.id,
+          name: service.name,
+          price: service.price
+        })),
         parts: [],
         workerId: worker?.id,
         workerName: worker?.name,
@@ -75,10 +237,186 @@ export function CreateOrderForm({ workers, onSubmit, onCancel }: CreateOrderForm
 
       reset();
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Could not create order.');
+      setSubmitError(
+        error instanceof Error ? error.message : 'Could not create order.'
+      );
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const addServiceToOrder = (service: AvailableService) => {
+    setServices((prev) => {
+      if (prev.some((item) => item.id === service.id)) {
+        return prev;
+      }
+      return [...prev, service];
+    });
+    setShowQuickAddService(false);
+  };
+
+  const quickAddService = async () => {
+    if (!quickServiceName.trim()) {
+      setSubmitError('Service name is required.');
+      return;
+    }
+
+    const parsedPrice = Number(quickServicePrice);
+    if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
+      setSubmitError('Price must be greater than 0.');
+      return;
+    }
+
+    setSubmitError('');
+    setIsSavingQuickService(true);
+
+    try {
+      const response = await fetch('/api/services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: quickServiceName.trim(),
+          category: 'OTHER',
+          price: parsedPrice,
+          estimatedTime: '60 minutes',
+          status: 'ACTIVE'
+        })
+      });
+      const payload = (await response.json()) as {
+        success: boolean;
+        data?: {
+          id: string;
+          name: string;
+          price: number;
+          estimatedTime?: string;
+        };
+        error?: string;
+      };
+
+      if (!payload.success || !payload.data) {
+        setSubmitError(payload.error ?? 'Could not add service.');
+        return;
+      }
+
+      const created: AvailableService = {
+        id: payload.data.id,
+        name: payload.data.name,
+        price: payload.data.price,
+        estimatedTime: payload.data.estimatedTime
+      };
+
+      setLocalAddedServices((prev) => [created, ...prev]);
+      addServiceToOrder(created);
+      setQuickServiceName('');
+      setQuickServicePrice('');
+      setShowQuickAddService(false);
+    } finally {
+      setIsSavingQuickService(false);
+    }
+  };
+
+  const createCustomerInline = async () => {
+    if (!quickCustomerName.trim()) {
+      setSubmitError('Customer name is required.');
+      return;
+    }
+
+    if (!quickCustomerPhone.trim()) {
+      setSubmitError('Phone is required.');
+      return;
+    }
+
+    setSubmitError('');
+    setLoadingCustomers(true);
+
+    try {
+      const response = await fetch('/api/customers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: quickCustomerName.trim(),
+          phone: quickCustomerPhone.trim(),
+          status: 'ACTIVE'
+        })
+      });
+      const payload = (await response.json()) as {
+        success: boolean;
+        data?: Customer;
+        error?: string;
+      };
+
+      if (!payload.success || !payload.data) {
+        setSubmitError(payload.error ?? 'Could not create customer.');
+        return;
+      }
+
+      setSelectedCustomer(payload.data);
+      setShowCustomerResults(false);
+      setShowCreateCustomer(false);
+      setQuickCustomerName('');
+      setQuickCustomerPhone('');
+      setCustomerSearch(payload.data.name);
+      setCustomerResults((prev) => [payload.data as Customer, ...prev]);
+      if (payload.data.vehicles.length === 0) {
+        setShowCreateVehicle(true);
+      }
+    } finally {
+      setLoadingCustomers(false);
+    }
+  };
+
+  const createVehicleInline = async () => {
+    if (!selectedCustomer) {
+      setSubmitError('Please select customer first.');
+      return;
+    }
+
+    if (!quickVehiclePlate.trim()) {
+      setSubmitError('Plate number is required.');
+      return;
+    }
+
+    setSubmitError('');
+
+    const response = await fetch(
+      `/api/customers/${selectedCustomer.id}/vehicles`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plate: quickVehiclePlate.trim().toUpperCase(),
+          brand: 'Other',
+          model: quickVehicleModel.trim() || undefined
+        })
+      }
+    );
+
+    const payload = (await response.json()) as {
+      success: boolean;
+      data?: Customer['vehicles'][number];
+      error?: string;
+    };
+
+    if (!payload.success || !payload.data) {
+      setSubmitError(payload.error ?? 'Could not add vehicle.');
+      return;
+    }
+
+    setSelectedCustomer((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        vehicles: [
+          payload.data as Customer['vehicles'][number],
+          ...prev.vehicles
+        ]
+      };
+    });
+    setSelectedVehicleId(payload.data.id);
+    setPlateNumber(payload.data.plate);
+    setShowCreateVehicle(false);
+    setQuickVehiclePlate('');
+    setQuickVehicleModel('');
   };
 
   return (
@@ -87,48 +425,507 @@ export function CreateOrderForm({ workers, onSubmit, onCancel }: CreateOrderForm
 
       {step === 1 ? (
         <Card className="space-y-s3 p-s4">
-          <h4 className="text-small font-semibold">Vehicle & Customer</h4>
-          <div className="space-y-s1">
-            <label className="text-small font-medium text-text-secondary">Plate Number</label>
-            <Input className="h-11" value={plateNumber} onChange={(e) => setPlateNumber(e.target.value.toUpperCase())} />
+          <h4 className="text-small font-semibold">Customer & Vehicle</h4>
+
+          <div className="space-y-s2">
+            <label className="text-small font-medium text-text-secondary">
+              Customer
+            </label>
+            <Input
+              className="h-11"
+              placeholder="Search or create new customer"
+              autoFocus
+              value={customerSearch}
+              onFocus={() => setShowCustomerResults(true)}
+              onChange={(event) => {
+                setCustomerSearch(event.target.value);
+                setShowCustomerResults(true);
+              }}
+            />
+
+            {selectedCustomer && !showCustomerResults ? (
+              <div className="rounded-md border border-border bg-surface-default p-s3">
+                <div className="flex items-start justify-between gap-s2">
+                  <div>
+                    <p className="text-small font-semibold text-text-primary">
+                      {selectedCustomer.name}
+                    </p>
+                    <p className="text-caption text-text-muted">
+                      {selectedCustomer.phone}
+                    </p>
+                    <p className="text-caption text-text-muted">
+                      Latest plate: {selectedCustomer.vehicles[0]?.plate ?? '-'}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowCustomerResults(true)}
+                  >
+                    Change
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
+            {showCustomerResults ? (
+              <div className="max-h-[220px] overflow-y-auto rounded-md border border-border bg-surface-default">
+                {loadingCustomers ? (
+                  <p className="px-s3 py-s2 text-small text-text-muted">
+                    Searching customers...
+                  </p>
+                ) : null}
+
+                {!loadingCustomers
+                  ? customerResults.map((customer) => (
+                      <button
+                        key={customer.id}
+                        type="button"
+                        className="flex w-full items-center justify-between gap-s2 border-t border-border px-s3 py-s2 text-left first:border-t-0 hover:bg-surface-hover"
+                        onClick={() => {
+                          setSelectedCustomer(customer);
+                          setShowCustomerResults(false);
+                          setSelectedVehicleId(customer.vehicles[0]?.id ?? '');
+                          setPlateNumber(customer.vehicles[0]?.plate ?? '');
+                          setShowCreateVehicle(customer.vehicles.length === 0);
+                          setShowCreateCustomer(false);
+                        }}
+                      >
+                        <div>
+                          <p className="text-small font-medium text-text-primary">
+                            {customer.name}
+                          </p>
+                          <p className="text-caption text-text-muted">
+                            {customer.phone}
+                          </p>
+                        </div>
+                        <p className="text-caption text-text-muted">
+                          {customer.vehicles[0]?.plate ?? '-'}
+                        </p>
+                      </button>
+                    ))
+                  : null}
+
+                <button
+                  type="button"
+                  className="w-full border-t border-border px-s3 py-s2 text-left text-small font-medium text-primary-700 hover:bg-surface-hover"
+                  onClick={() => setShowCreateCustomer(true)}
+                >
+                  + Create new customer
+                </button>
+              </div>
+            ) : null}
+
+            {showCreateCustomer ? (
+              <div className="grid gap-s2 rounded-md border border-border p-s3 md:grid-cols-[1fr_1fr_auto] md:items-end">
+                <div className="space-y-s1">
+                  <label className="text-small font-medium text-text-secondary">
+                    Name
+                  </label>
+                  <Input
+                    className="h-11"
+                    value={quickCustomerName}
+                    onChange={(event) =>
+                      setQuickCustomerName(event.target.value)
+                    }
+                  />
+                </div>
+                <div className="space-y-s1">
+                  <label className="text-small font-medium text-text-secondary">
+                    Phone
+                  </label>
+                  <Input
+                    className="h-11"
+                    value={quickCustomerPhone}
+                    onChange={(event) =>
+                      setQuickCustomerPhone(event.target.value)
+                    }
+                  />
+                </div>
+                <Button
+                  type="button"
+                  className="h-11"
+                  onClick={() => void createCustomerInline()}
+                >
+                  Save
+                </Button>
+              </div>
+            ) : null}
           </div>
+
+          {selectedCustomer ? (
+            <div className="space-y-s2 rounded-md border border-border p-s3">
+              <div className="flex items-center justify-between gap-s2">
+                <label className="text-small font-medium text-text-secondary">
+                  Vehicles
+                </label>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowCreateVehicle((prev) => !prev)}
+                >
+                  + Add Vehicle
+                </Button>
+              </div>
+
+              {selectedCustomer.vehicles.length > 0 ? (
+                <select
+                  className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small"
+                  value={selectedVehicleId}
+                  onChange={(event) => {
+                    const id = event.target.value;
+                    setSelectedVehicleId(id);
+                    const vehicle = selectedCustomer.vehicles.find(
+                      (item) => item.id === id
+                    );
+                    setPlateNumber(vehicle?.plate ?? '');
+                  }}
+                >
+                  <option value="">Select vehicle</option>
+                  {selectedCustomer.vehicles.map((vehicle) => (
+                    <option key={vehicle.id} value={vehicle.id}>
+                      {vehicle.plate}{' '}
+                      {vehicle.model ? `• ${vehicle.model}` : ''}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="text-small text-text-muted">
+                  No vehicles found for this customer.
+                </p>
+              )}
+
+              {showCreateVehicle ? (
+                <div className="grid gap-s2 md:grid-cols-[1fr_1fr_auto] md:items-end">
+                  <div className="space-y-s1">
+                    <label className="text-small font-medium text-text-secondary">
+                      Plate
+                    </label>
+                    <Input
+                      className="h-11"
+                      value={quickVehiclePlate}
+                      onChange={(event) =>
+                        setQuickVehiclePlate(event.target.value.toUpperCase())
+                      }
+                    />
+                  </div>
+                  <div className="space-y-s1">
+                    <label className="text-small font-medium text-text-secondary">
+                      Model (optional)
+                    </label>
+                    <Input
+                      className="h-11"
+                      value={quickVehicleModel}
+                      onChange={(event) =>
+                        setQuickVehicleModel(event.target.value)
+                      }
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    className="h-11"
+                    onClick={() => void createVehicleInline()}
+                  >
+                    Save
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
           <div className="space-y-s1">
-            <label className="text-small font-medium text-text-secondary">Customer Name</label>
-            <Input className="h-11" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-          </div>
-          <div className="space-y-s1">
-            <label className="text-small font-medium text-text-secondary">Customer Phone</label>
-            <Input className="h-11" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
+            <label className="text-small font-medium text-text-secondary">
+              Plate Number
+            </label>
+            <Input
+              className="h-11"
+              value={plateNumber}
+              onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
+            />
           </div>
         </Card>
       ) : null}
 
       {step === 2 ? (
-        <Card className="space-y-s3 p-s4">
-          <h4 className="text-small font-semibold">Add Services</h4>
-          <div className="space-y-s2">
-            {serviceCatalog.map((service) => {
-              const exists = services.some((x) => x.id === service.id);
-              return (
-                <button
-                  key={service.id}
-                  type="button"
-                  className="flex w-full items-center justify-between rounded-md border border-border px-s3 py-s2 text-left hover:bg-surface-hover"
-                  onClick={() => {
-                    if (exists) {
-                      setServices((prev) => prev.filter((x) => x.id !== service.id));
-                    } else {
-                      setServices((prev) => [...prev, service]);
-                    }
-                  }}
-                >
-                  <span className="text-small">{service.name}</span>
-                  <span className="text-small text-text-secondary">{formatCurrencyVnd(service.price)}</span>
-                </button>
-              );
-            })}
+        <Card className="space-y-s4 p-s4">
+          <div className="space-y-s1">
+            <h4 className="text-small font-semibold">Services (optional)</h4>
+            <p className="text-caption text-text-muted">
+              Add the work needed for this job. You can update it later.
+            </p>
           </div>
-          <p className="text-small font-medium">Total: {formatCurrencyVnd(total)}</p>
+
+          <div className="space-y-s2">
+            <div className="flex items-center justify-between gap-s2">
+              <p className="text-small font-semibold text-text-primary">
+                Choose services
+              </p>
+              <p className="text-caption text-text-muted">
+                {services.length} selected
+              </p>
+            </div>
+
+            <div className="grid gap-s2 md:grid-cols-[1fr_auto]">
+              <Input
+                className="h-10"
+                placeholder="Search service name"
+                value={serviceSearch}
+                onChange={(event) => setServiceSearch(event.target.value)}
+              />
+              <div className="grid grid-cols-3 gap-s1">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={serviceFilter === 'all' ? 'secondary' : 'ghost'}
+                  className="h-10 px-s2"
+                  onClick={() => setServiceFilter('all')}
+                >
+                  All
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={serviceFilter === 'selected' ? 'secondary' : 'ghost'}
+                  className="h-10 px-s2"
+                  onClick={() => setServiceFilter('selected')}
+                >
+                  Added
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={
+                    serviceFilter === 'not_selected' ? 'secondary' : 'ghost'
+                  }
+                  className="h-10 px-s2"
+                  onClick={() => setServiceFilter('not_selected')}
+                >
+                  New
+                </Button>
+              </div>
+            </div>
+
+            <div className="max-h-[220px] overflow-y-auto rounded-md border border-border bg-surface-default">
+              {serviceCatalog.length === 0 ? (
+                <div className="space-y-s2 px-s3 py-s3">
+                  <p className="text-small text-text-muted">
+                    No service found.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowQuickAddService(true)}
+                  >
+                    Quick Add Service
+                  </Button>
+                </div>
+              ) : filteredServiceCatalog.length === 0 ? (
+                <div className="space-y-s2 px-s3 py-s3">
+                  <p className="text-small text-text-muted">
+                    No matching service. Try another name or add quickly.
+                  </p>
+                  <div className="flex items-center gap-s2">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setShowQuickAddService(true)}
+                    >
+                      Quick Add Service
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setServiceSearch('');
+                        setServiceFilter('all');
+                      }}
+                    >
+                      Clear filter
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                visibleServiceCatalog.map((service) => {
+                  const isSelected = services.some(
+                    (item) => item.id === service.id
+                  );
+
+                  return (
+                    <div
+                      key={service.id}
+                      className="flex items-center justify-between gap-s2 border-t border-border px-s3 py-s2 first:border-t-0"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-small font-semibold text-text-primary">
+                          {service.name}
+                        </p>
+                        <p className="text-caption text-text-muted">
+                          {formatCurrencyVnd(service.price)} •{' '}
+                          {service.estimatedTime || '60 minutes'}
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={isSelected ? 'secondary' : 'ghost'}
+                        className="h-8 px-s2"
+                        disabled={isSelected}
+                        onClick={() => addServiceToOrder(service)}
+                      >
+                        {isSelected ? (
+                          <Check className="size-4" />
+                        ) : (
+                          <PlusCircle className="size-4" />
+                        )}
+                        <span className="sr-only">
+                          {isSelected
+                            ? `Added ${service.name}`
+                            : `Add ${service.name}`}
+                        </span>
+                      </Button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            {hasMoreServices ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-10 w-full"
+                onClick={() => setVisibleServiceCount((prev) => prev + 20)}
+              >
+                Load more services
+              </Button>
+            ) : null}
+
+            {serviceCatalog.length > 0 && !showQuickAddService ? (
+              <div className="flex items-center justify-between rounded-md border border-border px-s3 py-s2">
+                <p className="text-caption text-text-muted">
+                  Can’t find the service?
+                </p>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowQuickAddService(true)}
+                >
+                  Quick Add Service
+                </Button>
+              </div>
+            ) : null}
+          </div>
+
+          {showQuickAddService ? (
+            <div className="grid gap-s2 rounded-md border border-border p-s3 md:grid-cols-[1fr_160px_auto] md:items-end">
+              <div className="space-y-s1">
+                <label className="text-small font-medium text-text-secondary">
+                  Name
+                </label>
+                <Input
+                  className="h-11"
+                  placeholder="Service name"
+                  value={quickServiceName}
+                  onChange={(event) => setQuickServiceName(event.target.value)}
+                />
+              </div>
+              <div className="space-y-s1">
+                <label className="text-small font-medium text-text-secondary">
+                  Price
+                </label>
+                <Input
+                  className="h-11"
+                  inputMode="numeric"
+                  placeholder="0"
+                  value={quickServicePrice}
+                  onChange={(event) => setQuickServicePrice(event.target.value)}
+                />
+              </div>
+              <Button
+                type="button"
+                className="h-11"
+                disabled={isSavingQuickService}
+                onClick={() => void quickAddService()}
+              >
+                {isSavingQuickService ? 'Saving...' : 'Save'}
+              </Button>
+            </div>
+          ) : null}
+
+          <div className="space-y-s2 rounded-md border border-border bg-surface-default p-s3">
+            <div className="flex items-center justify-between">
+              <p className="text-small font-semibold text-text-primary">
+                Selected services
+              </p>
+              <p className="text-caption text-text-muted">
+                Edit price if needed
+              </p>
+            </div>
+
+            {services.length > 0 ? (
+              <div className="space-y-s2">
+                {services.map((service) => (
+                  <div
+                    key={service.id}
+                    className="grid gap-s2 rounded-md border border-border bg-white px-s3 py-s2 md:grid-cols-[1fr_150px_auto] md:items-center"
+                  >
+                    <div>
+                      <p className="text-small font-semibold text-text-primary">
+                        {service.name}
+                      </p>
+                      <p className="text-caption text-text-muted">
+                        {service.estimatedTime || '60 minutes'}
+                      </p>
+                    </div>
+                    <Input
+                      className="h-10"
+                      inputMode="numeric"
+                      value={String(service.price)}
+                      onChange={(event) =>
+                        setServices((prev) =>
+                          prev.map((item) =>
+                            item.id === service.id
+                              ? {
+                                  ...item,
+                                  price: Number(event.target.value) || 0
+                                }
+                              : item
+                          )
+                        )
+                      }
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setServices((prev) =>
+                          prev.filter((item) => item.id !== service.id)
+                        )
+                      }
+                    >
+                      <X className="size-4" />
+                      <span className="sr-only">Remove {service.name}</span>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-md border border-dashed border-border px-s3 py-s3 text-small text-text-muted">
+                No service selected yet. Choose from the list above.
+              </p>
+            )}
+          </div>
+
+          <p className="text-small font-semibold">
+            Total: {formatCurrencyVnd(total)}
+          </p>
         </Card>
       ) : null}
 
@@ -137,7 +934,9 @@ export function CreateOrderForm({ workers, onSubmit, onCancel }: CreateOrderForm
           <h4 className="text-small font-semibold">Assign & Confirm</h4>
 
           <div className="space-y-s1">
-            <label className="text-small font-medium text-text-secondary">Assign Worker</label>
+            <label className="text-small font-medium text-text-secondary">
+              Assign Worker
+            </label>
             <select
               className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small"
               value={workerId}
@@ -153,7 +952,9 @@ export function CreateOrderForm({ workers, onSubmit, onCancel }: CreateOrderForm
           </div>
 
           <div className="space-y-s1">
-            <label className="text-small font-medium text-text-secondary">Priority</label>
+            <label className="text-small font-medium text-text-secondary">
+              Priority
+            </label>
             <select
               className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small"
               value={priority}
@@ -166,12 +967,20 @@ export function CreateOrderForm({ workers, onSubmit, onCancel }: CreateOrderForm
           </div>
 
           <div className="space-y-s1">
-            <label className="text-small font-medium text-text-secondary">Estimated Time (minutes)</label>
-            <Input className="h-11" value={estimatedTimeMinutes} onChange={(e) => setEstimatedTimeMinutes(e.target.value)} />
+            <label className="text-small font-medium text-text-secondary">
+              Estimated Time (minutes)
+            </label>
+            <Input
+              className="h-11"
+              value={estimatedTimeMinutes}
+              onChange={(e) => setEstimatedTimeMinutes(e.target.value)}
+            />
           </div>
 
           <div className="space-y-s1">
-            <label className="text-small font-medium text-text-secondary">Notes</label>
+            <label className="text-small font-medium text-text-secondary">
+              Notes
+            </label>
             <textarea
               className="min-h-[92px] w-full rounded-md border border-input-border bg-input px-s3 py-s2 text-small"
               value={notes}
@@ -179,20 +988,36 @@ export function CreateOrderForm({ workers, onSubmit, onCancel }: CreateOrderForm
             />
           </div>
 
-          <p className="text-small font-medium">Order Total: {formatCurrencyVnd(total)}</p>
+          <p className="text-small font-medium">
+            Order Total: {formatCurrencyVnd(total)}
+          </p>
         </Card>
       ) : null}
 
-      {submitError ? <p className="text-caption text-state-error">{submitError}</p> : null}
+      {submitError ? (
+        <p className="text-caption text-state-error">{submitError}</p>
+      ) : null}
 
       <div className="flex items-center justify-between gap-s2">
-        <Button variant="secondary" onClick={step === 1 ? onCancel : () => setStep((prev) => Math.max(prev - 1, 1))} disabled={isSubmitting}>
+        <Button
+          variant="secondary"
+          onClick={
+            step === 1
+              ? onCancel
+              : () => setStep((prev) => Math.max(prev - 1, 1))
+          }
+          disabled={isSubmitting}
+        >
           {step === 1 ? 'Cancel' : 'Back'}
         </Button>
 
         {step < 3 ? (
           <Button
-            disabled={isSubmitting || (step === 1 && !canStep1) || (step === 2 && !canStep2)}
+            disabled={
+              isSubmitting ||
+              (step === 1 && !canStep1) ||
+              (step === 2 && !canStep2)
+            }
             onClick={() => setStep((prev) => Math.min(prev + 1, 3))}
           >
             Next

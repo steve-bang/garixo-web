@@ -39,6 +39,13 @@ function vehiclesCollection(garageId: string) {
     .collection('vehicles');
 }
 
+function withoutUndefined<T extends Record<string, unknown>>(value: T): T {
+  const entries = Object.entries(value).filter(
+    ([, entry]) => entry !== undefined
+  );
+  return Object.fromEntries(entries) as T;
+}
+
 function mapVehicleDoc(id: string, data: VehicleFirestoreDoc): Vehicle {
   const now = new Date().toISOString();
   return {
@@ -132,8 +139,9 @@ export async function createGarageVehicle(
     updatedAt: now
   };
 
-  await ref.set(payload);
-  return mapVehicleDoc(ref.id, payload);
+  const safePayload = withoutUndefined(payload);
+  await ref.set(safePayload);
+  return mapVehicleDoc(ref.id, safePayload);
 }
 
 export async function updateGarageVehicle(
@@ -156,7 +164,8 @@ export async function updateGarageVehicle(
     updatedAt: new Date().toISOString()
   };
 
-  await ref.set(payload, { merge: true });
+  const safePayload = withoutUndefined(payload);
+  await ref.set(safePayload, { merge: true });
   const updated = await ref.get();
   if (!updated.exists) return null;
   return mapVehicleDoc(updated.id, updated.data() as VehicleFirestoreDoc);

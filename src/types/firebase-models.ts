@@ -33,12 +33,7 @@ export interface GarageServiceDocument {
   updatedAt: string;
 }
 
-export type WorkOrderStatus =
-  | 'OPEN'
-  | 'IN_PROGRESS'
-  | 'READY'
-  | 'COMPLETED'
-  | 'CANCELLED';
+export type WorkOrderStatus = UnifiedWorkOrderStatus;
 
 export interface GarageWorkOrderDocument {
   id: string;
@@ -51,3 +46,4 @@ export interface GarageWorkOrderDocument {
   createdAt: string;
   updatedAt: string;
 }
+import type { WorkOrderStatus as UnifiedWorkOrderStatus } from '@/features/work-orders/types';

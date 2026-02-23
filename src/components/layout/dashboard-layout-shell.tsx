@@ -16,6 +16,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { Modal } from '@/components/ui/modal';
@@ -23,8 +24,13 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { SidebarUserSection } from '@/features/profile/components/sidebar-user-section';
 import { CreateOrderForm } from '@/features/work-orders/components/create-order-form';
-import { useCreateWorkOrder, useWorkOrders } from '@/features/work-orders/hooks';
+import { getServices } from '@/features/services/service';
+import {
+  useCreateWorkOrder,
+  useWorkOrders
+} from '@/features/work-orders/hooks';
 import type { CreateWorkOrderInput } from '@/features/work-orders/schema';
+import type { OrderService } from '@/features/work-orders/types';
 import { cn } from '@/lib/utils/cn';
 
 type SidebarSubItem = {
@@ -52,8 +58,14 @@ const menuItems: SidebarItem[] = [
     label: 'Settings',
     icon: Settings,
     children: [
-      { href: '/dashboard/settings/garage-information', label: 'Garage Information' },
-      { href: '/dashboard/settings/service-configuration', label: 'Service Configuration' }
+      {
+        href: '/dashboard/settings/garage-information',
+        label: 'Garage Information'
+      },
+      {
+        href: '/dashboard/settings/service-configuration',
+        label: 'Service Configuration'
+      }
     ]
   }
 ];
@@ -86,12 +98,19 @@ export function buildBreadcrumb(pathname: string): BreadcrumbItem[] {
 
   return segments.map((segment, index) => {
     const label = segmentToLabel(segment);
-    const href = index < segments.length - 1 ? `/${segments.slice(0, index + 1).join('/')}` : undefined;
+    const href =
+      index < segments.length - 1
+        ? `/${segments.slice(0, index + 1).join('/')}`
+        : undefined;
     return { label, href };
   });
 }
 
-export function DashboardLayoutShell({ children }: { children: ReactNode }): JSX.Element {
+export function DashboardLayoutShell({
+  children
+}: {
+  children: ReactNode;
+}): JSX.Element {
   const pathname = usePathname();
   const router = useRouter();
   const toast = useToast();
@@ -109,6 +128,18 @@ export function DashboardLayoutShell({ children }: { children: ReactNode }): JSX
   });
   const createMutation = useCreateWorkOrder();
   const workers = workersQuery.data?.workers ?? [];
+  const servicesQuery = useQuery({
+    queryKey: ['layout', 'work-order-services'],
+    queryFn: () =>
+      getServices({ status: 'ACTIVE', page: 1, pageSize: 20, sort: 'name_asc' })
+  });
+  const availableServices: OrderService[] = (
+    servicesQuery.data?.items ?? []
+  ).map((item) => ({
+    id: item.id,
+    name: item.name,
+    price: item.price
+  }));
 
   const handleCreateOrder = async (payload: CreateWorkOrderInput) => {
     await createMutation.mutateAsync(payload);
@@ -142,10 +173,6 @@ export function DashboardLayoutShell({ children }: { children: ReactNode }): JSX
     };
   }, [isSidebarOpen]);
 
-  useEffect(() => {
-    setIsSidebarOpen(false);
-  }, [pathname]);
-
   const sidebarContent = (
     <div className="flex h-full flex-col">
       <div className="border-b border-sidebar-border px-s4 py-s4">
@@ -153,12 +180,15 @@ export function DashboardLayoutShell({ children }: { children: ReactNode }): JSX
           <Home className="size-5" />
           <p className="text-h3">Garixo</p>
         </div>
-        <p className="mt-s1 text-caption text-text-muted">Garage Operations Suite</p>
+        <p className="mt-s1 text-caption text-text-muted">
+          Garage Operations Suite
+        </p>
       </div>
 
       <nav className="flex-1 space-y-s1 overflow-y-auto px-s3 py-s3">
         {menuItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const isActive =
+            pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
 
           return (
@@ -168,7 +198,9 @@ export function DashboardLayoutShell({ children }: { children: ReactNode }): JSX
                 onClick={() => setIsSidebarOpen(false)}
                 className={cn(
                   'flex items-center gap-s2 rounded-md px-s3 py-s2 text-small text-sidebar-foreground transition-colors',
-                  isActive ? 'bg-sidebar-active text-sidebar-active-text' : 'hover:bg-surface-hover'
+                  isActive
+                    ? 'bg-sidebar-active text-sidebar-active-text'
+                    : 'hover:bg-surface-hover'
                 )}
               >
                 <Icon className="size-4" />
@@ -178,7 +210,9 @@ export function DashboardLayoutShell({ children }: { children: ReactNode }): JSX
               {item.children?.length ? (
                 <div className="ml-s6 space-y-s1">
                   {item.children.map((child) => {
-                    const isChildActive = pathname === child.href || pathname.startsWith(`${child.href}/`);
+                    const isChildActive =
+                      pathname === child.href ||
+                      pathname.startsWith(`${child.href}/`);
                     return (
                       <Link
                         key={child.href}
@@ -225,26 +259,51 @@ export function DashboardLayoutShell({ children }: { children: ReactNode }): JSX
               >
                 <Menu className="size-5" />
               </Button>
-              <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-s2 overflow-hidden whitespace-nowrap text-small">
+              <nav
+                aria-label="Breadcrumb"
+                className="flex min-w-0 items-center gap-s2 overflow-hidden whitespace-nowrap text-small"
+              >
                 {breadcrumb.map((item, index) => {
                   const isLast = index === breadcrumb.length - 1;
                   return (
-                    <div key={`${item.label}-${index}`} className="flex min-w-0 items-center gap-s2">
+                    <div
+                      key={`${item.label}-${index}`}
+                      className="flex min-w-0 items-center gap-s2"
+                    >
                       {item.href && !isLast ? (
-                        <Link href={item.href} className="text-text-muted hover:text-text-primary">
+                        <Link
+                          href={item.href}
+                          className="text-text-muted hover:text-text-primary"
+                        >
                           {item.label}
                         </Link>
                       ) : (
-                        <span className={cn(isLast ? 'truncate text-text-primary' : 'text-text-muted')}>{item.label}</span>
+                        <span
+                          className={cn(
+                            isLast
+                              ? 'truncate text-text-primary'
+                              : 'text-text-muted'
+                          )}
+                        >
+                          {item.label}
+                        </span>
                       )}
-                      {!isLast ? <span className="text-text-muted">/</span> : null}
+                      {!isLast ? (
+                        <span className="text-text-muted">/</span>
+                      ) : null}
                     </div>
                   );
                 })}
               </nav>
             </div>
             <div className="flex items-center gap-s3">
-              <Button variant="ghost" size="sm" className="h-10 w-10 p-0" aria-label="Open owner help" onClick={() => setHelpOpen(true)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-10 w-10 p-0"
+                aria-label="Open owner help"
+                onClick={() => setHelpOpen(true)}
+              >
                 <HelpCircle className="size-5" />
               </Button>
               <Button size="sm" onClick={() => setCreateOpen(true)}>
@@ -253,7 +312,9 @@ export function DashboardLayoutShell({ children }: { children: ReactNode }): JSX
             </div>
           </header>
 
-          <main className="overflow-y-auto px-s4 py-s4 md:px-s6 md:py-s6">{children}</main>
+          <main className="overflow-y-auto px-s4 py-s4 md:px-s6 md:py-s6">
+            {children}
+          </main>
         </div>
       </div>
 
@@ -277,16 +338,41 @@ export function DashboardLayoutShell({ children }: { children: ReactNode }): JSX
         </div>
       ) : null}
 
-      <Modal open={helpOpen} onClose={() => setHelpOpen(false)} title="Owner Help" width="md">
+      <Modal
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        title="Owner Help"
+        width="md"
+      >
         <div className="space-y-s3 text-small text-text-secondary">
-          <p>Use the sidebar to switch modules and keep daily operations organized.</p>
-          <p>Click New Work Order to create a job, assign a worker, and track progress in one flow.</p>
-          <p>If numbers look unusual, check Work Orders and Inventory first to spot delays quickly.</p>
+          <p>
+            Use the sidebar to switch modules and keep daily operations
+            organized.
+          </p>
+          <p>
+            Click New Work Order to create a job, assign a worker, and track
+            progress in one flow.
+          </p>
+          <p>
+            If numbers look unusual, check Work Orders and Inventory first to
+            spot delays quickly.
+          </p>
         </div>
       </Modal>
 
-      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Create Work Order" width="lg" showCloseIcon={!createMutation.isPending}>
-        <CreateOrderForm workers={workers} onSubmit={handleCreateOrder} onCancel={() => setCreateOpen(false)} />
+      <Modal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        title="Create Work Order"
+        width="lg"
+        showCloseIcon={!createMutation.isPending}
+      >
+        <CreateOrderForm
+          workers={workers}
+          availableServices={availableServices}
+          onSubmit={handleCreateOrder}
+          onCancel={() => setCreateOpen(false)}
+        />
       </Modal>
     </div>
   );

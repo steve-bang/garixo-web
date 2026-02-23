@@ -1,12 +1,14 @@
 import { z } from 'zod';
+import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 
 export const workOrderStatusSchema = z.enum([
-  'ASSIGNED',
-  'IN_PROGRESS',
-  'WAITING_PARTS',
-  'READY_FOR_PAYMENT',
-  'COMPLETED',
-  'CANCELLED'
+  WorkOrderStatusEnum.Draft,
+  WorkOrderStatusEnum.WaitingForApproval,
+  WorkOrderStatusEnum.InProgress,
+  WorkOrderStatusEnum.WaitingForParts,
+  WorkOrderStatusEnum.Completed,
+  WorkOrderStatusEnum.Paid,
+  WorkOrderStatusEnum.Cancelled
 ]);
 
 export const priorityLevelSchema = z.enum(['NORMAL', 'HIGH', 'URGENT']);
@@ -44,9 +46,14 @@ export const workOrdersQuerySchema = z.object({
 
 export const createWorkOrderSchema = z.object({
   plateNumber: z.string().trim().min(1, 'Plate number is required.'),
+  customerId: z.string().trim().optional(),
   customerName: z.string().trim().min(1, 'Customer name is required.'),
   customerPhone: z.string().trim().min(9, 'Customer phone is required.'),
-  services: z.array(orderServiceSchema).min(1, 'At least one service is required.'),
+  vehicleId: z.string().trim().optional(),
+  vehicleModel: z.string().trim().optional(),
+  services: z
+    .array(orderServiceSchema)
+    .min(1, 'At least one service is required.'),
   parts: z.array(orderPartSchema).default([]),
   workerId: z.string().optional(),
   workerName: z.string().optional(),

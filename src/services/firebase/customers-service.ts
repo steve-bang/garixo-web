@@ -49,6 +49,13 @@ function customerVehiclesCollection(garageId: string, customerId: string) {
   return customersCollection(garageId).doc(customerId).collection('vehicles');
 }
 
+function withoutUndefined<T extends Record<string, unknown>>(value: T): T {
+  const entries = Object.entries(value).filter(
+    ([, entry]) => entry !== undefined
+  );
+  return Object.fromEntries(entries) as T;
+}
+
 function mapCustomerDoc(id: string, data: CustomerFirestoreDoc): Customer {
   const now = new Date().toISOString();
   return {
@@ -254,7 +261,18 @@ export async function syncGarageCustomerVehiclesSnapshot(
   garageId: string,
   customerId: string
 ): Promise<void> {
-  const vehicles = await listGarageCustomerVehicles(garageId, customerId);
+  const vehicles = (await listGarageCustomerVehicles(garageId, customerId)).map(
+    (vehicle) =>
+      withoutUndefined({
+        id: vehicle.id,
+        plate: vehicle.plate,
+        brand: vehicle.brand,
+        model: vehicle.model,
+        year: vehicle.year,
+        color: vehicle.color,
+        lastServiceDate: vehicle.lastServiceDate
+      })
+  );
   await customersCollection(garageId).doc(customerId).set(
     {
       vehicles,
@@ -288,9 +306,10 @@ export async function createGarageCustomerVehicle(
     updatedAt: new Date().toISOString()
   };
 
-  await ref.set(payload);
+  const safePayload = withoutUndefined(payload);
+  await ref.set(safePayload);
   await syncGarageCustomerVehiclesSnapshot(garageId, customerId);
-  return mapVehicleDoc(ref.id, payload);
+  return mapVehicleDoc(ref.id, safePayload);
 }
 
 export async function updateGarageCustomerVehicle(
@@ -312,13 +331,12 @@ export async function updateGarageCustomerVehicle(
     return null;
   }
 
-  await ref.set(
-    {
-      ...input,
-      updatedAt: new Date().toISOString()
-    },
-    { merge: true }
-  );
+  const safePayload = withoutUndefined({
+    ...input,
+    updatedAt: new Date().toISOString()
+  });
+
+  await ref.set(safePayload, { merge: true });
 
   const updated = await ref.get();
   if (!updated.exists) {

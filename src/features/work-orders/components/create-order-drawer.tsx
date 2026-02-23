@@ -3,16 +3,23 @@
 import { Drawer } from '@/components/ui/drawer';
 import { CreateOrderForm } from '@/features/work-orders/components/create-order-form';
 import type { CreateWorkOrderInput } from '@/features/work-orders/schema';
-import type { Worker } from '@/features/work-orders/types';
+import type { OrderService, Worker } from '@/features/work-orders/types';
 
 type Props = {
   open: boolean;
   workers: Worker[];
+  availableServices: OrderService[];
   onClose: () => void;
   onSubmit: (payload: CreateWorkOrderInput) => Promise<void>;
 };
 
-export function CreateOrderDrawer({ open, workers, onClose, onSubmit }: Props): JSX.Element | null {
+export function CreateOrderDrawer({
+  open,
+  workers,
+  availableServices,
+  onClose,
+  onSubmit
+}: Props): JSX.Element | null {
   return (
     <Drawer
       open={open}
@@ -21,7 +28,12 @@ export function CreateOrderDrawer({ open, workers, onClose, onSubmit }: Props): 
       description="Create and assign a new workshop job."
       width="lg"
     >
-      <CreateOrderForm workers={workers} onSubmit={onSubmit} onCancel={onClose} />
+      <CreateOrderForm
+        workers={workers}
+        availableServices={availableServices}
+        onSubmit={onSubmit}
+        onCancel={onClose}
+      />
     </Drawer>
   );
 }

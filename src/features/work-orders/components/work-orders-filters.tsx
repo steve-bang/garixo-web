@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { WorkOrderStatus, Worker } from '@/features/work-orders/types';
 
 type Props = {
@@ -38,6 +39,19 @@ export function WorkOrdersFilters({
   onDateToChange,
   onClear
 }: Props): JSX.Element {
+  const statusOptions: Array<{ label: string; value: WorkOrderStatus }> = [
+    { label: 'Draft', value: WorkOrderStatusEnum.Draft },
+    {
+      label: 'Waiting For Approval',
+      value: WorkOrderStatusEnum.WaitingForApproval
+    },
+    { label: 'In Progress', value: WorkOrderStatusEnum.InProgress },
+    { label: 'Waiting For Parts', value: WorkOrderStatusEnum.WaitingForParts },
+    { label: 'Completed', value: WorkOrderStatusEnum.Completed },
+    { label: 'Paid', value: WorkOrderStatusEnum.Paid },
+    { label: 'Cancelled', value: WorkOrderStatusEnum.Cancelled }
+  ];
+
   return (
     <Card className="space-y-s3 p-s4">
       <div className="grid gap-s3 md:grid-cols-[1fr_200px_220px_180px_auto] md:items-center">
@@ -67,20 +81,28 @@ export function WorkOrdersFilters({
         <select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={status ?? ''}
-          onChange={(event) => onStatusChange((event.target.value || undefined) as WorkOrderStatus | undefined)}
+          onChange={(event) =>
+            onStatusChange(
+              (event.target.value || undefined) as WorkOrderStatus | undefined
+            )
+          }
         >
           <option value="">All Status</option>
-          <option value="ASSIGNED">Assigned</option>
-          <option value="IN_PROGRESS">In Progress</option>
-          <option value="WAITING_PARTS">Waiting Parts</option>
-          <option value="READY_FOR_PAYMENT">Ready for Payment</option>
-          <option value="COMPLETED">Completed</option>
+          {statusOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
 
         <select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={dateFilter}
-          onChange={(event) => onDateFilterChange(event.target.value as 'all' | 'today' | 'this_week' | 'custom')}
+          onChange={(event) =>
+            onDateFilterChange(
+              event.target.value as 'all' | 'today' | 'this_week' | 'custom'
+            )
+          }
         >
           <option value="all">All Dates</option>
           <option value="today">Today</option>
@@ -95,8 +117,18 @@ export function WorkOrdersFilters({
 
       {dateFilter === 'custom' ? (
         <div className="grid gap-s3 md:grid-cols-2">
-          <Input type="date" className="h-11" value={dateFrom} onChange={(event) => onDateFromChange(event.target.value)} />
-          <Input type="date" className="h-11" value={dateTo} onChange={(event) => onDateToChange(event.target.value)} />
+          <Input
+            type="date"
+            className="h-11"
+            value={dateFrom}
+            onChange={(event) => onDateFromChange(event.target.value)}
+          />
+          <Input
+            type="date"
+            className="h-11"
+            value={dateTo}
+            onChange={(event) => onDateToChange(event.target.value)}
+          />
         </div>
       ) : null}
     </Card>

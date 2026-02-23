@@ -1,4 +1,5 @@
 import { firebaseAdmin } from '@/lib/firebase-admin';
+import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { GarageWorkOrderDocument } from '@/types/firebase-models';
 
 function mapDoc(
@@ -43,7 +44,7 @@ export async function createGarageWorkOrder(
     licensePlate: input.licensePlate.toUpperCase(),
     service: input.service ?? '',
     notes: input.notes ?? '',
-    status: 'OPEN',
+    status: WorkOrderStatusEnum.Draft,
     createdAt: now,
     updatedAt: now
   };

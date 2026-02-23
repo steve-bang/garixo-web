@@ -1,10 +1,15 @@
+export const WorkOrderStatusEnum = {
+  Draft: 'Draft',
+  WaitingForApproval: 'WaitingForApproval',
+  InProgress: 'InProgress',
+  WaitingForParts: 'WaitingForParts',
+  Completed: 'Completed',
+  Paid: 'Paid',
+  Cancelled: 'Cancelled'
+} as const;
+
 export type WorkOrderStatus =
-  | 'ASSIGNED'
-  | 'IN_PROGRESS'
-  | 'WAITING_PARTS'
-  | 'READY_FOR_PAYMENT'
-  | 'COMPLETED'
-  | 'CANCELLED';
+  (typeof WorkOrderStatusEnum)[keyof typeof WorkOrderStatusEnum];
 
 export type PriorityLevel = 'NORMAL' | 'HIGH' | 'URGENT';
 
@@ -39,8 +44,11 @@ export interface WorkOrder {
   id: string;
   orderCode: string;
   plateNumber: string;
+  customerId?: string;
   customerName: string;
   customerPhone: string;
+  vehicleId?: string;
+  vehicleModel?: string;
   workerId?: string;
   workerName?: string;
   services: OrderService[];
@@ -59,7 +67,10 @@ export interface WorkOrder {
   updatedAt: string;
 }
 
-export type WorkOrderGroup = Record<Exclude<WorkOrderStatus, 'CANCELLED'>, WorkOrder[]>;
+export type WorkOrderGroup = Record<
+  Exclude<WorkOrderStatus, typeof WorkOrderStatusEnum.Cancelled>,
+  WorkOrder[]
+>;
 
 export type WorkOrdersMeta = {
   page: number;

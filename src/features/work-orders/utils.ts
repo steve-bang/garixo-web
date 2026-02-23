@@ -1,11 +1,22 @@
-import type { OrderPart, OrderService, WorkOrder, WorkOrderGroup, WorkOrderStatus, Worker } from '@/features/work-orders/types';
+import { WorkOrderStatusEnum } from '@/features/work-orders/types';
+import type {
+  OrderPart,
+  OrderService,
+  WorkOrder,
+  WorkOrderGroup,
+  WorkOrderStatus,
+  Worker
+} from '@/features/work-orders/types';
 
-export const kanbanStatuses: Array<Exclude<WorkOrderStatus, 'CANCELLED'>> = [
-  'ASSIGNED',
-  'IN_PROGRESS',
-  'WAITING_PARTS',
-  'READY_FOR_PAYMENT',
-  'COMPLETED'
+export const kanbanStatuses: Array<
+  Exclude<WorkOrderStatus, typeof WorkOrderStatusEnum.Cancelled>
+> = [
+  WorkOrderStatusEnum.Draft,
+  WorkOrderStatusEnum.WaitingForApproval,
+  WorkOrderStatusEnum.InProgress,
+  WorkOrderStatusEnum.WaitingForParts,
+  WorkOrderStatusEnum.Completed,
+  WorkOrderStatusEnum.Paid
 ];
 
 export function normalizePlate(value: string): string {
@@ -16,21 +27,36 @@ export function toPlateDisplay(value: string): string {
   return value.trim().toUpperCase();
 }
 
-export function computeTotalAmount(services: OrderService[], parts: OrderPart[]): number {
+export function computeTotalAmount(
+  services: OrderService[],
+  parts: OrderPart[]
+): number {
   const servicesTotal = services.reduce((sum, item) => sum + item.price, 0);
-  const partsTotal = parts.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  const partsTotal = parts.reduce(
+    (sum, item) => sum + item.quantity * item.unitPrice,
+    0
+  );
   return servicesTotal + partsTotal;
 }
 
 export function formatCurrencyVnd(value: number): string {
-  return `${new Intl.NumberFormat('vi-VN').format(value)} đ`;
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(value);
 }
 
 export function formatDateTime(value?: string): string {
   if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '-';
-  return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
 }
 
 export function formatDate(value?: string): string {
@@ -51,15 +77,16 @@ export function formatMinutes(value?: number): string {
 
 export function groupByStatus(items: WorkOrder[]): WorkOrderGroup {
   const grouped: WorkOrderGroup = {
-    ASSIGNED: [],
-    IN_PROGRESS: [],
-    WAITING_PARTS: [],
-    READY_FOR_PAYMENT: [],
-    COMPLETED: []
+    Draft: [],
+    WaitingForApproval: [],
+    InProgress: [],
+    WaitingForParts: [],
+    Completed: [],
+    Paid: []
   };
 
   items.forEach((item) => {
-    if (item.status === 'CANCELLED') return;
+    if (item.status === WorkOrderStatusEnum.Cancelled) return;
     grouped[item.status].push(item);
   });
 
@@ -67,22 +94,50 @@ export function groupByStatus(items: WorkOrder[]): WorkOrderGroup {
 }
 
 export function statusLabel(status: WorkOrderStatus): string {
-  return status
-    .toLowerCase()
-    .split('_')
-    .map((x) => x.charAt(0).toUpperCase() + x.slice(1))
-    .join(' ');
+  if (status === WorkOrderStatusEnum.WaitingForApproval)
+    return 'Waiting For Approval';
+  if (status === WorkOrderStatusEnum.WaitingForParts)
+    return 'Waiting For Parts';
+  if (status === WorkOrderStatusEnum.InProgress) return 'In Progress';
+  return status;
 }
 
-export function canTransitionTo(current: WorkOrderStatus, next: WorkOrderStatus, totalAmount: number): { ok: boolean; error?: string } {
-  if (current === next) return { ok: true };
-  if (next === 'COMPLETED') return { ok: false, error: 'Use payment flow to complete this order.' };
-  if (current === 'CANCELLED' || current === 'COMPLETED') {
-    return { ok: false, error: 'Completed or cancelled orders cannot change status.' };
+export const allowedTransitions: Record<WorkOrderStatus, WorkOrderStatus[]> = {
+  [WorkOrderStatusEnum.Draft]: [
+    WorkOrderStatusEnum.WaitingForApproval,
+    WorkOrderStatusEnum.Cancelled
+  ],
+  [WorkOrderStatusEnum.WaitingForApproval]: [
+    WorkOrderStatusEnum.InProgress,
+    WorkOrderStatusEnum.Cancelled
+  ],
+  [WorkOrderStatusEnum.InProgress]: [
+    WorkOrderStatusEnum.WaitingForParts,
+    WorkOrderStatusEnum.Completed
+  ],
+  [WorkOrderStatusEnum.WaitingForParts]: [
+    WorkOrderStatusEnum.InProgress,
+    WorkOrderStatusEnum.Completed
+  ],
+  [WorkOrderStatusEnum.Completed]: [WorkOrderStatusEnum.Paid],
+  [WorkOrderStatusEnum.Paid]: [],
+  [WorkOrderStatusEnum.Cancelled]: []
+};
+
+export function canTransitionTo(
+  current: WorkOrderStatus,
+  next: WorkOrderStatus
+): { ok: boolean; error?: string } {
+  if (current === next) {
+    return { ok: true };
   }
-  if (next === 'CANCELLED') return { ok: false, error: 'Use cancel action to cancel this order.' };
-  if (next === 'READY_FOR_PAYMENT' && totalAmount <= 0) {
-    return { ok: false, error: 'Total amount must be greater than 0.' };
+
+  const nextStatuses = allowedTransitions[current] ?? [];
+  if (!nextStatuses.includes(next)) {
+    return {
+      ok: false,
+      error: `Invalid status transition: ${statusLabel(current)} → ${statusLabel(next)}.`
+    };
   }
 
   return { ok: true };
@@ -93,8 +148,18 @@ export function toSummary(items: WorkOrder[], workers: Worker[]) {
   const today = now.toDateString();
 
   return {
-    totalActiveJobs: items.filter((x) => x.status !== 'COMPLETED' && x.status !== 'CANCELLED').length,
-    completedToday: items.filter((x) => x.status === 'COMPLETED' && new Date(x.updatedAt).toDateString() === today).length,
+    totalActiveJobs: items.filter(
+      (x) =>
+        x.status !== WorkOrderStatusEnum.Completed &&
+        x.status !== WorkOrderStatusEnum.Paid &&
+        x.status !== WorkOrderStatusEnum.Cancelled
+    ).length,
+    completedToday: items.filter(
+      (x) =>
+        (x.status === WorkOrderStatusEnum.Completed ||
+          x.status === WorkOrderStatusEnum.Paid) &&
+        new Date(x.updatedAt).toDateString() === today
+    ).length,
     overdueJobs: items.filter((x) => x.isOverdue).length,
     busyWorkers: workers.filter((x) => x.activeJobs > 3).length
   };

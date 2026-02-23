@@ -3,7 +3,10 @@ import type { DashboardResponse, DateRange } from '@/features/dashboard/types';
 function toDateLabel(offset: number): string {
   const d = new Date();
   d.setDate(d.getDate() - offset);
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit' }).format(d);
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: '2-digit'
+  }).format(d);
 }
 
 function rangeFactor(range: DateRange): number {
@@ -13,7 +16,11 @@ function rangeFactor(range: DateRange): number {
   return 0.9;
 }
 
-export function createDashboardMock(range: DateRange, from?: string, to?: string): DashboardResponse {
+export function createDashboardMock(
+  range: DateRange,
+  from?: string,
+  to?: string
+): DashboardResponse {
   const factor = rangeFactor(range);
 
   if (range === 'custom' && from && to) {
@@ -21,13 +28,30 @@ export function createDashboardMock(range: DateRange, from?: string, to?: string
     const toDate = new Date(to);
 
     if (!Number.isNaN(fromDate.getTime()) && !Number.isNaN(toDate.getTime())) {
-      const diffDays = Math.floor((toDate.getTime() - fromDate.getTime()) / (24 * 3600 * 1000));
+      const diffDays = Math.floor(
+        (toDate.getTime() - fromDate.getTime()) / (24 * 3600 * 1000)
+      );
       if (diffDays < 0) {
         return {
-          kpi: { todayRevenue: 0, vehiclesToday: 0, activeOrders: 0, overdueOrders: 0 },
-          secondary: { revenueThisWeek: 0, averageTicket: 0, returningCustomersRate: 0, workerUtilization: 0 },
+          kpi: {
+            todayRevenue: 0,
+            vehiclesToday: 0,
+            activeOrders: 0,
+            overdueOrders: 0
+          },
+          secondary: {
+            revenueThisWeek: 0,
+            averageTicket: 0,
+            returningCustomersRate: 0,
+            workerUtilization: 0
+          },
           revenueTrend: [],
-          statusDistribution: { assigned: 0, inProgress: 0, completed: 0, overdue: 0 },
+          statusDistribution: {
+            draft: 0,
+            inProgress: 0,
+            completed: 0,
+            paid: 0
+          },
           todayOrders: [],
           topWorkers: []
         };
@@ -36,7 +60,9 @@ export function createDashboardMock(range: DateRange, from?: string, to?: string
   }
 
   const revenueTrend = Array.from({ length: 7 }).map((_, idx) => {
-    const revenue = Math.round((8_500_000 + (idx * 1_400_000 + (idx % 2) * 500_000)) * factor);
+    const revenue = Math.round(
+      (8_500_000 + (idx * 1_400_000 + (idx % 2) * 500_000)) * factor
+    );
     const previousRevenue = Math.round(revenue * 0.88);
 
     return {
@@ -63,17 +89,47 @@ export function createDashboardMock(range: DateRange, from?: string, to?: string
     },
     revenueTrend,
     statusDistribution: {
-      assigned: Math.round(6 * factor),
+      draft: Math.round(6 * factor),
       inProgress: Math.round(8 * factor),
       completed: Math.round(12 * factor),
-      overdue: Math.round(4 * factor)
+      paid: Math.round(4 * factor)
     },
     todayOrders: [
-      { id: 'wo-1', plate: '29A-12345', service: 'Oil Change', worker: 'Nguyen Tuan', status: 'in_progress' },
-      { id: 'wo-2', plate: '51H-88999', service: 'Brake Service', worker: 'Tran Kiet', status: 'assigned' },
-      { id: 'wo-3', plate: '30F-45678', service: 'Engine Check', worker: 'Le Huy', status: 'overdue' },
-      { id: 'wo-4', plate: '43B-76291', service: 'Battery Replace', worker: 'Pham Son', status: 'completed' },
-      { id: 'wo-5', plate: '60K-11752', service: 'AC Service', worker: 'Vo Duy', status: 'in_progress' }
+      {
+        id: 'wo-1',
+        plate: '29A-12345',
+        service: 'Oil Change',
+        worker: 'Nguyen Tuan',
+        status: 'InProgress'
+      },
+      {
+        id: 'wo-2',
+        plate: '51H-88999',
+        service: 'Brake Service',
+        worker: 'Tran Kiet',
+        status: 'Draft'
+      },
+      {
+        id: 'wo-3',
+        plate: '30F-45678',
+        service: 'Engine Check',
+        worker: 'Le Huy',
+        status: 'WaitingForApproval'
+      },
+      {
+        id: 'wo-4',
+        plate: '43B-76291',
+        service: 'Battery Replace',
+        worker: 'Pham Son',
+        status: 'Completed'
+      },
+      {
+        id: 'wo-5',
+        plate: '60K-11752',
+        service: 'AC Service',
+        worker: 'Vo Duy',
+        status: 'InProgress'
+      }
     ],
     topWorkers: [
       { id: 'w-1', name: 'Nguyen Tuan', completedJobs: 6, activeJobs: 3 },
