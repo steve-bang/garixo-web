@@ -1,5 +1,6 @@
 'use client';
 
+import { Check, Minus, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { z } from 'zod';
 
@@ -8,8 +9,6 @@ import { Drawer } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { CustomerAutocomplete } from '@/features/work-orders/components/customer-autocomplete';
-import { InventorySelector } from '@/features/work-orders/components/inventory-selector';
-import { ServiceSelector } from '@/features/work-orders/components/service-selector';
 import {
   createWorkOrder,
   updateWorkOrderStatus
@@ -59,6 +58,30 @@ type ServicesApiResponse = {
   data?: { items: Service[] };
   error?: string;
 };
+
+function toEstimatedMinutes(value?: string): number | null {
+  if (!value) return null;
+  const lower = value.toLowerCase().trim();
+  const rangeMatch = lower.match(/(\d+)\s*-\s*(\d+)\s*hour/);
+  if (rangeMatch) {
+    const min = Number(rangeMatch[1]);
+    const max = Number(rangeMatch[2]);
+    if (Number.isFinite(min) && Number.isFinite(max)) {
+      return Math.round(((min + max) / 2) * 60);
+    }
+  }
+  const hourMatch = lower.match(/(\d+)\s*hour/);
+  if (hourMatch) {
+    const hours = Number(hourMatch[1]);
+    return Number.isFinite(hours) ? hours * 60 : null;
+  }
+  const minuteMatch = lower.match(/(\d+)\s*minute/);
+  if (minuteMatch) {
+    const minutes = Number(minuteMatch[1]);
+    return Number.isFinite(minutes) ? minutes : null;
+  }
+  return null;
+}
 
 function useDebouncedValue(value: string, delay = 300): string {
   const [debounced, setDebounced] = useState(value);
@@ -130,6 +153,7 @@ export function FirstWorkOrderDrawer({
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
   );
+  const [lockCustomerSelection, setLockCustomerSelection] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [selectedServices, setSelectedServices] = useState<OrderService[]>([]);
   const [selectedParts, setSelectedParts] = useState<OrderPart[]>([]);
@@ -140,7 +164,6 @@ export function FirstWorkOrderDrawer({
   const [showCreateCustomer, setShowCreateCustomer] = useState(false);
   const [showCreateVehicle, setShowCreateVehicle] = useState(false);
   const [showQuickService, setShowQuickService] = useState(false);
-  const [inventoryOpen, setInventoryOpen] = useState(false);
 
   const [quickCustomerName, setQuickCustomerName] = useState('');
   const [quickCustomerPhone, setQuickCustomerPhone] = useState('');
@@ -172,7 +195,7 @@ export function FirstWorkOrderDrawer({
   }, [debouncedServiceQuery, open]);
 
   useEffect(() => {
-    if (!open || !inventoryOpen) {
+    if (!open) {
       return;
     }
 
@@ -180,7 +203,7 @@ export function FirstWorkOrderDrawer({
     void fetchInventory(debouncedInventoryQuery)
       .then((items) => setInventoryOptions(items))
       .finally(() => setLoadingInventory(false));
-  }, [debouncedInventoryQuery, inventoryOpen, open]);
+  }, [debouncedInventoryQuery, open]);
 
   useEffect(() => {
     if (!open) {
@@ -188,6 +211,7 @@ export function FirstWorkOrderDrawer({
     }
 
     setSelectedCustomer(null);
+    setLockCustomerSelection(false);
     setSelectedVehicleId('');
     setSelectedServices([]);
     setSelectedParts([]);
@@ -196,7 +220,6 @@ export function FirstWorkOrderDrawer({
     setShowCreateCustomer(false);
     setShowCreateVehicle(false);
     setShowQuickService(false);
-    setInventoryOpen(false);
     setQuickCustomerName('');
     setQuickCustomerPhone('');
     setQuickVehiclePlate('');
@@ -232,12 +255,29 @@ export function FirstWorkOrderDrawer({
     return servicesTotal + partsTotal;
   }, [selectedParts, selectedServices]);
 
+  const selectedServiceIds = useMemo(
+    () => new Set(selectedServices.map((service) => service.id)),
+    [selectedServices]
+  );
+  const estimatedMinutesByServiceId = useMemo(() => {
+    const map = new Map<string, number | null>();
+    serviceOptions.forEach((service) => {
+      map.set(service.id, toEstimatedMinutes(service.estimatedTime));
+    });
+    return map;
+  }, [serviceOptions]);
+  const selectedPartIds = useMemo(
+    () => new Set(selectedParts.map((part) => part.id)),
+    [selectedParts]
+  );
+
   const canStartWork = Boolean(
     selectedCustomer &&
     (selectedVehicle || quickVehiclePlate.trim()) &&
     selectedServices.length > 0 &&
     !isSubmitting
   );
+  const hasVehicle = Boolean(selectedVehicle || quickVehiclePlate.trim());
 
   const createCustomerInline = async (): Promise<void> => {
     const parsed = quickCustomerSchema.safeParse({
@@ -274,6 +314,8 @@ export function FirstWorkOrderDrawer({
 
     setSelectedCustomer(payload.data);
     setCustomers((prev) => [payload.data as Customer, ...prev]);
+    setLockCustomerSelection(true);
+    setSubmitError('');
     setShowCreateCustomer(false);
     setQuickCustomerName('');
     setQuickCustomerPhone('');
@@ -330,6 +372,7 @@ export function FirstWorkOrderDrawer({
       return { ...prev, vehicles: [vehicle, ...prev.vehicles] };
     });
     setSelectedVehicleId(vehicle.id);
+    setSubmitError('');
     setQuickVehiclePlate('');
     setQuickVehicleModel('');
     setShowCreateVehicle(false);
@@ -424,9 +467,7 @@ export function FirstWorkOrderDrawer({
       };
 
       const created = await createWorkOrder(payload);
-      await updateWorkOrderStatus(created.id, {
-        status: WorkOrderStatusEnum.InProgress
-      });
+
       toast.success('First job created successfully.');
       onClose();
       onCreated(created.id);
@@ -468,19 +509,60 @@ export function FirstWorkOrderDrawer({
       }
     >
       <div className="space-y-s4">
-        <CustomerAutocomplete
-          query={customerQuery}
-          loading={loadingCustomers}
-          items={customers}
-          selectedCustomerId={selectedCustomer?.id}
-          onQueryChange={setCustomerQuery}
-          onSelect={(customer) => {
-            setSelectedCustomer(customer);
-            setSelectedVehicleId(customer.vehicles[0]?.id ?? '');
-            setShowCreateVehicle(customer.vehicles.length === 0);
-          }}
-          onCreateNew={() => setShowCreateCustomer(true)}
-        />
+        <div className="space-y-s2">
+          <div>
+            <h3 className="text-small font-semibold text-text-primary">
+              1. Customer
+            </h3>
+            <p className="text-caption text-text-muted">
+              Search customer or create a new one.
+            </p>
+          </div>
+
+          {selectedCustomer && lockCustomerSelection ? (
+            <div className="rounded-md border border-border bg-surface-default p-s3">
+              <div className="flex items-start justify-between gap-s2">
+                <div className="space-y-0.5">
+                  <p className="text-small font-semibold text-text-primary">
+                    {selectedCustomer.name}
+                  </p>
+                  <p className="text-caption text-text-muted">
+                    {selectedCustomer.phone || 'No phone number'}
+                  </p>
+                  <p className="text-caption text-text-muted">
+                    {selectedCustomer.vehicles.length > 0
+                      ? `${selectedCustomer.vehicles.length} vehicle(s)`
+                      : 'No vehicles yet'}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setLockCustomerSelection(false)}
+                >
+                  Change
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <CustomerAutocomplete
+              query={customerQuery}
+              loading={loadingCustomers}
+              items={customers}
+              selectedCustomerId={selectedCustomer?.id}
+              onQueryChange={setCustomerQuery}
+              onSelect={(customer) => {
+                setSelectedCustomer(customer);
+                setSelectedVehicleId(customer.vehicles[0]?.id ?? '');
+                setShowCreateVehicle(customer.vehicles.length === 0);
+                setLockCustomerSelection(true);
+                setSubmitError('');
+              }}
+              onCreateNew={() => setShowCreateCustomer(true)}
+            />
+          )}
+        </div>
 
         {showCreateCustomer ? (
           <div className="grid gap-s2 rounded-md border border-border p-s3 md:grid-cols-[1fr_1fr_auto] md:items-end">
@@ -517,9 +599,14 @@ export function FirstWorkOrderDrawer({
         {selectedCustomer ? (
           <div className="space-y-s2 rounded-md border border-border p-s3">
             <div className="flex items-center justify-between gap-s2">
-              <label className="text-small font-medium text-text-secondary">
-                Vehicle
-              </label>
+              <div>
+                <label className="text-small font-semibold text-text-primary">
+                  2. Vehicle
+                </label>
+                <p className="text-caption text-text-muted">
+                  Select vehicle or add a new one.
+                </p>
+              </div>
               <Button
                 type="button"
                 variant="secondary"
@@ -587,37 +674,190 @@ export function FirstWorkOrderDrawer({
           </div>
         ) : null}
 
-        <ServiceSelector
-          query={serviceQuery}
-          loading={loadingServices}
-          available={serviceOptions}
-          selected={selectedServices}
-          onQueryChange={setServiceQuery}
-          onAdd={(service) => {
-            setSelectedServices((prev) => {
-              if (prev.some((item) => item.id === service.id)) {
-                return prev;
-              }
-              return [
-                ...prev,
-                { id: service.id, name: service.name, price: service.price }
-              ];
-            });
-          }}
-          onRemove={(serviceId) =>
-            setSelectedServices((prev) =>
-              prev.filter((item) => item.id !== serviceId)
-            )
-          }
-          onUpdatePrice={(serviceId, price) => {
-            setSelectedServices((prev) =>
-              prev.map((item) =>
-                item.id === serviceId ? { ...item, price } : item
-              )
-            );
-          }}
-          onQuickAdd={() => setShowQuickService(true)}
-        />
+        <div className="space-y-s2">
+          <div>
+            <h3 className="text-small font-semibold text-text-primary">
+              3. Services
+            </h3>
+            <p className="text-caption text-text-muted">
+              Step 1: tap + to add service. Step 2: review selected list below.
+            </p>
+          </div>
+          <div className="rounded-md border border-border bg-surface-default p-s3">
+            <div className="space-y-s2">
+              <label className="text-small font-medium text-text-secondary">
+                Search Service
+              </label>
+              <Input
+                className="h-11"
+                placeholder="Type service name"
+                value={serviceQuery}
+                onChange={(event) => setServiceQuery(event.target.value)}
+              />
+            </div>
+
+            <div className="mt-s3 rounded-md border border-border">
+              <div className="border-b border-border bg-background-secondary px-s3 py-s2">
+                <p className="text-caption font-medium text-text-secondary">
+                  Available Services
+                </p>
+              </div>
+              <div className="max-h-[220px] overflow-y-auto">
+                {loadingServices ? (
+                  <p className="px-s3 py-s3 text-small text-text-muted">
+                    Loading services...
+                  </p>
+                ) : null}
+
+                {!loadingServices && serviceOptions.length === 0 ? (
+                  <div className="space-y-s2 px-s3 py-s3">
+                    <p className="text-small text-text-muted">
+                      No services found.
+                    </p>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setShowQuickService(true)}
+                    >
+                      + Quick Add Service
+                    </Button>
+                  </div>
+                ) : null}
+
+                {!loadingServices
+                  ? serviceOptions.map((service) => {
+                      const isSelected = selectedServiceIds.has(service.id);
+
+                      return (
+                        <div
+                          key={service.id}
+                          className="flex items-center justify-between gap-s3 border-t border-border px-s3 py-s2 first:border-t-0"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-small font-medium text-text-primary">
+                              {service.name}
+                            </p>
+                            <p className="text-caption text-text-muted">
+                              {service.estimatedTime}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-s2">
+                            <p className="text-small text-text-secondary">
+                              {formatCurrencyVnd(service.price)}
+                            </p>
+                            <Button
+                              type="button"
+                              size="sm"
+                              className="h-9 w-9 px-0"
+                              variant={isSelected ? 'secondary' : 'default'}
+                              aria-label={
+                                isSelected
+                                  ? `Service ${service.name} already added`
+                                  : `Add service ${service.name}`
+                              }
+                              disabled={isSelected}
+                              onClick={() => {
+                                setSelectedServices((prev) => [
+                                  ...prev,
+                                  {
+                                    id: service.id,
+                                    name: service.name,
+                                    price: service.price
+                                  }
+                                ]);
+                                setSubmitError('');
+                              }}
+                            >
+                              {isSelected ? (
+                                <Check className="size-4" />
+                              ) : (
+                                <Plus className="size-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  : null}
+              </div>
+            </div>
+
+            <div className="mt-s3 rounded-md border border-border">
+              <div className="border-b border-border bg-background-secondary px-s3 py-s2">
+                <p className="text-caption font-medium text-text-secondary">
+                  Selected Services for This Job ({selectedServices.length})
+                </p>
+              </div>
+              <div className="space-y-s2 p-s3">
+                {selectedServices.length === 0 ? (
+                  <p className="text-small text-text-muted">
+                    No services selected yet.
+                  </p>
+                ) : (
+                  selectedServices.map((service) => (
+                    <div
+                      key={service.id}
+                      className="grid gap-s3 rounded-md border border-border bg-background-primary p-s3 md:grid-cols-[1fr_220px_auto] md:items-start"
+                    >
+                      <div>
+                        <p className="text-small font-medium text-text-primary">
+                          {service.name}
+                        </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-s2">
+                          <span className="rounded-full bg-surface-hover px-2 py-0.5 text-caption text-text-muted">
+                            {estimatedMinutesByServiceId.get(service.id)
+                              ? `${estimatedMinutesByServiceId.get(service.id)} mins`
+                              : 'Time not set'}
+                          </span>
+                          <span className="rounded-full bg-surface-hover px-2 py-0.5 text-caption text-text-muted">
+                            {formatCurrencyVnd(service.price)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-caption font-medium text-text-secondary">
+                          Price (USD)
+                        </label>
+                        <Input
+                          className="h-10"
+                          inputMode="numeric"
+                          value={String(service.price)}
+                          onChange={(event) =>
+                            setSelectedServices((prev) =>
+                              prev.map((item) =>
+                                item.id === service.id
+                                  ? {
+                                      ...item,
+                                      price: Number(event.target.value) || 0
+                                    }
+                                  : item
+                              )
+                            )
+                          }
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 w-9 px-0 text-state-error hover:bg-error-50 hover:text-error-700"
+                        aria-label={`Remove service ${service.name}`}
+                        onClick={() =>
+                          setSelectedServices((prev) =>
+                            prev.filter((item) => item.id !== service.id)
+                          )
+                        }
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
 
         {showQuickService ? (
           <div className="grid gap-s2 rounded-md border border-border p-s3 md:grid-cols-[1fr_160px_auto] md:items-end">
@@ -652,51 +892,189 @@ export function FirstWorkOrderDrawer({
           </div>
         ) : null}
 
-        <InventorySelector
-          open={inventoryOpen}
-          query={inventoryQuery}
-          loading={loadingInventory}
-          available={inventoryOptions}
-          selected={selectedParts}
-          onToggleOpen={() => setInventoryOpen((prev) => !prev)}
-          onQueryChange={setInventoryQuery}
-          onAdd={(item) => {
-            setSelectedParts((prev) => {
-              const existing = prev.find((part) => part.id === item.id);
-              if (existing) {
-                return prev.map((part) =>
-                  part.id === item.id
-                    ? { ...part, quantity: part.quantity + 1 }
-                    : part
-                );
-              }
+        <div className="space-y-s2">
+          <div>
+            <h3 className="text-small font-semibold text-text-primary">
+              4. Parts (optional)
+            </h3>
+            <p className="text-caption text-text-muted">
+              Add parts only if needed for this job.
+            </p>
+          </div>
 
-              return [
-                ...prev,
-                {
-                  id: item.id,
-                  partName: item.name,
-                  quantity: 1,
-                  unitPrice: item.costPrice
-                }
-              ];
-            });
-          }}
-          onRemove={(partId) =>
-            setSelectedParts((prev) =>
-              prev.filter((part) => part.id !== partId)
-            )
-          }
-          onChangeQuantity={(partId, quantity) => {
-            setSelectedParts((prev) =>
-              prev.map((part) =>
-                part.id === partId
-                  ? { ...part, quantity: Math.max(1, quantity) }
-                  : part
-              )
-            );
-          }}
-        />
+          <div className="rounded-md border border-border bg-surface-default p-s3">
+            <div className="space-y-s2">
+              <label className="text-small font-medium text-text-secondary">
+                Search Part
+              </label>
+              <Input
+                className="h-11"
+                placeholder="Type part name"
+                value={inventoryQuery}
+                onChange={(event) => setInventoryQuery(event.target.value)}
+              />
+            </div>
+
+            <div className="mt-s3 rounded-md border border-border">
+              <div className="border-b border-border bg-background-secondary px-s3 py-s2">
+                <p className="text-caption font-medium text-text-secondary">
+                  Available Parts
+                </p>
+              </div>
+              <div className="max-h-[220px] overflow-y-auto">
+                {loadingInventory ? (
+                  <p className="px-s3 py-s3 text-small text-text-muted">
+                    Loading parts...
+                  </p>
+                ) : null}
+
+                {!loadingInventory && inventoryOptions.length === 0 ? (
+                  <p className="px-s3 py-s3 text-small text-text-muted">
+                    No parts found.
+                  </p>
+                ) : null}
+
+                {!loadingInventory
+                  ? inventoryOptions.map((item) => {
+                      const isSelected = selectedPartIds.has(item.id);
+                      return (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between gap-s3 border-t border-border px-s3 py-s2 first:border-t-0"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-small font-medium text-text-primary">
+                              {item.name}
+                            </p>
+                            <p className="text-caption text-text-muted">
+                              Stock: {item.quantity} •{' '}
+                              {formatCurrencyVnd(item.costPrice)}
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            size="sm"
+                            className="h-9 w-9 px-0"
+                            variant={isSelected ? 'secondary' : 'default'}
+                            aria-label={
+                              isSelected
+                                ? `Part ${item.name} already added`
+                                : `Add part ${item.name}`
+                            }
+                            disabled={isSelected}
+                            onClick={() =>
+                              setSelectedParts((prev) => [
+                                ...prev,
+                                {
+                                  id: item.id,
+                                  partName: item.name,
+                                  quantity: 1,
+                                  unitPrice: item.costPrice
+                                }
+                              ])
+                            }
+                          >
+                            <Plus className="size-4" />
+                          </Button>
+                        </div>
+                      );
+                    })
+                  : null}
+              </div>
+            </div>
+
+            <div className="mt-s3 rounded-md border border-border">
+              <div className="border-b border-border bg-background-secondary px-s3 py-s2">
+                <p className="text-caption font-medium text-text-secondary">
+                  Selected Parts for This Job ({selectedParts.length})
+                </p>
+              </div>
+              <div className="space-y-s2 p-s3">
+                {selectedParts.length === 0 ? (
+                  <p className="text-small text-text-muted">
+                    No parts selected.
+                  </p>
+                ) : (
+                  selectedParts.map((part) => (
+                    <div
+                      key={part.id}
+                      className="grid gap-s2 rounded-md border border-border p-s2 md:grid-cols-[1fr_auto_auto_auto_auto] md:items-center"
+                    >
+                      <div>
+                        <p className="text-small font-medium text-text-primary">
+                          {part.partName}
+                        </p>
+                        <p className="text-caption text-text-muted">
+                          {formatCurrencyVnd(part.unitPrice)} each
+                        </p>
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="h-9 w-9 px-0"
+                        aria-label={`Decrease quantity of ${part.partName}`}
+                        onClick={() =>
+                          setSelectedParts((prev) =>
+                            prev.map((item) =>
+                              item.id === part.id
+                                ? {
+                                    ...item,
+                                    quantity: Math.max(1, item.quantity - 1)
+                                  }
+                                : item
+                            )
+                          )
+                        }
+                      >
+                        <Minus className="size-4" />
+                      </Button>
+
+                      <p className="w-10 text-center text-small font-medium text-text-primary">
+                        {part.quantity}
+                      </p>
+
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="h-9 w-9 px-0"
+                        aria-label={`Increase quantity of ${part.partName}`}
+                        onClick={() =>
+                          setSelectedParts((prev) =>
+                            prev.map((item) =>
+                              item.id === part.id
+                                ? { ...item, quantity: item.quantity + 1 }
+                                : item
+                            )
+                          )
+                        }
+                      >
+                        <Plus className="size-4" />
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 w-9 px-0"
+                        aria-label={`Remove ${part.partName}`}
+                        onClick={() =>
+                          setSelectedParts((prev) =>
+                            prev.filter((item) => item.id !== part.id)
+                          )
+                        }
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="space-y-s1">
           <label className="text-small font-medium text-text-secondary">
@@ -714,6 +1092,25 @@ export function FirstWorkOrderDrawer({
           <p className="mt-s1 text-h2 text-text-primary">
             {formatCurrencyVnd(totalPrice)}
           </p>
+        </div>
+
+        <div className="rounded-md border border-border bg-surface-default p-s3">
+          <p className="text-caption font-medium text-text-secondary">
+            Before you start
+          </p>
+          <ul className="mt-s2 space-y-1 text-small text-text-primary">
+            <li>{selectedCustomer ? '✓' : '•'} Customer selected</li>
+            <li>{hasVehicle ? '✓' : '•'} Vehicle selected</li>
+            <li>
+              {selectedServices.length > 0 ? '✓' : '•'} At least one service
+              added
+            </li>
+          </ul>
+          {!canStartWork ? (
+            <p className="mt-s2 text-caption text-text-muted">
+              Complete the 3 items above to enable Start Work.
+            </p>
+          ) : null}
         </div>
 
         {submitError ? (

@@ -99,7 +99,9 @@ export function DashboardOnboardingState({
     metrics.readyForPickup > 0 ||
     metrics.todayRevenue > 0 ||
     metrics.weekRevenue > 0 ||
-    metrics.monthRevenue > 0;
+    metrics.monthRevenue > 0 ||
+    recentWorkOrders.length > 0;
+
   const isEmpty = !hasDashboardData;
   const tooltip = useSoftOnboardingTooltip(isEmpty);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -180,13 +182,12 @@ export function DashboardOnboardingState({
         <div className="space-y-s1">
           <h1 className="text-h1">{greeting}</h1>
           <p className="text-small text-text-secondary">
-            {garageName ? `${garageName} • ` : ''}Your daily operations start
-            here.
+            Your daily operations start here.
           </p>
         </div>
-        <Button className="h-11" onClick={() => setDrawerOpen(true)}>
+        {/* <Button className="h-11" onClick={() => setDrawerOpen(true)}>
           <Plus className="mr-2 size-4" /> New Work Order
-        </Button>
+        </Button> */}
       </header>
 
       {isEmpty ? (
