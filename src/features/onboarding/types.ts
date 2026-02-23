@@ -6,11 +6,15 @@ export type GarageProfile = {
 
 export type QuickWorkOrder = {
   id: string;
+  orderCode?: string;
   customerName: string;
   licensePlate: string;
+  status?: string;
+  totalAmount?: number;
   service?: string;
   notes?: string;
   createdAt: string;
+  updatedAt?: string;
 };
 
 export type OnboardingState = {

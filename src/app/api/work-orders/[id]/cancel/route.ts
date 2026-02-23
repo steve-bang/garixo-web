@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
 
-import {
-  findGarageWorkOrderById,
-  updateGarageWorkOrder
-} from '@/app/api/work-orders/work-orders-db';
+import { findGarageWorkOrderById } from '@/app/api/work-orders/work-orders-db';
 import { cancelSchema } from '@/features/work-orders/schema';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { WorkOrder } from '@/features/work-orders/types';
 import { auth } from '@/lib/auth';
 import { getRequestGarageId } from '@/lib/auth/garage-context';
+import { applyWorkOrderStatusTransition } from '@/services/firebase/dashboard-summary-service';
+import { incrementGarageStaffCurrentJobs } from '@/services/firebase/staff-service';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -56,18 +55,25 @@ export async function PATCH(
     );
   }
 
-  const now = new Date().toISOString();
-  const updated = await updateGarageWorkOrder(garageId, id, {
-    status: WorkOrderStatusEnum.Cancelled,
-    cancellationReason: parsed.data.reason,
-    timeline: [
-      ...current.timeline,
-      { status: WorkOrderStatusEnum.Cancelled, timestamp: now }
-    ],
-    isOverdue: false
+  const updated = await applyWorkOrderStatusTransition({
+    garageId,
+    orderId: id,
+    nextStatus: WorkOrderStatusEnum.Cancelled,
+    cancellationReason: parsed.data.reason
   });
   if (!updated) {
     return response({ success: false, error: 'Work order not found.' }, 404);
+  }
+
+  if (current.workerId) {
+    const wasAlreadyFinal =
+      current.status === WorkOrderStatusEnum.Completed ||
+      current.status === WorkOrderStatusEnum.Paid ||
+      current.status === WorkOrderStatusEnum.Cancelled;
+
+    if (!wasAlreadyFinal) {
+      await incrementGarageStaffCurrentJobs(garageId, current.workerId, -1);
+    }
   }
 
   return response({ success: true, data: updated });

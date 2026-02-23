@@ -23,6 +23,7 @@ import {
 } from '@/features/work-orders/utils';
 import { auth } from '@/lib/auth';
 import { getRequestGarageId } from '@/lib/auth/garage-context';
+import { ensureDashboardSummaryDocs } from '@/services/firebase/dashboard-summary-service';
 import {
   findGarageStaffById,
   incrementGarageStaffCurrentJobs
@@ -292,6 +293,7 @@ export async function POST(
   };
 
   const created = await createGarageWorkOrder(garageId, createdPayload);
+  await ensureDashboardSummaryDocs(garageId);
   if (created.workerId) {
     await incrementGarageStaffCurrentJobs(garageId, created.workerId, 1);
   }

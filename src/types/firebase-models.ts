@@ -38,8 +38,10 @@ export type WorkOrderStatus = UnifiedWorkOrderStatus;
 
 export interface GarageWorkOrderDocument {
   id: string;
+  orderCode?: string;
   customerName: string;
   licensePlate: string;
+  totalAmount?: number;
   serviceId?: string;
   service?: string;
   notes?: string;

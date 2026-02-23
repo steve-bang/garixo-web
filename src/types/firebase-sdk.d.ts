@@ -6,7 +6,15 @@ declare module 'firebase-admin/app' {
 }
 
 declare module 'firebase-admin/firestore' {
+  export const FieldValue: {
+    increment: (value: number) => unknown;
+    serverTimestamp: () => unknown;
+  };
+
   export type Firestore = {
+    runTransaction: <T>(
+      updateFunction: (transaction: unknown) => Promise<T>
+    ) => Promise<T>;
     collection: (path: string) => {
       doc: (id?: string) => {
         id: string;

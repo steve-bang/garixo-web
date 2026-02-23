@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 
-import {
-  findGarageWorkOrderById,
-  updateGarageWorkOrder
-} from '@/app/api/work-orders/work-orders-db';
+import { findGarageWorkOrderById } from '@/app/api/work-orders/work-orders-db';
 import { paymentSchema } from '@/features/work-orders/schema';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { WorkOrder } from '@/features/work-orders/types';
 import { auth } from '@/lib/auth';
 import { getRequestGarageId } from '@/lib/auth/garage-context';
+import { applyWorkOrderStatusTransition } from '@/services/firebase/dashboard-summary-service';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -70,15 +68,11 @@ export async function PATCH(
     );
   }
 
-  const now = new Date().toISOString();
-  const updated = await updateGarageWorkOrder(garageId, id, {
-    paymentMethod: parsed.data.method,
-    status: WorkOrderStatusEnum.Paid,
-    timeline: [
-      ...current.timeline,
-      { status: WorkOrderStatusEnum.Paid, timestamp: now }
-    ],
-    isOverdue: false
+  const updated = await applyWorkOrderStatusTransition({
+    garageId,
+    orderId: id,
+    nextStatus: WorkOrderStatusEnum.Paid,
+    paymentMethod: parsed.data.method
   });
   if (!updated) {
     return response({ success: false, error: 'Work order not found.' }, 404);

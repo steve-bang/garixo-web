@@ -3,6 +3,10 @@ import { redirect } from 'next/navigation';
 import { DashboardOnboardingState } from '@/features/onboarding/components/dashboard-onboarding-state';
 import { auth } from '@/lib/auth';
 import { getRequestGarage } from '@/lib/auth/garage-context';
+import {
+  getDashboardOverviewSummary,
+  getRevenueSummary
+} from '@/services/firebase/dashboard-summary-service';
 import { listGarageWorkOrders } from '@/services/firebase/work-orders-service';
 
 export default async function DashboardPage(): Promise<JSX.Element> {
@@ -17,14 +21,45 @@ export default async function DashboardPage(): Promise<JSX.Element> {
     redirect('/onboarding/setup-garage');
   }
 
-  const orders = (await listGarageWorkOrders(garage.id)).map((item) => ({
-    id: item.id,
-    customerName: item.customerName,
-    licensePlate: item.licensePlate,
-    service: item.service,
-    notes: item.notes,
-    createdAt: item.createdAt
-  }));
+  const [overview, revenue, workOrders] = await Promise.all([
+    getDashboardOverviewSummary(garage.id),
+    getRevenueSummary(garage.id),
+    listGarageWorkOrders(garage.id)
+  ]);
 
-  return <DashboardOnboardingState workOrders={orders} />;
+  const recentWorkOrders = workOrders
+    .slice()
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt ?? b.createdAt).getTime() -
+        new Date(a.updatedAt ?? a.createdAt).getTime()
+    )
+    .slice(0, 5)
+    .map((item) => ({
+      id: item.id,
+      orderCode: item.orderCode,
+      customerName: item.customerName,
+      licensePlate: item.licensePlate,
+      status: item.status,
+      totalAmount: item.totalAmount,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt
+    }));
+
+  return (
+    <DashboardOnboardingState
+      ownerName={session.user.name ?? undefined}
+      garageName={garage.name}
+      metrics={{
+        carsInShop: overview.carsInShop,
+        waitingForApproval: overview.waitingApproval,
+        readyForPickup: overview.readyForPickup,
+        stuckInProgress: overview.stuckJobs,
+        todayRevenue: revenue.today.totalRevenue,
+        weekRevenue: revenue.week.totalRevenue,
+        monthRevenue: revenue.month.totalRevenue
+      }}
+      recentWorkOrders={recentWorkOrders}
+    />
+  );
 }

@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server';
 
-import {
-  findGarageWorkOrderById,
-  updateGarageWorkOrder
-} from '@/app/api/work-orders/work-orders-db';
+import { findGarageWorkOrderById } from '@/app/api/work-orders/work-orders-db';
 import { updateStatusSchema } from '@/features/work-orders/schema';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { WorkOrder } from '@/features/work-orders/types';
 import { canTransitionTo } from '@/features/work-orders/utils';
 import { auth } from '@/lib/auth';
-import { firebaseAdmin } from '@/lib/firebase-admin';
 import { getRequestGarageId } from '@/lib/auth/garage-context';
+import { applyWorkOrderStatusTransition } from '@/services/firebase/dashboard-summary-service';
 import { incrementGarageStaffCurrentJobs } from '@/services/firebase/staff-service';
 import type { ApiResponse } from '@/types/api';
 
@@ -68,69 +65,27 @@ export async function PATCH(
     );
   }
 
-  if (
-    parsed.data.status === WorkOrderStatusEnum.Completed &&
-    current.parts.length > 0
-  ) {
-    try {
-      const db = firebaseAdmin.db as any;
-      await db.runTransaction(async (transaction: any) => {
-        for (const part of current.parts) {
-          const ref = db
-            .collection('garages')
-            .doc(garageId)
-            .collection('inventory')
-            .doc(part.id);
-
-          const snapshot = await transaction.get(ref);
-          if (!snapshot.exists) {
-            continue;
-          }
-
-          const data = snapshot.data() as { quantity?: number };
-          const currentQuantity = data.quantity ?? 0;
-
-          if (currentQuantity < part.quantity) {
-            throw new Error(`Not enough quantity for ${part.partName}.`);
-          }
-
-          transaction.set(
-            ref,
-            {
-              quantity: currentQuantity - part.quantity,
-              updatedAt: new Date().toISOString()
-            },
-            { merge: true }
-          );
-        }
-      });
-    } catch (error) {
-      return response(
-        {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : 'Could not complete order because stock is insufficient.'
-        },
-        400
-      );
-    }
+  let updated: WorkOrder | null = null;
+  try {
+    updated = await applyWorkOrderStatusTransition({
+      garageId,
+      orderId: id,
+      nextStatus: parsed.data.status,
+      deductInventoryOnComplete:
+        parsed.data.status === WorkOrderStatusEnum.Completed
+    });
+  } catch (error) {
+    return response(
+      {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Could not update work order status.'
+      },
+      400
+    );
   }
-
-  const updated = await updateGarageWorkOrder(garageId, id, {
-    status: parsed.data.status,
-    timeline: [
-      ...current.timeline,
-      { status: parsed.data.status, timestamp: new Date().toISOString() }
-    ],
-    isOverdue:
-      parsed.data.status === WorkOrderStatusEnum.Completed ||
-      parsed.data.status === WorkOrderStatusEnum.Paid ||
-      parsed.data.status === WorkOrderStatusEnum.Cancelled
-        ? false
-        : current.isOverdue
-  });
   if (!updated) {
     return response({ success: false, error: 'Work order not found.' }, 404);
   }
