@@ -48,7 +48,7 @@ export function StaffTable({
     return (
       <Card className="overflow-hidden p-0">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[980px] text-left text-small">
+          <table className="w-full min-w-[1080px] text-left text-small">
             <thead className="bg-table-header text-table-header-text">
               <tr>
                 <th className="px-s4 py-s3 font-semibold">Avatar</th>
@@ -57,6 +57,9 @@ export function StaffTable({
                 <th className="px-s4 py-s3 font-semibold">Status</th>
                 <th className="px-s4 py-s3 text-right font-semibold">
                   Current Jobs
+                </th>
+                <th className="px-s4 py-s3 text-right font-semibold">
+                  Completed Jobs
                 </th>
                 <th className="px-s4 py-s3 font-semibold">Phone</th>
                 <th className="px-s4 py-s3 font-semibold">Actions</th>
@@ -85,6 +88,9 @@ export function StaffTable({
                   </td>
                   <td className="px-s4 py-s3 text-right">
                     <div className="ml-auto h-4 w-8 animate-pulse rounded bg-surface-hover" />
+                  </td>
+                  <td className="px-s4 py-s3 text-right">
+                    <div className="ml-auto h-4 w-10 animate-pulse rounded bg-surface-hover" />
                   </td>
                   <td className="px-s4 py-s3">
                     <div className="h-4 w-24 animate-pulse rounded bg-surface-hover" />
@@ -129,7 +135,7 @@ export function StaffTable({
   return (
     <Card className="overflow-hidden p-0">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[980px] text-left text-small">
+        <table className="w-full min-w-[1080px] text-left text-small">
           <thead className="bg-table-header text-table-header-text">
             <tr>
               <th className="px-s4 py-s3 font-semibold">Avatar</th>
@@ -138,6 +144,9 @@ export function StaffTable({
               <th className="px-s4 py-s3 font-semibold">Status</th>
               <th className="px-s4 py-s3 text-right font-semibold">
                 Current Jobs
+              </th>
+              <th className="px-s4 py-s3 text-right font-semibold">
+                Completed Jobs
               </th>
               <th className="px-s4 py-s3 font-semibold">Phone</th>
               <th className="px-s4 py-s3 font-semibold">Actions</th>
@@ -187,6 +196,9 @@ export function StaffTable({
                     )}
                   >
                     {item.currentJobs}
+                  </td>
+                  <td className="px-s4 py-s3 text-right tabular-nums text-text-primary">
+                    {item.completedJobs ?? 0}
                   </td>
                   <td className="px-s4 py-s3">{item.phone}</td>
                   <td className="px-s4 py-s3">

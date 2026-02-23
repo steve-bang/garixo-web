@@ -3,14 +3,16 @@
 import { Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { LoadingState } from '@/components/common/loading-state';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { AddStaffModal } from '@/features/staff/components/add-staff-modal';
 import { DeleteStaffModal } from '@/features/staff/components/delete-staff-modal';
 import { EditStaffDrawer } from '@/features/staff/components/edit-staff-drawer';
-import { StaffKpiRow } from '@/features/staff/components/staff-kpi-row';
+import {
+  StaffKpiRow,
+  StaffKpiRowSkeleton
+} from '@/features/staff/components/staff-kpi-row';
 import { StaffTable } from '@/features/staff/components/staff-table';
 import {
   useCreateStaff,
@@ -43,6 +45,7 @@ export function StaffManagementPage(): JSX.Element {
 
   const staff = useMemo(() => staffQuery.data ?? [], [staffQuery.data]);
   const kpis = useStaffKpis(staff);
+  const isInitialLoading = staffQuery.isLoading && !staffQuery.data;
   const isTableUpdating =
     (staffQuery.isFetching && !staffQuery.isLoading) ||
     createMutation.isPending ||
@@ -84,11 +87,7 @@ export function StaffManagementPage(): JSX.Element {
     setDeleteTarget(null);
   };
 
-  if (staffQuery.isLoading) {
-    return <LoadingState label="Loading staff..." />;
-  }
-
-  if (staffQuery.isError) {
+  if (staffQuery.isError && !staffQuery.data) {
     return (
       <Card className="p-s4">
         <p className="text-small text-state-error">
@@ -116,11 +115,11 @@ export function StaffManagementPage(): JSX.Element {
         ) : null}
       </header>
 
-      <StaffKpiRow kpis={kpis} />
+      {isInitialLoading ? <StaffKpiRowSkeleton /> : <StaffKpiRow kpis={kpis} />}
 
       <StaffTable
-        loading={isTableUpdating}
-        staff={staff}
+        loading={isInitialLoading || isTableUpdating}
+        staff={isInitialLoading ? [] : staff}
         canAddStaff={canManage}
         onAddFirstStaff={() => setAddOpen(true)}
         currentUserRole={currentUserRole}

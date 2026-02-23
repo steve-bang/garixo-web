@@ -1,9 +1,8 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { JSX, useEffect, useMemo, useState } from 'react';
+import { JSX, useEffect, useState } from 'react';
 
-import { LoadingState } from '@/components/common/loading-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -12,7 +11,10 @@ import { BulkUpdateModal } from '@/features/services/components/bulk-update-moda
 import { DeleteServiceModal } from '@/features/services/components/delete-service-modal';
 import { ServiceDrawer } from '@/features/services/components/service-drawer';
 import { ServicesFilters } from '@/features/services/components/services-filters';
-import { ServicesKpiRow } from '@/features/services/components/services-kpi-row';
+import {
+  ServicesKpiRow,
+  ServicesKpiRowSkeleton
+} from '@/features/services/components/services-kpi-row';
 import { ServicesTable } from '@/features/services/components/services-table';
 import {
   toServiceKpis,
@@ -36,6 +38,19 @@ type DrawerState = {
   mode: 'create' | 'edit' | 'duplicate';
   service: Service | null;
 };
+
+function ServicesFiltersSkeleton(): JSX.Element {
+  return (
+    <Card className="space-y-s3 p-s4">
+      <div className="grid gap-s3 md:grid-cols-[1fr_200px_180px_auto] md:items-center">
+        <div className="h-11 animate-pulse rounded-md bg-surface-hover" />
+        <div className="h-11 animate-pulse rounded-md bg-surface-hover" />
+        <div className="h-11 animate-pulse rounded-md bg-surface-hover" />
+        <div className="h-11 animate-pulse rounded-md bg-surface-hover" />
+      </div>
+    </Card>
+  );
+}
 
 export function ServicesManagementPage(): JSX.Element {
   const toast = useToast();
@@ -90,7 +105,11 @@ export function ServicesManagementPage(): JSX.Element {
   const listItems = listQuery.data?.items ?? [];
   const kpiItems = kpiQuery.data?.items ?? [];
   const meta = listQuery.data?.meta;
-  const kpis = useMemo(() => toServiceKpis(kpiItems), [kpiItems]);
+  const kpis = toServiceKpis(kpiItems);
+  const isInitialLoading =
+    (listQuery.isLoading || kpiQuery.isLoading) &&
+    !listQuery.data &&
+    !kpiQuery.data;
   const isTableRefreshing = listQuery.isFetching && !listQuery.isLoading;
 
   useEffect(() => {
@@ -168,11 +187,11 @@ export function ServicesManagementPage(): JSX.Element {
     setBulkOpen(false);
   };
 
-  if (listQuery.isLoading || kpiQuery.isLoading) {
-    return <LoadingState label="Loading services..." />;
-  }
-
-  if (listQuery.isError || kpiQuery.isError) {
+  if (
+    (listQuery.isError || kpiQuery.isError) &&
+    !listQuery.data &&
+    !kpiQuery.data
+  ) {
     return (
       <Card className="p-s6">
         <p className="text-small text-state-error">Could not load services.</p>
@@ -201,41 +220,49 @@ export function ServicesManagementPage(): JSX.Element {
         </div>
       </header>
 
-      <ServicesKpiRow kpis={kpis} />
+      {isInitialLoading ? (
+        <ServicesKpiRowSkeleton />
+      ) : (
+        <ServicesKpiRow kpis={kpis} />
+      )}
 
-      <ServicesFilters
-        searchInput={searchInput}
-        onSearchInputChange={setSearchInput}
-        category={category}
-        status={status}
-        onCategoryChange={(value) => {
-          setCategory(value);
-          setPage(1);
-        }}
-        onStatusChange={(value) => {
-          setStatus(value);
-          setPage(1);
-        }}
-        onRemoveCategory={() => {
-          setCategory(undefined);
-          setPage(1);
-        }}
-        onRemoveStatus={() => {
-          setStatus(undefined);
-          setPage(1);
-        }}
-        onClear={() => {
-          setSearchInput('');
-          setSearch('');
-          setCategory(undefined);
-          setStatus(undefined);
-          setPage(1);
-        }}
-      />
+      {isInitialLoading ? (
+        <ServicesFiltersSkeleton />
+      ) : (
+        <ServicesFilters
+          searchInput={searchInput}
+          onSearchInputChange={setSearchInput}
+          category={category}
+          status={status}
+          onCategoryChange={(value) => {
+            setCategory(value);
+            setPage(1);
+          }}
+          onStatusChange={(value) => {
+            setStatus(value);
+            setPage(1);
+          }}
+          onRemoveCategory={() => {
+            setCategory(undefined);
+            setPage(1);
+          }}
+          onRemoveStatus={() => {
+            setStatus(undefined);
+            setPage(1);
+          }}
+          onClear={() => {
+            setSearchInput('');
+            setSearch('');
+            setCategory(undefined);
+            setStatus(undefined);
+            setPage(1);
+          }}
+        />
+      )}
 
       <ServicesTable
-        loading={isTableRefreshing}
-        services={listItems}
+        loading={isInitialLoading || isTableRefreshing}
+        services={isInitialLoading ? [] : listItems}
         highlightedId={highlightedId}
         onAddFirst={openCreateDrawer}
         onEdit={openEditDrawer}

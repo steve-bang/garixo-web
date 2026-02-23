@@ -11,6 +11,7 @@ type StaffFirestoreDoc = {
   role?: Staff['role'];
   status?: StaffStatus;
   currentJobs?: number;
+  completedJobs?: number;
   branchId?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -39,6 +40,7 @@ function mapDoc(id: string, data: StaffFirestoreDoc): Staff {
     role: data.role ?? 'STAFF',
     status: data.status ?? 'ACTIVE',
     currentJobs: data.currentJobs ?? 0,
+    completedJobs: data.completedJobs ?? 0,
     branchId: data.branchId ?? '',
     createdAt: data.createdAt ?? now,
     updatedAt: data.updatedAt ?? now
@@ -96,6 +98,7 @@ export async function createGarageStaff(
     role: input.role,
     status: input.status,
     currentJobs: input.currentJobs,
+    completedJobs: input.completedJobs ?? 0,
     branchId: input.branchId ?? '',
     createdAt: now,
     updatedAt: now
@@ -146,6 +149,27 @@ export async function incrementGarageStaffCurrentJobs(
   const data = existing.data() as StaffFirestoreDoc;
   const next: StaffFirestoreDoc = {
     currentJobs: Math.max(0, (data.currentJobs ?? 0) + delta),
+    updatedAt: new Date().toISOString()
+  };
+
+  await ref.set(next, { merge: true });
+  return mapDoc(existing.id, { ...data, ...next });
+}
+
+export async function incrementGarageStaffCompletedJobs(
+  garageId: string,
+  staffId: string,
+  delta: number
+): Promise<Staff | null> {
+  const ref = staffCollection(garageId).doc(staffId);
+  const existing = await ref.get();
+  if (!existing.exists) {
+    return null;
+  }
+
+  const data = existing.data() as StaffFirestoreDoc;
+  const next: StaffFirestoreDoc = {
+    completedJobs: Math.max(0, (data.completedJobs ?? 0) + delta),
     updatedAt: new Date().toISOString()
   };
 

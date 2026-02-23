@@ -8,7 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
-import { updateStaffSchema, type UpdateStaffInput } from '@/features/staff/schema';
+import {
+  updateStaffSchema,
+  type UpdateStaffInput
+} from '@/features/staff/schema';
 import type { Role, Staff, StaffStatus } from '@/features/staff/types';
 
 type EditStaffDrawerProps = {
@@ -19,7 +22,13 @@ type EditStaffDrawerProps = {
   onSubmit: (values: UpdateStaffInput) => Promise<void>;
 };
 
-export function EditStaffDrawer({ open, staff, currentUserRole, onClose, onSubmit }: EditStaffDrawerProps): JSX.Element | null {
+export function EditStaffDrawer({
+  open,
+  staff,
+  currentUserRole,
+  onClose,
+  onSubmit
+}: EditStaffDrawerProps): JSX.Element | null {
   const [submitError, setSubmitError] = useState('');
 
   const form = useForm<UpdateStaffInput>({
@@ -51,7 +60,6 @@ export function EditStaffDrawer({ open, staff, currentUserRole, onClose, onSubmi
       avatar: staff.avatar,
       branchId: staff.branchId
     });
-    setSubmitError('');
   }, [form, staff]);
 
   if (!staff) {
@@ -72,7 +80,8 @@ export function EditStaffDrawer({ open, staff, currentUserRole, onClose, onSubmi
     try {
       await onSubmit(values);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Could not update staff.';
+      const message =
+        error instanceof Error ? error.message : 'Could not update staff.';
       setSubmitError(message);
 
       if (message.toLowerCase().includes('phone')) {
@@ -92,39 +101,83 @@ export function EditStaffDrawer({ open, staff, currentUserRole, onClose, onSubmi
       footer={
         canEdit ? (
           <div className="flex justify-end gap-s2">
-            <Button variant="secondary" type="button" onClick={onClose} disabled={form.formState.isSubmitting}>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={onClose}
+              disabled={form.formState.isSubmitting}
+            >
               Cancel
             </Button>
-            <Button type="submit" form="edit-staff-drawer-form" disabled={form.formState.isSubmitting}>
+            <Button
+              type="submit"
+              form="edit-staff-drawer-form"
+              disabled={form.formState.isSubmitting}
+            >
               {form.formState.isSubmitting ? 'Saving...' : 'Save'}
             </Button>
           </div>
         ) : undefined
       }
     >
-      <form id="edit-staff-drawer-form" className="space-y-s3" onSubmit={handleSubmit}>
+      <form
+        id="edit-staff-drawer-form"
+        className="space-y-s3"
+        onSubmit={handleSubmit}
+      >
         <div className="space-y-s1">
-          <label className="text-small font-medium text-text-secondary">Full Name</label>
-          <Input className="h-11" disabled={!canEdit} {...form.register('fullName')} />
+          <label className="text-small font-medium text-text-secondary">
+            Full Name
+          </label>
+          <Input
+            className="h-11"
+            disabled={!canEdit}
+            {...form.register('fullName')}
+          />
           {form.formState.errors.fullName ? (
-            <p className="text-caption text-state-error">{form.formState.errors.fullName.message}</p>
+            <p className="text-caption text-state-error">
+              {form.formState.errors.fullName.message}
+            </p>
           ) : null}
         </div>
 
         <div className="space-y-s1">
-          <label className="text-small font-medium text-text-secondary">Phone</label>
-          <Input className="h-11" disabled={!canEdit} {...form.register('phone')} />
-          {form.formState.errors.phone ? <p className="text-caption text-state-error">{form.formState.errors.phone.message}</p> : null}
+          <label className="text-small font-medium text-text-secondary">
+            Phone
+          </label>
+          <Input
+            className="h-11"
+            disabled={!canEdit}
+            {...form.register('phone')}
+          />
+          {form.formState.errors.phone ? (
+            <p className="text-caption text-state-error">
+              {form.formState.errors.phone.message}
+            </p>
+          ) : null}
         </div>
 
         <div className="space-y-s1">
-          <label className="text-small font-medium text-text-secondary">Email</label>
-          <Input className="h-11" disabled={!canEdit} type="email" {...form.register('email')} />
-          {form.formState.errors.email ? <p className="text-caption text-state-error">{form.formState.errors.email.message}</p> : null}
+          <label className="text-small font-medium text-text-secondary">
+            Email
+          </label>
+          <Input
+            className="h-11"
+            disabled={!canEdit}
+            type="email"
+            {...form.register('email')}
+          />
+          {form.formState.errors.email ? (
+            <p className="text-caption text-state-error">
+              {form.formState.errors.email.message}
+            </p>
+          ) : null}
         </div>
 
         <div className="space-y-s1">
-          <label className="text-small font-medium text-text-secondary">Role</label>
+          <label className="text-small font-medium text-text-secondary">
+            Role
+          </label>
           {canEditRole ? (
             <select
               className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
@@ -143,25 +196,36 @@ export function EditStaffDrawer({ open, staff, currentUserRole, onClose, onSubmi
         </div>
 
         <div className="space-y-s1">
-          <label className="text-small font-medium text-text-secondary">Status</label>
+          <label className="text-small font-medium text-text-secondary">
+            Status
+          </label>
           <select
             className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
             disabled={!canEdit}
             {...form.register('status')}
           >
-            {(['ACTIVE', 'ON_LEAVE', 'INACTIVE'] as StaffStatus[]).map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
+            {(['ACTIVE', 'ON_LEAVE', 'INACTIVE'] as StaffStatus[]).map(
+              (status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              )
+            )}
           </select>
         </div>
 
         <div className="flex items-center gap-s2">
-          <Badge variant={staff.currentJobs >= 3 ? 'warning' : 'default'}>Current Jobs: {staff.currentJobs}</Badge>
+          <Badge variant={staff.currentJobs >= 3 ? 'warning' : 'default'}>
+            Current Jobs: {staff.currentJobs}
+          </Badge>
+          <Badge variant="default">
+            Completed Jobs: {staff.completedJobs ?? 0}
+          </Badge>
         </div>
 
-        {submitError ? <p className="text-caption text-state-error">{submitError}</p> : null}
+        {submitError ? (
+          <p className="text-caption text-state-error">{submitError}</p>
+        ) : null}
       </form>
     </Drawer>
   );

@@ -11,6 +11,7 @@ export interface Staff {
   role: Role;
   status: StaffStatus;
   currentJobs: number;
+  completedJobs?: number;
   branchId?: string;
   createdAt: string;
   updatedAt: string;

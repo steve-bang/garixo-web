@@ -8,7 +8,10 @@ import { canTransitionTo } from '@/features/work-orders/utils';
 import { auth } from '@/lib/auth';
 import { getRequestGarageId } from '@/lib/auth/garage-context';
 import { applyWorkOrderStatusTransition } from '@/services/firebase/dashboard-summary-service';
-import { incrementGarageStaffCurrentJobs } from '@/services/firebase/staff-service';
+import {
+  incrementGarageStaffCompletedJobs,
+  incrementGarageStaffCurrentJobs
+} from '@/services/firebase/staff-service';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -102,6 +105,9 @@ export async function PATCH(
 
     if (!wasAlreadyFinal) {
       await incrementGarageStaffCurrentJobs(garageId, current.workerId, -1);
+      if (parsed.data.status === WorkOrderStatusEnum.Completed) {
+        await incrementGarageStaffCompletedJobs(garageId, current.workerId, 1);
+      }
     }
   }
 
