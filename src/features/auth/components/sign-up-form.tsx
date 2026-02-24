@@ -8,6 +8,7 @@ import {
   Mail,
   Store
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -41,7 +42,21 @@ export function SignUpForm(): JSX.Element {
           backgroundPosition: 'center'
         }}
       >
-        <p className="text-h2 text-text-inverse">Garixo</p>
+        <Link
+          href="/"
+          className="inline-flex w-fit items-center gap-s2 text-text-inverse hover:opacity-90"
+        >
+          <span className="grid size-10 place-items-center overflow-hidden rounded-md border border-white/30 bg-white">
+            <Image
+              src="/favicon/favicon.svg"
+              alt="Garixo logo"
+              width={28}
+              height={28}
+              className="size-7"
+            />
+          </span>
+          <span className="text-h2 text-text-inverse">Garixo</span>
+        </Link>
 
         <div className="max-w-[460px] space-y-s4 text-text-inverse">
           <h1 className="text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-white lg:text-[2.5rem]">
@@ -76,6 +91,22 @@ export function SignUpForm(): JSX.Element {
       </section>
 
       <section className="flex min-h-screen flex-col p-s6 md:justify-center md:p-s12">
+        <Link
+          href="/"
+          className="mb-s4 inline-flex w-fit items-center gap-s2 md:hidden"
+        >
+          <span className="grid size-10 place-items-center overflow-hidden rounded-md border border-border bg-surface-default">
+            <Image
+              src="/favicon/favicon.svg"
+              alt="Garixo logo"
+              width={28}
+              height={28}
+              className="size-7"
+            />
+          </span>
+          <span className="text-h3 text-text-primary">Garixo</span>
+        </Link>
+
         <div className="mb-s6 rounded-lg border border-border bg-surface-default p-s6 md:hidden">
           <h2 className="text-h3">Manage your garage easily.</h2>
           <ul className="mt-s3 space-y-s2 text-small text-text-secondary">

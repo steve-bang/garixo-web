@@ -1,6 +1,7 @@
 'use client';
 
 import { CheckCircle2, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -23,7 +24,21 @@ export function LoginForm(): JSX.Element {
     <div className="min-h-screen bg-background-secondary lg:grid lg:grid-cols-2">
       <section className="bg-gradient-to-br from-primary-600 to-primary-800 p-s6 text-text-inverse md:p-s10 lg:flex lg:min-h-screen lg:flex-col lg:justify-center lg:p-s12">
         <div className="mx-auto w-full max-w-[520px] space-y-s4 lg:space-y-s6">
-          <p className="text-h2 text-text-inverse">Garixo</p>
+          <Link
+            href="/"
+            className="inline-flex w-fit items-center gap-s2 text-text-inverse hover:opacity-90"
+          >
+            <span className="grid size-10 place-items-center overflow-hidden rounded-md border border-white/30 bg-white">
+              <Image
+                src="/favicon/favicon.svg"
+                alt="Garixo logo"
+                width={28}
+                height={28}
+                className="size-7"
+              />
+            </span>
+            <span className="text-h2 text-text-inverse">Garixo</span>
+          </Link>
 
           <h1 className="text-[1.75rem] font-bold leading-tight tracking-[-0.02em] text-text-inverse md:text-[2rem] lg:text-[2.5rem]">
             Manage your garage
@@ -31,7 +46,9 @@ export function LoginForm(): JSX.Element {
             Without the stress.
           </h1>
 
-          <p className="text-small text-slate-100/90 md:text-body">Simple tools. Clear reports. More profit.</p>
+          <p className="text-small text-slate-100/90 md:text-body">
+            Simple tools. Clear reports. More profit.
+          </p>
 
           <ul className="space-y-s2 text-small text-slate-100/90 md:text-body">
             <li className="flex items-center gap-s2">
@@ -53,11 +70,16 @@ export function LoginForm(): JSX.Element {
       <section className="flex min-h-[58vh] items-center justify-center p-s6 md:p-s8 lg:min-h-screen lg:p-s12">
         <Card className="w-full max-w-[420px] rounded-lg border border-border bg-surface-default p-s6 shadow-sm md:p-s8">
           <h1 className="text-h2">Sign in</h1>
-          <p className="mt-s1 text-small text-text-muted">Enter your email and password to access your garage.</p>
+          <p className="mt-s1 text-small text-text-muted">
+            Enter your email and password to access your garage.
+          </p>
 
           <form className="mt-s6 space-y-s4" onSubmit={onSubmit}>
             <div className="space-y-s1">
-              <label htmlFor="email" className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="email"
+                className="text-small font-medium text-text-secondary"
+              >
                 Email address
               </label>
               <div className="relative">
@@ -68,15 +90,25 @@ export function LoginForm(): JSX.Element {
                   inputMode="email"
                   autoComplete="email"
                   placeholder="example@gmail.com"
-                  className={cn('h-12 pl-9', emailError ? 'border-error-600 focus-visible:ring-error-300' : '')}
+                  className={cn(
+                    'h-12 pl-9',
+                    emailError
+                      ? 'border-error-600 focus-visible:ring-error-300'
+                      : ''
+                  )}
                   {...form.register('email')}
                 />
               </div>
-              {emailError ? <p className="text-caption text-state-error">{emailError}</p> : null}
+              {emailError ? (
+                <p className="text-caption text-state-error">{emailError}</p>
+              ) : null}
             </div>
 
             <div className="space-y-s1">
-              <label htmlFor="password" className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="password"
+                className="text-small font-medium text-text-secondary"
+              >
                 Password
               </label>
               <div className="relative">
@@ -85,7 +117,12 @@ export function LoginForm(): JSX.Element {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  className={cn('h-12 pl-9 pr-11', passwordError ? 'border-error-600 focus-visible:ring-error-300' : '')}
+                  className={cn(
+                    'h-12 pl-9 pr-11',
+                    passwordError
+                      ? 'border-error-600 focus-visible:ring-error-300'
+                      : ''
+                  )}
                   {...form.register('password')}
                 />
                 <button
@@ -94,31 +131,49 @@ export function LoginForm(): JSX.Element {
                   className="absolute right-s3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
                   onClick={() => setShowPassword((prev) => !prev)}
                 >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  {showPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
                 </button>
               </div>
-              {passwordError ? <p className="text-caption text-state-error">{passwordError}</p> : null}
+              {passwordError ? (
+                <p className="text-caption text-state-error">{passwordError}</p>
+              ) : null}
 
               <div className="pt-s1">
-                <Link href="/auth/forgot-password" className="text-small font-medium text-primary-700 hover:underline">
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-small font-medium text-primary-700 hover:underline"
+                >
                   Forgot password?
                 </Link>
               </div>
             </div>
 
-            {formError ? <p className="rounded-md bg-error-50 px-s3 py-s2 text-small text-state-error">{formError}</p> : null}
+            {formError ? (
+              <p className="rounded-md bg-error-50 px-s3 py-s2 text-small text-state-error">
+                {formError}
+              </p>
+            ) : null}
 
             <Button
               type="submit"
               className="h-12 w-full"
-              disabled={!hasFormValue || !form.formState.isValid || mutation.isPending}
+              disabled={
+                !hasFormValue || !form.formState.isValid || mutation.isPending
+              }
             >
               {mutation.isPending ? 'Signing in...' : 'Sign In'}
             </Button>
 
             <p className="text-small text-text-secondary">
               Don&apos;t have an account?{' '}
-              <Link href="/auth/sign-up" className="font-medium text-primary-700 hover:underline">
+              <Link
+                href="/auth/sign-up"
+                className="font-medium text-primary-700 hover:underline"
+              >
                 Sign up
               </Link>
             </p>
