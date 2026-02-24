@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api/client';
-import type { User } from '@/features/user/types';
 import type { ApiResponse } from '@/types/api';
+import { User } from '@/types/user';
 
 export async function fetchUsers(): Promise<User[]> {
   const response = await apiClient.get<ApiResponse<User[]>>('/users');

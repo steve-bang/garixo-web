@@ -1,4 +1,7 @@
-export type FirebaseRole = 'owner' | 'staff' | 'admin' | 'user';
+import type { UserRole } from '@/types/user';
+import type { WorkOrderStatus as UnifiedWorkOrderStatus } from '@/features/work-orders/types';
+
+export type FirebaseRole = UserRole;
 
 export interface UserDocument {
   id: string;
@@ -49,4 +52,3 @@ export interface GarageWorkOrderDocument {
   createdAt: string;
   updatedAt: string;
 }
-import type { WorkOrderStatus as UnifiedWorkOrderStatus } from '@/features/work-orders/types';

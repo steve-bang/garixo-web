@@ -1,11 +1,9 @@
-export type UserRole = 'admin' | 'staff' | 'user';
+import type { User, UserRole } from '@/types/user';
 
-export type AuthUser = {
-  id: string;
-  email: string;
+export type { UserRole };
+
+export type AuthUser = Pick<User, 'id' | 'email' | 'name' | 'role'> & {
   phone: string;
-  name: string;
-  role: UserRole;
 };
 
 export type LoginPayload = {

@@ -8,7 +8,7 @@ import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import type { User } from '@/features/profile/types';
+import { User } from '@/types/user';
 
 function initials(nameOrEmail: string): string {
   const tokens = nameOrEmail.trim().split(/\s+/).filter(Boolean);
@@ -65,7 +65,7 @@ export function SidebarUserSection(): JSX.Element {
         if (payload.success && payload.data) {
           setUser(payload.data);
           setProfileEmail(payload.data.email);
-          setProfileName(payload.data.fullName ?? '');
+          setProfileName(payload.data.name ?? '');
           setAvatarPreview(payload.data.avatarUrl);
         }
       } finally {
@@ -86,7 +86,7 @@ export function SidebarUserSection(): JSX.Element {
     }
 
     setProfileEmail(user.email);
-    setProfileName(user.fullName ?? '');
+    setProfileName(user.name ?? '');
     setAvatarPreview(user.avatarUrl);
     setAvatarFile(null);
     setGeneralError('');
@@ -105,7 +105,7 @@ export function SidebarUserSection(): JSX.Element {
   }, []);
 
   const avatarText = useMemo(
-    () => initials(user?.fullName || user?.email || 'User'),
+    () => initials(user?.name || user?.email || 'User'),
     [user]
   );
 
@@ -289,7 +289,7 @@ export function SidebarUserSection(): JSX.Element {
 
         <span className="min-w-0 flex-1">
           <span className="block truncate text-small font-medium text-text-primary">
-            {user?.fullName || 'User'}
+            {user?.name || 'User'}
           </span>
           <span className="block truncate text-small text-text-secondary">
             {loading ? 'Loading…' : user?.email || '-'}

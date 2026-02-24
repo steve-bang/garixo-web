@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 
 import { auth } from '@/lib/auth';
 import { firebaseAdmin } from '@/lib/firebase-admin';
-import type { User } from '@/features/profile/types';
 import type { UserDocument } from '@/types/firebase-models';
 import type { ApiResponse } from '@/types/api';
+import { USER_ROLES, type User, type UserRole } from '@/types/user';
 
 function response<T>(
   payload: ApiResponse<T>,
@@ -25,8 +25,8 @@ function validEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
-function mapRole(role: string | undefined): User['role'] {
-  return role === 'staff' ? 'staff' : 'owner';
+function mapRole(role: string | undefined): UserRole {
+  return USER_ROLES.includes(role as UserRole) ? (role as UserRole) : 'owner';
 }
 
 function extensionFromMime(type: string): string {
@@ -41,7 +41,7 @@ function toProfile(
   return {
     id: doc.id,
     email: doc.email,
-    fullName: doc.name,
+    name: doc.name ?? doc.email,
     avatarUrl: doc.avatarUrl,
     role: mapRole(doc.role)
   };
