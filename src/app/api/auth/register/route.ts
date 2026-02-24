@@ -81,7 +81,10 @@ export async function POST(
         email: normalizedEmail,
         name: parsed.data.garageName,
         role: 'owner',
-        createdAt: now
+        createdAt: now,
+        emailVerifiedAt: authUser.emailVerified
+          ? (authUser.metadata.creationTime ?? new Date().toISOString())
+          : null
       },
       { merge: true }
     );

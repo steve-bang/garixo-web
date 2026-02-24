@@ -144,6 +144,7 @@ export const authOptions: NextAuthOptions = {
             firebaseSession.email,
           role: userDoc?.role ?? 'owner',
           garageId: userDoc?.garageId,
+          emailVerifiedAt: userDoc?.emailVerifiedAt,
           accessToken: firebaseSession.idToken
         };
       }
@@ -156,10 +157,18 @@ export const authOptions: NextAuthOptions = {
       }
 
       try {
+        const authUser = await firebaseAdmin.auth.getUser(user.id);
+        const emailVerifiedAt = authUser.emailVerified
+          ? (authUser.metadata.lastSignInTime ??
+            authUser.metadata.creationTime ??
+            new Date().toISOString())
+          : undefined;
+
         await syncUserDocument({
           id: user.id,
           email: user.email,
-          name: user.name ?? user.email
+          name: user.name ?? user.email,
+          emailVerifiedAt
         });
         return true;
       } catch {
@@ -170,6 +179,9 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role;
         token.garageId = (user as { garageId?: string }).garageId;
+        token.emailVerifiedAt = (
+          user as { emailVerifiedAt?: string }
+        ).emailVerifiedAt;
         token.accessToken =
           (user as { accessToken?: string }).accessToken ??
           (token.sub
@@ -202,6 +214,8 @@ export const authOptions: NextAuthOptions = {
           (token.sub
             ? (await getGarageByOwnerIdCached(token.sub))?.id
             : undefined);
+        session.user.emailVerifiedAt =
+          firestoreUser?.emailVerifiedAt ?? token.emailVerifiedAt;
         session.accessToken = token.accessToken;
       }
 

@@ -7,6 +7,7 @@ export interface User {
   email: string;
   name: string;
   role: UserRole;
+  emailVerifiedAt?: string | null;
   phone?: string;
   avatarUrl?: string;
   garageId?: string;

@@ -8,12 +8,14 @@ declare module 'next-auth' {
       id: string;
       role: UserRole;
       garageId?: string;
+      emailVerifiedAt?: string | null;
     };
   }
 
   interface User {
     role: UserRole;
     garageId?: string;
+    emailVerifiedAt?: string | null;
   }
 }
 
@@ -22,5 +24,6 @@ declare module 'next-auth/jwt' {
     role?: UserRole;
     accessToken?: string;
     garageId?: string;
+    emailVerifiedAt?: string | null;
   }
 }

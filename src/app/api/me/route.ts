@@ -43,7 +43,8 @@ function toProfile(
     email: doc.email,
     name: doc.name ?? doc.email,
     avatarUrl: doc.avatarUrl,
-    role: mapRole(doc.role)
+    role: mapRole(doc.role),
+    emailVerifiedAt: doc.emailVerifiedAt
   };
 }
 
@@ -64,7 +65,8 @@ export async function GET(): Promise<NextResponse<ApiResponse<User>>> {
       email: session.user.email,
       name: session.user.name ?? session.user.email,
       role: mapRole(session.user.role),
-      createdAt
+      createdAt,
+      emailVerifiedAt: session.user.emailVerifiedAt
     };
     await userRef.set(created, { merge: true });
     return response({ success: true, data: toProfile(created) });
@@ -186,6 +188,8 @@ export async function PUT(
     name: nextName,
     role: nextRole,
     createdAt,
+    emailVerifiedAt:
+      currentData?.emailVerifiedAt ?? session.user.emailVerifiedAt,
     updatedAt: new Date().toISOString(),
     ...(avatarUrl ? { avatarUrl } : {})
   };

@@ -88,17 +88,21 @@ declare module 'firebase-admin/firestore' {
 }
 
 declare module 'firebase-admin/auth' {
+  export type UserRecord = {
+    uid: string;
+    email?: string | null;
+    emailVerified?: boolean;
+    metadata: {
+      creationTime?: string;
+      lastSignInTime?: string;
+    };
+  };
+
   export type Auth = {
-    createUser: (
-      input: unknown
-    ) => Promise<{ uid: string; email?: string | null }>;
-    getUserByEmail: (
-      email: string
-    ) => Promise<{ uid: string; email?: string | null }>;
-    updateUser: (
-      uid: string,
-      input: unknown
-    ) => Promise<{ uid: string; email?: string | null }>;
+    createUser: (input: unknown) => Promise<UserRecord>;
+    getUserByEmail: (email: string) => Promise<UserRecord>;
+    getUser: (uid: string) => Promise<UserRecord>;
+    updateUser: (uid: string, input: unknown) => Promise<UserRecord>;
     createCustomToken: (uid: string) => Promise<string>;
   };
 
