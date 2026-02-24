@@ -7,6 +7,7 @@ import {
   getDashboardOverviewSummary,
   getRevenueSummary
 } from '@/services/firebase/dashboard-summary-service';
+import { getUserDocument } from '@/services/firebase/user-sync-service';
 import { listGarageWorkOrders } from '@/services/firebase/work-orders-service';
 
 export default async function DashboardPage(): Promise<JSX.Element> {
@@ -21,10 +22,11 @@ export default async function DashboardPage(): Promise<JSX.Element> {
     redirect('/onboarding/setup-garage');
   }
 
-  const [overview, revenue, workOrders] = await Promise.all([
+  const [overview, revenue, workOrders, userDoc] = await Promise.all([
     getDashboardOverviewSummary(garage.id),
     getRevenueSummary(garage.id),
-    listGarageWorkOrders(garage.id)
+    listGarageWorkOrders(garage.id),
+    getUserDocument(session.user.id)
   ]);
 
   const recentWorkOrders = workOrders
@@ -50,6 +52,11 @@ export default async function DashboardPage(): Promise<JSX.Element> {
     <DashboardOnboardingState
       ownerName={session.user.name ?? undefined}
       garageName={garage.name}
+      ownerEmail={session.user.email ?? userDoc?.email}
+      ownerCreatedAt={userDoc?.createdAt}
+      ownerEmailVerifiedAt={
+        session.user.emailVerifiedAt ?? userDoc?.emailVerifiedAt ?? null
+      }
       metrics={{
         carsInShop: overview.carsInShop,
         waitingForApproval: overview.waitingApproval,

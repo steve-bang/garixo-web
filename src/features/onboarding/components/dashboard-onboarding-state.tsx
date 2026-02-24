@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   CircleDollarSign,
   Clock3,
-  Plus,
   X
 } from 'lucide-react';
 import Link from 'next/link';
@@ -15,6 +14,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { EmailVerificationNotice } from '@/features/onboarding/components/email-verification-notice';
 import { useSoftOnboardingTooltip } from '@/features/onboarding/hooks/use-soft-onboarding-tooltip';
 import type { QuickWorkOrder } from '@/features/onboarding/types';
 import { FirstWorkOrderDrawer } from '@/features/work-orders/components/first-work-order-drawer';
@@ -33,6 +33,9 @@ type DashboardOnboardingStateProps = {
   recentWorkOrders: QuickWorkOrder[];
   ownerName?: string;
   garageName?: string;
+  ownerEmail?: string;
+  ownerCreatedAt?: string;
+  ownerEmailVerifiedAt?: string | null;
 };
 
 function formatCurrency(value: number): string {
@@ -86,11 +89,40 @@ function ageInDays(createdAt: string): number {
   return Math.max(0, Math.floor((now - created) / (1000 * 60 * 60 * 24)));
 }
 
+function shouldShowVerificationNotice(input: {
+  ownerEmail?: string;
+  ownerCreatedAt?: string;
+  ownerEmailVerifiedAt?: string | null;
+}): boolean {
+  if (!input.ownerEmail) {
+    return false;
+  }
+
+  if (input.ownerEmailVerifiedAt) {
+    return false;
+  }
+
+  if (!input.ownerCreatedAt) {
+    return false;
+  }
+
+  const createdAtTime = new Date(input.ownerCreatedAt).getTime();
+  if (Number.isNaN(createdAtTime)) {
+    return false;
+  }
+
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  return Date.now() - createdAtTime >= oneDayMs;
+}
+
 export function DashboardOnboardingState({
   metrics,
   recentWorkOrders,
   ownerName,
-  garageName
+  garageName,
+  ownerEmail,
+  ownerCreatedAt,
+  ownerEmailVerifiedAt
 }: DashboardOnboardingStateProps): JSX.Element {
   const router = useRouter();
   const hasDashboardData =
@@ -117,6 +149,12 @@ export function DashboardOnboardingState({
   const now = new Date();
   const greetingName = ownerName?.trim() || 'Owner';
   const greeting = `Good ${timeGreeting(now)}, ${greetingName}`;
+  const showVerificationNotice = shouldShowVerificationNotice({
+    ownerEmail,
+    ownerCreatedAt,
+    ownerEmailVerifiedAt
+  });
+
   const snapshotCards = [
     {
       key: 'cars-in-shop',
@@ -189,6 +227,13 @@ export function DashboardOnboardingState({
           <Plus className="mr-2 size-4" /> New Work Order
         </Button> */}
       </header>
+
+      {showVerificationNotice && ownerEmail ? (
+        <EmailVerificationNotice
+          ownerEmail={ownerEmail}
+          ownerName={ownerName}
+        />
+      ) : null}
 
       {isEmpty ? (
         <Card className="mx-auto max-w-[640px] space-y-s4 p-s8 text-center">

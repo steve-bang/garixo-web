@@ -9,6 +9,9 @@ export interface UserDocument {
   name: string;
   role: FirebaseRole;
   emailVerifiedAt?: string | null;
+  emailVerifyTokenHash?: string | null;
+  emailVerifyTokenExpiresAt?: string | null;
+  emailVerifyTokenUsedAt?: string | null;
   garageId?: string;
   avatarUrl?: string;
   createdAt: string;
