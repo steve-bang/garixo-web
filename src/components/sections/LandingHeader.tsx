@@ -25,7 +25,7 @@ export function LandingHeader(): JSX.Element {
           aria-label="Primary"
         >
           <Link
-            href="/features/garage-management"
+            href="/features"
             className="text-small text-text-secondary hover:text-text-primary"
           >
             Features

@@ -53,7 +53,7 @@ export function Problem(): JSX.Element {
           <p className="text-small text-text-secondary">
             Explore{' '}
             <Link
-              href="/features/garage-management"
+              href="/features"
               className="text-primary-700 hover:text-primary-800"
             >
               garage management features

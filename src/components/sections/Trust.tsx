@@ -15,7 +15,7 @@ export function Trust(): JSX.Element {
           itemScope
           itemType="https://schema.org/Organization"
         >
-          <Card className="p-s5 text-center shadow-xs">
+          <Card className="p-s4 text-center shadow-xs">
             <p className="text-[36px] font-bold leading-none text-primary-700">
               1,200+
             </p>
@@ -23,7 +23,7 @@ export function Trust(): JSX.Element {
               vehicles managed monthly
             </p>
           </Card>
-          <Card className="p-s5 text-center shadow-xs">
+          <Card className="p-s4 text-center shadow-xs">
             <p className="text-[36px] font-bold leading-none text-success-700">
               98%
             </p>
@@ -31,7 +31,7 @@ export function Trust(): JSX.Element {
               user satisfaction
             </p>
           </Card>
-          <Card className="p-s5 text-center shadow-xs">
+          <Card className="p-s4 text-center shadow-xs">
             <p className="text-[36px] font-bold leading-none text-primary-700">
               30+
             </p>

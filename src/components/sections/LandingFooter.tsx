@@ -28,10 +28,7 @@ export function LandingFooter(): JSX.Element {
             <p className="text-small font-semibold text-white">Product</p>
             <div className="space-y-s1 text-small text-slate-400">
               <p>
-                <Link
-                  href="/features/garage-management"
-                  className="hover:text-white"
-                >
+                <Link href="/features" className="hover:text-white">
                   Garage Management
                 </Link>
               </p>
@@ -74,12 +71,12 @@ export function LandingFooter(): JSX.Element {
             <p className="text-small font-semibold text-white">Company</p>
             <div className="space-y-s1 text-small text-slate-400">
               <p>
-                <Link href="/privacy" className="hover:text-white">
+                <Link href="/privacy-policy" className="hover:text-white">
                   Privacy Policy
                 </Link>
               </p>
               <p>
-                <Link href="/terms" className="hover:text-white">
+                <Link href="/term-of-services" className="hover:text-white">
                   Terms of Service
                 </Link>
               </p>

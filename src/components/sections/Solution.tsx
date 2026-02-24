@@ -8,7 +8,7 @@ const solutionBlocks = [
     title: 'Vehicle Workflow',
     description: 'Track every vehicle from check-in to delivery.',
     icon: CarFront,
-    href: '/features/garage-management'
+    href: '/features'
   },
   {
     title: 'Technician Management',
@@ -26,7 +26,7 @@ const solutionBlocks = [
     title: 'Real-Time Financial Dashboard',
     description: 'See daily revenue and performance clearly.',
     icon: BarChart3,
-    href: '/features/garage-management'
+    href: '/features'
   }
 ] as const;
 

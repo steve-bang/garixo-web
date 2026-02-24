@@ -58,7 +58,7 @@ export function Hero(): JSX.Element {
               <Link href="/auth/sign-up">Get Started</Link>
             </Button>
             <Button asChild variant="secondary" className="h-12 min-h-12">
-              <Link href="/features/garage-management">See How It Works</Link>
+              <Link href="/features">See How It Works</Link>
             </Button>
           </div>
 
