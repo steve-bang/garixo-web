@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { Vehicle, VehicleStatus } from '@/features/vehicles/types';
-import { formatDate, formatVehicleLabel } from '@/features/vehicles/utils';
+import { formatVehicleLabel } from '@/features/vehicles/utils';
 import { cn } from '@/lib/utils/cn';
+import { formatDate } from '@/lib/utils/format';
 
 type UserRole = 'OWNER' | 'MANAGER' | 'STAFF';
 
@@ -20,6 +21,10 @@ type VehiclesTableProps = {
   onEdit: (vehicle: Vehicle) => void;
   onDelete: (vehicle: Vehicle) => void;
 };
+
+function formatVehicleDate(value?: string | null): string {
+  return formatDate(value, { locale: 'en-GB' });
+}
 
 function statusStyle(status: VehicleStatus): {
   text: string;
@@ -182,7 +187,7 @@ export function VehiclesTable({
                     {formatVehicleLabel(vehicle)}
                   </td>
                   <td className="px-s4 py-s3 text-text-secondary">
-                    {formatDate(vehicle.lastServiceDate)}
+                    {formatVehicleDate(vehicle.lastServiceDate)}
                   </td>
                   <td className="px-s4 py-s3">
                     <Badge variant="default" className={badge.className}>

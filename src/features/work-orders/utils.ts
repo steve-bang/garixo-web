@@ -11,13 +11,13 @@ import type {
 export const kanbanStatuses: Array<
   Exclude<WorkOrderStatus, typeof WorkOrderStatusEnum.Cancelled>
 > = [
-  WorkOrderStatusEnum.Draft,
-  WorkOrderStatusEnum.WaitingForApproval,
-  WorkOrderStatusEnum.InProgress,
-  WorkOrderStatusEnum.WaitingForParts,
-  WorkOrderStatusEnum.Completed,
-  WorkOrderStatusEnum.Paid
-];
+    WorkOrderStatusEnum.Draft,
+    WorkOrderStatusEnum.WaitingForApproval,
+    WorkOrderStatusEnum.InProgress,
+    WorkOrderStatusEnum.WaitingForParts,
+    WorkOrderStatusEnum.Completed,
+    WorkOrderStatusEnum.Paid
+  ];
 
 export function normalizePlate(value: string): string {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -39,41 +39,6 @@ export function computeTotalAmount(
   return servicesTotal + partsTotal;
 }
 
-export function formatCurrencyVnd(value: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(value);
-}
-
-export function formatDateTime(value?: string): string {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date);
-}
-
-export function formatDate(value?: string): string {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return new Intl.DateTimeFormat('en-GB').format(date);
-}
-
-export function formatMinutes(value?: number): string {
-  if (!value) return '-';
-  const h = Math.floor(value / 60);
-  const m = value % 60;
-  if (!h) return `${m}m`;
-  if (!m) return `${h}h`;
-  return `${h}h ${m}m`;
-}
 
 export function groupByStatus(items: WorkOrder[]): WorkOrderGroup {
   const grouped: WorkOrderGroup = {

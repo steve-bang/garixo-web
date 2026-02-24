@@ -5,10 +5,9 @@ import { Card } from '@/components/ui/card';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { WorkOrderStatus } from '@/features/work-orders/types';
 import {
-  formatCurrencyVnd,
-  formatDateTime,
   statusLabel
 } from '@/features/work-orders/utils';
+import { formatCurrencyUsd, formatDateTime } from '@/lib/utils/format';
 
 type WorkOrderActionPanelProps = {
   status: WorkOrderStatus;
@@ -73,7 +72,7 @@ export function WorkOrderActionPanel({
       <div>
         <p className="text-caption text-text-muted">Total</p>
         <p className="mt-s1 text-h2 font-bold text-text-primary">
-          {formatCurrencyVnd(totalAmount)}
+          {formatCurrencyUsd(totalAmount)}
         </p>
       </div>
 

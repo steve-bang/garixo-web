@@ -22,8 +22,19 @@ import {
   updateCustomerVehicle
 } from '@/features/customers/service';
 import type { Customer } from '@/features/customers/types';
-import { formatDate } from '@/features/customers/utils';
 import { useToast } from '@/hooks/use-toast';
+import { formatDate } from '@/lib/utils/format';
+
+function formatCustomerDate(value?: string | null): string {
+  return formatDate(value, {
+    locale: 'en-US',
+    options: {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
+    }
+  });
+}
 
 const customerVehicleSchema = z.object({
   plate: z.string().trim().min(1, 'Plate number is required.'),
@@ -432,7 +443,7 @@ export function CustomerVehiclesManagementPage({
                     <td className="px-s4 py-s3">{vehicle.year || '-'}</td>
                     <td className="px-s4 py-s3">{vehicle.color || '-'}</td>
                     <td className="px-s4 py-s3 text-text-secondary">
-                      {formatDate(vehicle.lastServiceDate)}
+                      {formatCustomerDate(vehicle.lastServiceDate)}
                     </td>
                     <td className="px-s4 py-s3">
                       <div className="flex items-center gap-s2">

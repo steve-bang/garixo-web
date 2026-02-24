@@ -10,17 +10,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { CustomerAutocomplete } from '@/features/work-orders/components/customer-autocomplete';
 import {
-  createWorkOrder,
-  updateWorkOrderStatus
+  createWorkOrder
 } from '@/features/work-orders/service';
 import type { CreateWorkOrderInput } from '@/features/work-orders/schema';
 import type { Customer } from '@/features/customers/types';
 import type { InventoryItem } from '@/features/inventory/types';
 import type { Service } from '@/features/services/types';
-import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { OrderPart, OrderService } from '@/features/work-orders/types';
-import { formatCurrencyVnd } from '@/features/work-orders/utils';
 import { useToast } from '@/hooks/use-toast';
+import { formatCurrencyUsd } from '@/lib/utils/format';
 
 const quickCustomerSchema = z.object({
   name: z.string().trim().min(1, 'Customer name is required.'),
@@ -744,7 +742,7 @@ export function FirstWorkOrderDrawer({
                           </div>
                           <div className="flex items-center gap-s2">
                             <p className="text-small text-text-secondary">
-                              {formatCurrencyVnd(service.price)}
+                              {formatCurrencyUsd(service.price)}
                             </p>
                             <Button
                               type="button"
@@ -811,7 +809,7 @@ export function FirstWorkOrderDrawer({
                               : 'Time not set'}
                           </span>
                           <span className="rounded-full bg-surface-hover px-2 py-0.5 text-caption text-text-muted">
-                            {formatCurrencyVnd(service.price)}
+                            {formatCurrencyUsd(service.price)}
                           </span>
                         </div>
                       </div>
@@ -948,7 +946,7 @@ export function FirstWorkOrderDrawer({
                             </p>
                             <p className="text-caption text-text-muted">
                               Stock: {item.quantity} •{' '}
-                              {formatCurrencyVnd(item.costPrice)}
+                              {formatCurrencyUsd(item.costPrice)}
                             </p>
                           </div>
                           <Button
@@ -1005,7 +1003,7 @@ export function FirstWorkOrderDrawer({
                           {part.partName}
                         </p>
                         <p className="text-caption text-text-muted">
-                          {formatCurrencyVnd(part.unitPrice)} each
+                          {formatCurrencyUsd(part.unitPrice)} each
                         </p>
                       </div>
 
@@ -1090,7 +1088,7 @@ export function FirstWorkOrderDrawer({
         <div className="rounded-md border border-border bg-surface-default p-s3">
           <p className="text-small text-text-secondary">Total Price</p>
           <p className="mt-s1 text-h2 text-text-primary">
-            {formatCurrencyVnd(totalPrice)}
+            {formatCurrencyUsd(totalPrice)}
           </p>
         </div>
 

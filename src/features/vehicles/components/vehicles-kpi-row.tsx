@@ -2,7 +2,7 @@ import { AlertTriangle, Car, CircleDollarSign, Wrench } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
 import type { VehicleKpis } from '@/features/vehicles/types';
-import { formatCurrencyVnd } from '@/features/vehicles/utils';
+import { formatCurrencyUsd } from '@/lib/utils/format';
 
 type VehiclesKpiRowProps = {
   kpis: VehicleKpis;
@@ -13,7 +13,7 @@ export function VehiclesKpiRow({ kpis }: VehiclesKpiRowProps): JSX.Element {
     { label: 'Total Vehicles', value: String(kpis.totalVehicles), icon: Car, tone: 'text-text-primary' },
     { label: 'In Service', value: String(kpis.inService), icon: Wrench, tone: 'text-info-700 dark:text-info-300' },
     { label: 'Overdue', value: String(kpis.overdue), icon: AlertTriangle, tone: 'text-state-error' },
-    { label: 'Total Revenue', value: formatCurrencyVnd(kpis.totalRevenue), icon: CircleDollarSign, tone: 'text-state-success' }
+    { label: 'Total Revenue', value: formatCurrencyUsd(kpis.totalRevenue), icon: CircleDollarSign, tone: 'text-state-success' }
   ] as const;
 
   return (

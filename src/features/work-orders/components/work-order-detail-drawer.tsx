@@ -11,10 +11,9 @@ import { Drawer } from '@/components/ui/drawer';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { WorkOrder } from '@/features/work-orders/types';
 import {
-  formatCurrencyVnd,
-  formatDateTime,
   statusLabel
 } from '@/features/work-orders/utils';
+import { formatCurrencyUsd, formatDateTime } from '@/lib/utils/format';
 
 type Props = {
   open: boolean;
@@ -87,7 +86,7 @@ export function WorkOrderDetailDrawer({
             {order.services.map((service) => (
               <div key={service.id} className="flex justify-between text-small">
                 <span>{service.name}</span>
-                <span>{formatCurrencyVnd(service.price)}</span>
+                <span>{formatCurrencyUsd(service.price)}</span>
               </div>
             ))}
           </div>
@@ -103,7 +102,7 @@ export function WorkOrderDetailDrawer({
                     {part.partName} x{part.quantity}
                   </span>
                   <span>
-                    {formatCurrencyVnd(part.quantity * part.unitPrice)}
+                    {formatCurrencyUsd(part.quantity * part.unitPrice)}
                   </span>
                 </div>
               ))}
@@ -141,7 +140,7 @@ export function WorkOrderDetailDrawer({
             <div className="flex justify-between">
               <span>Total</span>
               <span className="font-semibold">
-                {formatCurrencyVnd(order.totalAmount)}
+                {formatCurrencyUsd(order.totalAmount)}
               </span>
             </div>
             <div className="flex justify-between">

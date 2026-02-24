@@ -5,8 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { Customer, CustomerStatus } from '@/features/customers/types';
-import { formatCurrencyVnd, formatDate } from '@/features/customers/utils';
 import { cn } from '@/lib/utils/cn';
+import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
 
 type UserRole = 'OWNER' | 'MANAGER' | 'STAFF';
 
@@ -21,6 +21,17 @@ type CustomersTableProps = {
   onDelete: (customer: Customer) => void;
   onCopyPhone: (phone: string) => void;
 };
+
+function formatCustomerDate(value?: string | null): string {
+  return formatDate(value, {
+    locale: 'en-US',
+    options: {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
+    }
+  });
+}
 
 function statusTone(status: CustomerStatus): {
   text: string;
@@ -202,10 +213,10 @@ export function CustomersTable({
                     {customer.totalVisits}
                   </td>
                   <td className="px-s4 py-s3 text-right font-semibold tabular-nums">
-                    {formatCurrencyVnd(customer.totalSpent)}
+                    {formatCurrencyUsd(customer.totalSpent)}
                   </td>
                   <td className="px-s4 py-s3 text-text-secondary">
-                    {formatDate(customer.lastVisit)}
+                    {formatCustomerDate(customer.lastVisit)}
                   </td>
                   <td className="px-s4 py-s3">
                     <Badge variant="default" className={badge.className}>

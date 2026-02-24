@@ -8,24 +8,6 @@ export function toPlateDisplay(value: string): string {
   return value.trim().toUpperCase();
 }
 
-export function formatCurrencyVnd(value: number): string {
-  return `${new Intl.NumberFormat('vi-VN').format(value)} đ`;
-}
-
-export function formatDate(value?: string): string {
-  if (!value) {
-    return '-';
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return '-';
-  }
-
-  return new Intl.DateTimeFormat('en-GB').format(date);
-}
-
 export function formatVehicleLabel(vehicle: Vehicle): string {
   const parts = [vehicle.brand, vehicle.model, vehicle.year ? String(vehicle.year) : undefined].filter(Boolean);
   return parts.length ? parts.join(' ') : '-';

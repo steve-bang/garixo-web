@@ -6,10 +6,9 @@ import { Card } from '@/components/ui/card';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { WorkOrder } from '@/features/work-orders/types';
 import {
-  formatCurrencyVnd,
-  formatDateTime,
   statusLabel
 } from '@/features/work-orders/utils';
+import { formatCurrencyUsd, formatDateTime } from '@/lib/utils/format';
 
 type Props = {
   items: WorkOrder[];
@@ -94,7 +93,7 @@ export function WorkOrdersTableView({
                   {formatDateTime(item.estimatedFinish)}
                 </td>
                 <td className="px-s4 py-s3 text-right font-medium tabular-nums">
-                  {formatCurrencyVnd(item.totalAmount)}
+                  {formatCurrencyUsd(item.totalAmount)}
                 </td>
                 <td className="px-s4 py-s3">
                   <div className="flex items-center gap-s1">

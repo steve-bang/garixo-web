@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { OrderService } from '@/features/work-orders/types';
 import type { Service } from '@/features/services/types';
-import { formatCurrencyVnd } from '@/features/work-orders/utils';
+import { formatCurrencyUsd } from '@/lib/utils/format';
 
 type Props = {
   query: string;
@@ -87,7 +87,7 @@ export function ServiceSelector({
                   </p>
                 </div>
                 <p className="text-small text-text-secondary">
-                  {formatCurrencyVnd(service.price)}
+                  {formatCurrencyUsd(service.price)}
                 </p>
               </button>
             ))

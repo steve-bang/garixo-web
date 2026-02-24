@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { InventoryItem } from '@/features/inventory/types';
 import type { OrderPart } from '@/features/work-orders/types';
-import { formatCurrencyVnd } from '@/features/work-orders/utils';
+import { formatCurrencyUsd } from '@/lib/utils/format';
+
 
 type Props = {
   open: boolean;
@@ -89,7 +90,7 @@ export function InventorySelector({
                     {item.name}
                   </p>
                   <p className="text-caption text-text-muted">
-                    Stock: {item.quantity} • {formatCurrencyVnd(item.costPrice)}
+                    Stock: {item.quantity} • {formatCurrencyUsd(item.costPrice)}
                   </p>
                 </div>
                 {item.quantity <= 1 ? (

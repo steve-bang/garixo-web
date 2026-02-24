@@ -20,11 +20,10 @@ import type {
 } from '@/features/vehicles/types';
 import {
   averageTicket,
-  formatCurrencyVnd,
-  formatDate,
   toPlateDisplay
 } from '@/features/vehicles/utils';
 import type { Customer } from '@/features/customers/types';
+import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
 
 type DrawerMode = 'view' | 'create' | 'edit';
 
@@ -39,6 +38,10 @@ type VehicleDrawerProps = {
   onClose: () => void;
   onSubmit: (payload: CreateVehicleInput) => Promise<void>;
 };
+
+function formatVehicleDate(value?: string | null): string {
+  return formatDate(value, { locale: 'en-GB' });
+}
 
 function defaults(vehicle?: Vehicle | null): CreateVehicleInput {
   if (!vehicle) {
@@ -321,11 +324,11 @@ export function VehicleDrawer({
                             className="border-t border-border"
                           >
                             <td className="py-s2 text-text-secondary">
-                              {formatDate(record.date)}
+                              {formatVehicleDate(record.date)}
                             </td>
                             <td className="py-s2">{record.serviceName}</td>
                             <td className="py-s2 text-right font-medium tabular-nums">
-                              {formatCurrencyVnd(record.amount)}
+                              {formatCurrencyUsd(record.amount)}
                             </td>
                             <td className="py-s2">{record.status}</td>
                           </tr>
@@ -352,7 +355,7 @@ export function VehicleDrawer({
                   <div className="rounded-md border border-border bg-surface-default p-s3">
                     <p className="text-caption text-text-muted">Total Spent</p>
                     <p className="mt-s1 text-h3">
-                      {formatCurrencyVnd(detailVehicle.totalSpent)}
+                      {formatCurrencyUsd(detailVehicle.totalSpent)}
                     </p>
                   </div>
                   <div className="rounded-md border border-border bg-surface-default p-s3">
@@ -360,7 +363,7 @@ export function VehicleDrawer({
                       Average Ticket
                     </p>
                     <p className="mt-s1 text-h3">
-                      {formatCurrencyVnd(averageTicket(detailVehicle))}
+                      {formatCurrencyUsd(averageTicket(detailVehicle))}
                     </p>
                   </div>
                 </div>

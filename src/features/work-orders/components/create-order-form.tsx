@@ -13,7 +13,7 @@ import type {
   PriorityLevel,
   Worker
 } from '@/features/work-orders/types';
-import { formatCurrencyVnd } from '@/features/work-orders/utils';
+import { formatCurrencyUsd } from '@/lib/utils/format';
 
 type AvailableService = OrderService & {
   estimatedTime?: string;
@@ -765,7 +765,7 @@ export function CreateOrderForm({
                           {service.name}
                         </p>
                         <p className="text-caption text-text-muted">
-                          {formatCurrencyVnd(service.price)} •{' '}
+                          {formatCurrencyUsd(service.price)} •{' '}
                           {service.estimatedTime || '60 minutes'}
                         </p>
                       </div>
@@ -924,7 +924,7 @@ export function CreateOrderForm({
           </div>
 
           <p className="text-small font-semibold">
-            Total: {formatCurrencyVnd(total)}
+            Total: {formatCurrencyUsd(total)}
           </p>
         </Card>
       ) : null}
@@ -989,7 +989,7 @@ export function CreateOrderForm({
           </div>
 
           <p className="text-small font-medium">
-            Order Total: {formatCurrencyVnd(total)}
+            Order Total: {formatCurrencyUsd(total)}
           </p>
         </Card>
       ) : null}

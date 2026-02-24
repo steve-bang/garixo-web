@@ -11,7 +11,8 @@ import { Drawer } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { createCustomerSchema, type CreateCustomerInput } from '@/features/customers/schema';
 import type { Customer, CustomerDetailResponse, CustomerStatus } from '@/features/customers/types';
-import { calculateAverageTicket, formatCurrencyVnd, formatDate } from '@/features/customers/utils';
+import { calculateAverageTicket } from '@/features/customers/utils';
+import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
 
 type DrawerMode = 'view' | 'create' | 'edit';
 
@@ -24,6 +25,17 @@ type CustomerDrawerProps = {
   onClose: () => void;
   onSubmit: (payload: CreateCustomerInput) => Promise<void>;
 };
+
+function formatCustomerDate(value?: string | null): string {
+  return formatDate(value, {
+    locale: 'en-US',
+    options: {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
+    }
+  });
+}
 
 function defaults(customer?: Customer | null): CreateCustomerInput {
   if (!customer) {
@@ -149,8 +161,8 @@ export function CustomerDrawer({ open, mode, customer, detail, loadingDetail, on
                   <div className="mt-s3 grid gap-s3 md:grid-cols-2">
                     <p className="text-small text-text-secondary">Email: {detailCustomer.email || '-'}</p>
                     <p className="text-small text-text-secondary">Address: {detailCustomer.address || '-'}</p>
-                    <p className="text-small text-text-secondary">Last Visit: {formatDate(detailCustomer.lastVisit)}</p>
-                    <p className="text-small text-text-secondary">Last Updated: {formatDate(detailCustomer.updatedAt)}</p>
+                    <p className="text-small text-text-secondary">Last Visit: {formatCustomerDate(detailCustomer.lastVisit)}</p>
+                    <p className="text-small text-text-secondary">Last Updated: {formatCustomerDate(detailCustomer.updatedAt)}</p>
                   </div>
                 </Card>
 
@@ -173,7 +185,7 @@ export function CustomerDrawer({ open, mode, customer, detail, loadingDetail, on
                             <tr key={vehicle.id} className="border-t border-border">
                               <td className="py-s2">{vehicle.plate}</td>
                               <td className="py-s2">{vehicle.brand}</td>
-                              <td className="py-s2 text-text-secondary">{formatDate(vehicle.lastServiceDate)}</td>
+                              <td className="py-s2 text-text-secondary">{formatCustomerDate(vehicle.lastServiceDate)}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -198,10 +210,10 @@ export function CustomerDrawer({ open, mode, customer, detail, loadingDetail, on
                         <tbody>
                           {detail.serviceHistory.map((record) => (
                             <tr key={record.id} className="border-t border-border">
-                              <td className="py-s2 text-text-secondary">{formatDate(record.date)}</td>
+                              <td className="py-s2 text-text-secondary">{formatCustomerDate(record.date)}</td>
                               <td className="py-s2">{record.vehiclePlate}</td>
                               <td className="py-s2">{record.serviceName}</td>
-                              <td className="py-s2 text-right tabular-nums font-medium">{formatCurrencyVnd(record.amount)}</td>
+                              <td className="py-s2 text-right tabular-nums font-medium">{formatCurrencyUsd(record.amount)}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -221,11 +233,11 @@ export function CustomerDrawer({ open, mode, customer, detail, loadingDetail, on
                     </div>
                     <div className="rounded-md border border-border bg-surface-default p-s3">
                       <p className="text-caption text-text-muted">Total Spent</p>
-                      <p className="mt-s1 text-h3">{formatCurrencyVnd(detailCustomer.totalSpent)}</p>
+                      <p className="mt-s1 text-h3">{formatCurrencyUsd(detailCustomer.totalSpent)}</p>
                     </div>
                     <div className="rounded-md border border-border bg-surface-default p-s3">
                       <p className="text-caption text-text-muted">Average Ticket</p>
-                      <p className="mt-s1 text-h3">{formatCurrencyVnd(calculateAverageTicket(detailCustomer))}</p>
+                      <p className="mt-s1 text-h3">{formatCurrencyUsd(calculateAverageTicket(detailCustomer))}</p>
                     </div>
                   </div>
                 </Card>
@@ -294,7 +306,7 @@ export function CustomerDrawer({ open, mode, customer, detail, loadingDetail, on
             </Card>
 
             {customer ? (
-              <p className="text-caption text-text-muted">Last Updated: {formatDate(customer.updatedAt)}</p>
+              <p className="text-caption text-text-muted">Last Updated: {formatCustomerDate(customer.updatedAt)}</p>
             ) : null}
 
             {submitError ? <p className="text-caption text-state-error">{submitError}</p> : null}

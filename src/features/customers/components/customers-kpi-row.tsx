@@ -2,7 +2,8 @@ import { Crown, Repeat, UserCheck, Users } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
 import type { CustomerKpis } from '@/features/customers/types';
-import { formatCurrencyVnd } from '@/features/customers/utils';
+import { formatCurrencyUsd } from '@/lib/utils/format';
+
 
 type CustomersKpiRowProps = {
   kpis: CustomerKpis;
@@ -13,7 +14,7 @@ export function CustomersKpiRow({ kpis }: CustomersKpiRowProps): JSX.Element {
     { label: 'Total Customers', value: String(kpis.totalCustomers), icon: Users, tone: 'text-text-primary' },
     { label: 'Active This Month', value: String(kpis.activeThisMonth), icon: UserCheck, tone: 'text-state-success' },
     { label: 'Returning Rate', value: `${kpis.returningRate}%`, icon: Repeat, tone: 'text-text-primary' },
-    { label: 'Top Spender', value: formatCurrencyVnd(kpis.topSpender), icon: Crown, tone: 'text-warning-700 dark:text-warning-300' }
+    { label: 'Top Spender', value: formatCurrencyUsd(kpis.topSpender), icon: Crown, tone: 'text-warning-700 dark:text-warning-300' }
   ] as const;
 
   return (

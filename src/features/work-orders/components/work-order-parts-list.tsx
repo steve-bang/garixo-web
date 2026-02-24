@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import type { InventoryItem } from '@/features/inventory/types';
 import type { OrderPart } from '@/features/work-orders/types';
-import { formatCurrencyVnd } from '@/features/work-orders/utils';
+import { formatCurrencyUsd } from '@/lib/utils/format';
 
 type WorkOrderPartsListProps = {
   parts: OrderPart[];
@@ -106,7 +106,7 @@ export function WorkOrderPartsList({
                         {item.name}
                       </span>
                       <span className="block text-caption text-text-muted">
-                        {formatCurrencyVnd(item.costPrice)} • Stock:{' '}
+                        {formatCurrencyUsd(item.costPrice)} • Stock:{' '}
                         {item.quantity}
                       </span>
                     </span>
@@ -140,7 +140,7 @@ export function WorkOrderPartsList({
                     {part.partName}
                   </p>
                   <p className="text-caption text-text-muted">
-                    Unit: {formatCurrencyVnd(part.unitPrice)}
+                    Unit: {formatCurrencyUsd(part.unitPrice)}
                   </p>
                   {stock !== undefined && stock <= 1 ? (
                     <p className="text-caption font-medium text-state-error">
@@ -168,7 +168,7 @@ export function WorkOrderPartsList({
                   }}
                 />
                 <p className="text-small font-semibold text-text-primary">
-                  {formatCurrencyVnd(part.quantity * part.unitPrice)}
+                  {formatCurrencyUsd(part.quantity * part.unitPrice)}
                 </p>
                 <Button
                   type="button"

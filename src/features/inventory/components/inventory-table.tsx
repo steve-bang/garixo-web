@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { InventoryItem, StockStatus } from '@/features/inventory/types';
-import { formatCurrency, getStockStatus } from '@/features/inventory/utils';
+import { getStockStatus } from '@/features/inventory/utils';
 import { cn } from '@/lib/utils/cn';
+import { formatCurrencyUsd } from '@/lib/utils/format';
 
 type UserRole = 'OWNER' | 'MANAGER' | 'STAFF';
 
@@ -87,7 +88,7 @@ export function InventoryTable({ items, currentUserRole, onAddFirst, onEdit, onA
                   <td className="px-s4 py-s3">{item.category}</td>
                   <td className={cn('px-s4 py-s3 text-right tabular-nums', quantityClass)}>{item.quantity}</td>
                   <td className="px-s4 py-s3 text-right tabular-nums text-text-secondary">{item.minLevel}</td>
-                  <td className="px-s4 py-s3 text-right tabular-nums">{formatCurrency(item.costPrice)}</td>
+                  <td className="px-s4 py-s3 text-right tabular-nums">{formatCurrencyUsd(item.costPrice)}</td>
                   <td className="px-s4 py-s3">
                     <Badge variant="default" className={badge.className}>
                       {badge.text}

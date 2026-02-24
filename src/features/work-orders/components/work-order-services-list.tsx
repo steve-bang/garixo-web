@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
 import type { Service } from '@/features/services/types';
 import type { OrderService } from '@/features/work-orders/types';
-import { formatCurrencyVnd } from '@/features/work-orders/utils';
+import { formatCurrencyUsd } from '@/lib/utils/format';
 
 type WorkOrderServicesListProps = {
   services: OrderService[];
@@ -143,7 +143,7 @@ export function WorkOrderServicesList({
               </div>
               <div className="space-y-s1">
                 <p className="text-caption font-medium text-text-secondary">
-                  Price: {formatCurrencyVnd(service.price)}
+                  Price: {formatCurrencyUsd(service.price)}
                 </p>
                 <Input
                   key={`${service.id}-${service.price}`}
@@ -259,7 +259,7 @@ export function WorkOrderServicesList({
                         {service.name}
                       </span>
                       <span className="block text-caption text-text-muted">
-                        {formatCurrencyVnd(service.price)} •{' '}
+                        {formatCurrencyUsd(service.price)} •{' '}
                         {service.estimatedTime}
                       </span>
                     </span>

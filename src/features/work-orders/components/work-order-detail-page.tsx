@@ -23,8 +23,6 @@ import type {
 } from '@/features/work-orders/types';
 import {
   allowedTransitions,
-  formatCurrencyVnd,
-  formatDateTime,
   statusLabel
 } from '@/features/work-orders/utils';
 import type { InventoryItem } from '@/features/inventory/types';
@@ -33,6 +31,7 @@ import { WorkOrderPartsList } from '@/features/work-orders/components/work-order
 import { WorkOrderServicesList } from '@/features/work-orders/components/work-order-services-list';
 import { WorkOrderStatusBadge } from '@/features/work-orders/components/work-order-status-badge';
 import type { Worker } from '@/features/work-orders/types';
+import { formatCurrencyUsd, formatDateTime } from '@/lib/utils/format';
 
 type Props = {
   orderId: string;
@@ -562,7 +561,7 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
           <div>
             <p className="text-caption text-text-muted">Total</p>
             <p className="text-small font-semibold text-text-primary">
-              {formatCurrencyVnd(order.totalAmount)}
+              {formatCurrencyUsd(order.totalAmount)}
             </p>
           </div>
           {nextStatuses.length === 0 ? (

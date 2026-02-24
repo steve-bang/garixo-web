@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import type { PaymentMethod, WorkOrder } from '@/features/work-orders/types';
-import { formatCurrencyVnd } from '@/features/work-orders/utils';
+import { formatCurrencyUsd } from '@/lib/utils/format';
 
 type Props = {
   open: boolean;
@@ -55,15 +55,15 @@ export function PaymentModal({ open, order, onClose, onConfirm }: Props): JSX.El
       <div className="mt-s4 space-y-s2 text-small">
         <div className="flex justify-between">
           <span>Services total</span>
-          <span>{formatCurrencyVnd(servicesTotal)}</span>
+          <span>{formatCurrencyUsd(servicesTotal)}</span>
         </div>
         <div className="flex justify-between">
           <span>Parts total</span>
-          <span>{formatCurrencyVnd(partsTotal)}</span>
+          <span>{formatCurrencyUsd(partsTotal)}</span>
         </div>
         <div className="flex justify-between font-semibold">
           <span>Grand total</span>
-          <span>{formatCurrencyVnd(order.totalAmount)}</span>
+          <span>{formatCurrencyUsd(order.totalAmount)}</span>
         </div>
       </div>
 

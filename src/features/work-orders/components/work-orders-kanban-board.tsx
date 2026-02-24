@@ -9,10 +9,10 @@ import type {
   WorkOrderStatus
 } from '@/features/work-orders/types';
 import {
-  formatMinutes,
   kanbanStatuses,
   statusLabel
 } from '@/features/work-orders/utils';
+import { formatMinutes } from '@/lib/utils/format';
 
 type Props = {
   grouped: WorkOrderGroup;
