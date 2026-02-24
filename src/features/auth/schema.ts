@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const phonePattern = /^\+?[\d\s-]{9,}$/;
+// const phonePattern = /^\+?[\d\s-]{9,}$/;
 
 export const loginSchema = z.object({
   email: z
@@ -39,11 +39,8 @@ export const forgotPasswordSchema = z.object({
   identifier: z
     .string()
     .trim()
-    .min(1, 'Phone number or email is required.')
-    .refine(
-      (value) => emailPattern.test(value) || phonePattern.test(value),
-      'Enter a valid phone number or email.'
-    )
+    .min(1, 'Email address is required.')
+    .refine((value) => emailPattern.test(value), 'Enter a valid email address.')
 });
 
 export const resetPasswordSchema = z

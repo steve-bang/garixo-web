@@ -12,7 +12,12 @@ const envSchema = z.object({
   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: z.string().optional(),
   NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().optional(),
   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string().optional(),
-  NEXT_PUBLIC_FIREBASE_APP_ID: z.string().optional()
+  NEXT_PUBLIC_FIREBASE_APP_ID: z.string().optional(),
+  NEXT_PUBLIC_SMTP_HOST: z.string().optional(),
+  NEXT_PUBLIC_SMTP_PORT: z.string().optional(),
+  NEXT_PUBLIC_SMTP_USERNAME: z.string().optional(),
+  NEXT_PUBLIC_SMTP_PASSWORD: z.string().optional(),
+  NEXT_PUBLIC_SMTP_SENDER: z.string().optional()
 });
 
 export const env = envSchema.parse({
@@ -29,5 +34,10 @@ export const env = envSchema.parse({
   NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:
     process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
+  NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  NEXT_PUBLIC_SMTP_HOST: process.env.NEXT_PUBLIC_SMTP_HOST,
+  NEXT_PUBLIC_SMTP_PORT: process.env.NEXT_PUBLIC_SMTP_PORT,
+  NEXT_PUBLIC_SMTP_USERNAME: process.env.NEXT_PUBLIC_SMTP_USERNAME,
+  NEXT_PUBLIC_SMTP_PASSWORD: process.env.NEXT_PUBLIC_SMTP_PASSWORD,
+  NEXT_PUBLIC_SMTP_SENDER: process.env.NEXT_PUBLIC_SMTP_SENDER
 });

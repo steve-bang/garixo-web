@@ -24,11 +24,14 @@ export function ForgotPasswordForm(): JSX.Element {
   return (
     <AuthPageShell
       title="Forgot your password?"
-      subtitle="Enter your email address. We'll send you a reset link."
+      subtitle="Enter your email address. We'll send password reset instructions."
     >
       <form className="space-y-s4" onSubmit={onSubmit}>
         <div className="space-y-s1">
-          <label htmlFor="identifier" className="text-small font-medium text-text-secondary">
+          <label
+            htmlFor="identifier"
+            className="text-small font-medium text-text-secondary"
+          >
             Email Address
           </label>
           <div className="relative">
@@ -38,21 +41,39 @@ export function ForgotPasswordForm(): JSX.Element {
               type="text"
               autoComplete="username"
               placeholder="e.g. demo@example.com"
-              className={cn('h-12 pl-9', identifierError ? 'border-error-600 focus-visible:ring-error-300' : '')}
+              className={cn(
+                'h-12 pl-9',
+                identifierError
+                  ? 'border-error-600 focus-visible:ring-error-300'
+                  : ''
+              )}
               {...form.register('identifier')}
             />
           </div>
-          {identifierError ? <p className="text-caption text-state-error">{identifierError}</p> : null}
+          {identifierError ? (
+            <p className="text-caption text-state-error">{identifierError}</p>
+          ) : null}
         </div>
 
-        {formError ? <p className="rounded-md bg-error-50 px-s3 py-s2 text-small text-state-error">{formError}</p> : null}
+        {formError ? (
+          <p className="rounded-md bg-error-50 px-s3 py-s2 text-small text-state-error">
+            {formError}
+          </p>
+        ) : null}
 
-        <Button type="submit" className="h-12 w-full" disabled={!hasValue || mutation.isPending}>
-          {mutation.isPending ? 'Sending...' : 'Send Reset Link'}
+        <Button
+          type="submit"
+          className="h-12 w-full"
+          disabled={!hasValue || mutation.isPending}
+        >
+          {mutation.isPending ? 'Sending...' : 'Send Reset Email'}
         </Button>
 
         <div className="pt-s1">
-          <Link href="/auth/login" className="text-small font-medium text-primary-700 hover:underline">
+          <Link
+            href="/auth/login"
+            className="text-small font-medium text-primary-700 hover:underline"
+          >
             Back to Sign In
           </Link>
         </div>
