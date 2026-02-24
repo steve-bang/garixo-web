@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Menu,
   Package,
+  Plus,
   Settings,
   UserCog,
   Users,
@@ -120,6 +121,9 @@ export function DashboardLayoutShell({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const breadcrumb = useMemo(() => buildBreadcrumb(pathname), [pathname]);
+  const firstBreadcrumb = breadcrumb[0];
+  const currentBreadcrumb = breadcrumb[breadcrumb.length - 1];
+  const hasMiddleBreadcrumb = breadcrumb.length > 2;
 
   const workersQuery = useWorkOrders({
     page: 1,
@@ -259,55 +263,90 @@ export function DashboardLayoutShell({
               >
                 <Menu className="size-5" />
               </Button>
-              <nav
-                aria-label="Breadcrumb"
-                className="flex min-w-0 items-center gap-s2 overflow-hidden whitespace-nowrap text-small"
-              >
-                {breadcrumb.map((item, index) => {
-                  const isLast = index === breadcrumb.length - 1;
-                  return (
-                    <div
-                      key={`${item.label}-${index}`}
-                      className="flex min-w-0 items-center gap-s2"
+              <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
+                <div className="flex min-w-0 items-center gap-1 overflow-hidden whitespace-nowrap text-caption sm:text-small md:hidden">
+                  {firstBreadcrumb?.href ? (
+                    <Link
+                      href={firstBreadcrumb.href}
+                      className="shrink-0 text-text-muted hover:text-text-primary"
                     >
-                      {item.href && !isLast ? (
-                        <Link
-                          href={item.href}
-                          className="text-text-muted hover:text-text-primary"
-                        >
-                          {item.label}
-                        </Link>
-                      ) : (
-                        <span
-                          className={cn(
-                            isLast
-                              ? 'truncate text-text-primary'
-                              : 'text-text-muted'
-                          )}
-                        >
-                          {item.label}
-                        </span>
-                      )}
-                      {!isLast ? (
-                        <span className="text-text-muted">/</span>
+                      {firstBreadcrumb.label}
+                    </Link>
+                  ) : (
+                    <span className="shrink-0 text-text-muted">
+                      {firstBreadcrumb?.label}
+                    </span>
+                  )}
+
+                  {currentBreadcrumb && breadcrumb.length > 1 ? (
+                    <>
+                      <span className="shrink-0 text-text-muted">/</span>
+                      {hasMiddleBreadcrumb ? (
+                        <>
+                          <span className="shrink-0 text-text-muted">...</span>
+                          <span className="shrink-0 text-text-muted">/</span>
+                        </>
                       ) : null}
-                    </div>
-                  );
-                })}
+                      <span className="truncate text-text-primary">
+                        {currentBreadcrumb.label}
+                      </span>
+                    </>
+                  ) : null}
+                </div>
+
+                <div className="hidden min-w-0 items-center gap-s2 overflow-hidden whitespace-nowrap text-small md:flex">
+                  {breadcrumb.map((item, index) => {
+                    const isLast = index === breadcrumb.length - 1;
+                    return (
+                      <div
+                        key={`${item.label}-${index}`}
+                        className="flex min-w-0 items-center gap-s2"
+                      >
+                        {item.href && !isLast ? (
+                          <Link
+                            href={item.href}
+                            className="text-text-muted hover:text-text-primary"
+                          >
+                            {item.label}
+                          </Link>
+                        ) : (
+                          <span
+                            className={cn(
+                              isLast
+                                ? 'truncate text-text-primary'
+                                : 'text-text-muted'
+                            )}
+                          >
+                            {item.label}
+                          </span>
+                        )}
+                        {!isLast ? (
+                          <span className="text-text-muted">/</span>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
               </nav>
             </div>
-            <div className="flex items-center gap-s3">
+            <div className="flex shrink-0 items-center gap-s2">
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-10 w-10 p-0"
+                className="h-9 w-9 p-0 sm:h-10 sm:w-10"
                 aria-label="Open owner help"
                 onClick={() => setHelpOpen(true)}
               >
                 <HelpCircle className="size-5" />
               </Button>
-              <Button size="sm" onClick={() => setCreateOpen(true)}>
-                New Work Order
+              <Button
+                size="sm"
+                className="h-9 px-s2 sm:h-10 sm:px-s3"
+                onClick={() => setCreateOpen(true)}
+                aria-label="Create new work order"
+              >
+                <Plus className="size-4" />
+                <span className="hidden sm:inline">New Work Order</span>
               </Button>
             </div>
           </header>
