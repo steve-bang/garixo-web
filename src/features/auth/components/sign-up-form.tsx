@@ -107,20 +107,6 @@ export function SignUpForm(): JSX.Element {
           <span className="text-h3 text-text-primary">Garixo</span>
         </Link>
 
-        <div className="mb-s6 rounded-lg border border-border bg-surface-default p-s6 md:hidden">
-          <h2 className="text-h3">Manage your garage easily.</h2>
-          <ul className="mt-s3 space-y-s2 text-small text-text-secondary">
-            <li className="flex items-center gap-s2">
-              <CheckCircle2 className="size-4 text-success-600" />
-              <span>Track jobs</span>
-            </li>
-            <li className="flex items-center gap-s2">
-              <CheckCircle2 className="size-4 text-success-600" />
-              <span>Increase profit</span>
-            </li>
-          </ul>
-        </div>
-
         <Card className="mx-auto w-full max-w-[420px] rounded-lg border border-border bg-surface-default p-s8 shadow-sm">
           <h1 className="text-h2">Create your account</h1>
           <p className="mt-s1 text-small text-text-muted">
