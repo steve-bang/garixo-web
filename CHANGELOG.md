@@ -10,6 +10,16 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 - No entries yet.
 
+## [0.1.4] - 2026-02-24
+
+### Fixed
+
+- Resolved `/verify-email` prerender build failure by moving `useSearchParams()` usage into a client component wrapped with `Suspense`.
+- Improved dashboard header responsiveness on small mobile/tablet:
+- Compact breadcrumb rendering for narrow screens.
+- Better action button sizing/spacing so breadcrumb remains readable.
+- Added horizontal spacing for `/auth/forgot-password` on small mobile/tablet to match other auth pages.
+
 ## [0.1.3] - 2026-02-24
 
 ### Added
