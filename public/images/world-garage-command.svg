@@ -1,0 +1,42 @@
+<svg width="1280" height="853" viewBox="0 0 1280 853" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="853" rx="24" fill="#F8FAFC"/>
+  <rect x="40" y="40" width="1200" height="773" rx="18" fill="#FFFFFF" stroke="#E5E7EB"/>
+
+  <text x="90" y="108" fill="#111827" font-family="Arial, sans-serif" font-size="34" font-weight="700">World Garage Command Center</text>
+  <text x="90" y="142" fill="#6B7280" font-family="Arial, sans-serif" font-size="20">One system for jobs, approvals, and daily revenue</text>
+
+  <rect x="90" y="178" width="340" height="104" rx="12" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="116" y="216" fill="#2563EB" font-family="Arial, sans-serif" font-size="17" font-weight="600">Cars in Shop</text>
+  <text x="116" y="254" fill="#111827" font-family="Arial, sans-serif" font-size="34" font-weight="700">54</text>
+
+  <rect x="450" y="178" width="340" height="104" rx="12" fill="#FFFBEB" stroke="#FDE68A"/>
+  <text x="476" y="216" fill="#D97706" font-family="Arial, sans-serif" font-size="17" font-weight="600">Waiting Approval</text>
+  <text x="476" y="254" fill="#111827" font-family="Arial, sans-serif" font-size="34" font-weight="700">9</text>
+
+  <rect x="810" y="178" width="350" height="104" rx="12" fill="#ECFDF3" stroke="#BBF7D0"/>
+  <text x="836" y="216" fill="#16A34A" font-family="Arial, sans-serif" font-size="17" font-weight="600">Today Revenue</text>
+  <text x="836" y="254" fill="#111827" font-family="Arial, sans-serif" font-size="34" font-weight="700">$9,180</text>
+
+  <rect x="90" y="316" width="1070" height="430" rx="14" fill="#F9FAFB" stroke="#E5E7EB"/>
+  <text x="118" y="356" fill="#111827" font-family="Arial, sans-serif" font-size="22" font-weight="700">Global Workshop Coverage</text>
+
+  <ellipse cx="625" cy="550" rx="415" ry="150" fill="#DBEAFE"/>
+  <ellipse cx="375" cy="540" rx="130" ry="60" fill="#BFDBFE"/>
+  <ellipse cx="620" cy="560" rx="190" ry="78" fill="#93C5FD"/>
+  <ellipse cx="860" cy="546" rx="145" ry="62" fill="#BFDBFE"/>
+
+  <circle cx="320" cy="522" r="10" fill="#2563EB"/>
+  <circle cx="480" cy="590" r="10" fill="#2563EB"/>
+  <circle cx="620" cy="526" r="10" fill="#2563EB"/>
+  <circle cx="770" cy="590" r="10" fill="#2563EB"/>
+  <circle cx="915" cy="536" r="10" fill="#2563EB"/>
+
+  <line x1="320" y1="522" x2="480" y2="590" stroke="#60A5FA" stroke-width="3"/>
+  <line x1="480" y1="590" x2="620" y2="526" stroke="#60A5FA" stroke-width="3"/>
+  <line x1="620" y1="526" x2="770" y2="590" stroke="#60A5FA" stroke-width="3"/>
+  <line x1="770" y1="590" x2="915" y2="536" stroke="#60A5FA" stroke-width="3"/>
+
+  <rect x="930" y="632" width="205" height="90" rx="10" fill="#FFFFFF" stroke="#E5E7EB"/>
+  <text x="956" y="666" fill="#6B7280" font-family="Arial, sans-serif" font-size="15">Active Workshops</text>
+  <text x="956" y="702" fill="#111827" font-family="Arial, sans-serif" font-size="30" font-weight="700">1,200+</text>
+</svg>

@@ -1,35 +1,118 @@
 import Link from 'next/link';
 
+import { Card } from '@/components/ui/card';
+
+const painPoints = [
+  {
+    title: 'No real-time visibility of vehicles in service',
+    description: 'You cannot quickly see which jobs are blocked or delayed.'
+  },
+  {
+    title: 'Technicians not tracked properly',
+    description: 'Labor efficiency is unclear and hard to improve.'
+  },
+  {
+    title: 'Inventory shrinkage and parts mismanagement',
+    description: 'Stock errors increase rework and reduce margin.'
+  },
+  {
+    title: 'No clear daily profit overview',
+    description: 'You finish the day without financial confidence.'
+  }
+] as const;
+
 export function Problem(): JSX.Element {
   return (
-    <section className="bg-background-primary">
-      <div className="mx-auto grid max-w-[1200px] gap-s8 px-s4 py-s16 lg:grid-cols-2 lg:items-center">
+    <section className="bg-surface-default" aria-labelledby="problem-title">
+      <div className="mx-auto grid w-full max-w-[1200px] gap-s8 px-s4 py-s16 lg:grid-cols-2 lg:items-center">
         <div className="space-y-s4">
-          <h2 className="text-h1">Most Auto Repair Shops Lose 10–30% Profit Without Knowing It</h2>
-          <ul className="space-y-s2 text-body text-text-secondary">
-            <li>No real-time visibility of vehicles in service</li>
-            <li>Technicians not tracked properly</li>
-            <li>Inventory shrinkage and parts mismanagement</li>
-            <li>No clear daily profit overview</li>
-          </ul>
-          <p className="text-body text-text-primary">If you can&apos;t measure it, you can&apos;t improve it.</p>
-          <p className="text-small text-text-secondary">
-            These are common <span className="font-medium">auto repair shop</span> and <span className="font-medium">workshop operations</span>{' '}
-            issues that reduce <span className="font-medium">repair shop profit</span>. Garixo solves real{' '}
-            <span className="font-medium">shop management problems</span> with a single operational platform.
+          <h2 id="problem-title" className="text-h1">
+            Most Auto Repair Shops Lose 10–30% Profit Without Knowing It
+          </h2>
+          <p className="text-body text-text-secondary">
+            If you cannot measure daily workshop operations, you cannot improve
+            them. This is a common issue in small and mid-sized garages.
           </p>
+
+          <div className="space-y-s3">
+            {painPoints.map((item) => (
+              <Card
+                key={item.title}
+                className="rounded-lg border-l-4 border-l-error-500 bg-error-50 p-s4 shadow-xs"
+              >
+                <p className="text-small font-semibold text-text-primary">
+                  {item.title}
+                </p>
+                <p className="mt-s1 text-caption text-text-secondary">
+                  {item.description}
+                </p>
+              </Card>
+            ))}
+          </div>
+
           <p className="text-small text-text-secondary">
-            Explore <Link href="/features/garage-management" className="text-primary-700 hover:text-primary-800">garage management features</Link>{' '}
-            and <Link href="/features/inventory-management" className="text-primary-700 hover:text-primary-800">inventory management workflows</Link>.
+            Explore{' '}
+            <Link
+              href="/features/garage-management"
+              className="text-primary-700 hover:text-primary-800"
+            >
+              garage management features
+            </Link>{' '}
+            and{' '}
+            <Link
+              href="/features/inventory-management"
+              className="text-primary-700 hover:text-primary-800"
+            >
+              inventory management workflows
+            </Link>
+            .
           </p>
         </div>
 
-        <div className="rounded-lg border border-border bg-surface-hover p-s6">
-          <div className="grid min-h-[280px] place-items-center rounded-md border border-dashed border-border bg-background-primary">
-            <p className="text-small text-text-muted">Operational visibility illustration placeholder</p>
+        <Card className="space-y-s4 rounded-xl border border-border bg-background-primary p-s6">
+          <p className="text-small font-semibold uppercase tracking-wide text-warning-700">
+            Before Garixo
+          </p>
+          <div className="space-y-s3">
+            <Metric label="Revenue Visibility" value="12%" width="w-[12%]" />
+            <Metric label="Technician Tracking" value="23%" width="w-[23%]" />
+            <Metric label="Inventory Accuracy" value="38%" width="w-[38%]" />
+            <Metric label="Profit Tracking" value="8%" width="w-[8%]" />
           </div>
-        </div>
+
+          <Card className="rounded-lg border border-warning-100 bg-surface-default p-s4">
+            <p className="text-caption text-text-muted">
+              Estimated monthly profit leak
+            </p>
+            <p className="text-h1 text-error-600">$4,200</p>
+            <p className="text-caption text-text-secondary">
+              Average for a 5-bay auto repair shop
+            </p>
+          </Card>
+        </Card>
       </div>
     </section>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  width
+}: {
+  label: string;
+  value: string;
+  width: string;
+}): JSX.Element {
+  return (
+    <div className="space-y-s1">
+      <div className="flex items-center justify-between text-small">
+        <span className="text-text-secondary">{label}</span>
+        <span className="font-semibold text-error-600">{value}</span>
+      </div>
+      <div className="h-2 w-full rounded-full bg-surface-hover">
+        <div className={`h-2 rounded-full bg-error-500 ${width}`} />
+      </div>
+    </div>
   );
 }
