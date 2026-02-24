@@ -10,6 +10,12 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 - No entries yet.
 
+## [0.1.5] - 2026-02-24
+
+### Changed
+
+- Release metadata updated for the latest production tag cycle.
+
 ## [0.1.4] - 2026-02-24
 
 ### Fixed
