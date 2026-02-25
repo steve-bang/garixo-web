@@ -1,6 +1,11 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseQueryOptions
+} from '@tanstack/react-query';
 
 import { customersQueryKey } from '@/features/customers/api';
 import {
@@ -11,13 +16,24 @@ import {
   updateCustomer,
   type GetCustomersParams
 } from '@/features/customers/service';
-import type { CreateCustomerInput, UpdateCustomerInput } from '@/features/customers/schema';
+import type {
+  CreateCustomerInput,
+  UpdateCustomerInput
+} from '@/features/customers/schema';
 import type { Customer, CustomerKpis } from '@/features/customers/types';
+import type { CustomerListResponse } from '@/features/customers/types';
 
-export function useCustomers(params: GetCustomersParams) {
+export function useCustomers(
+  params: GetCustomersParams,
+  options?: Omit<
+    UseQueryOptions<CustomerListResponse, Error>,
+    'queryKey' | 'queryFn'
+  >
+) {
   return useQuery({
     queryKey: [...customersQueryKey, 'list', params],
-    queryFn: () => getCustomers(params)
+    queryFn: () => getCustomers(params),
+    ...options
   });
 }
 
@@ -44,12 +60,16 @@ export function toCustomerKpis(items: Customer[]): CustomerKpis {
   }).length;
 
   const returningCount = items.filter((item) => item.totalVisits > 1).length;
-  const topSpender = items.reduce((max, item) => Math.max(max, item.totalSpent), 0);
+  const topSpender = items.reduce(
+    (max, item) => Math.max(max, item.totalSpent),
+    0
+  );
 
   return {
     totalCustomers: items.length,
     activeThisMonth,
-    returningRate: items.length > 0 ? Math.round((returningCount / items.length) * 100) : 0,
+    returningRate:
+      items.length > 0 ? Math.round((returningCount / items.length) * 100) : 0,
     topSpender
   };
 }
@@ -69,7 +89,13 @@ export function useUpdateCustomer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Omit<UpdateCustomerInput, 'id'> }) => updateCustomer(id, payload),
+    mutationFn: ({
+      id,
+      payload
+    }: {
+      id: string;
+      payload: Omit<UpdateCustomerInput, 'id'>;
+    }) => updateCustomer(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: customersQueryKey });
     }

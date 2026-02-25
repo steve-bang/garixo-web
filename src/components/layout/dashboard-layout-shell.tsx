@@ -199,6 +199,7 @@ export function DashboardLayoutShell({
             <div key={item.href} className="space-y-s1">
               <Link
                 href={item.href}
+                prefetch={false}
                 onClick={() => setIsSidebarOpen(false)}
                 className={cn(
                   'flex items-center gap-s2 rounded-md px-s3 py-s2 text-small text-sidebar-foreground transition-colors',
@@ -221,6 +222,7 @@ export function DashboardLayoutShell({
                       <Link
                         key={child.href}
                         href={child.href}
+                        prefetch={false}
                         onClick={() => setIsSidebarOpen(false)}
                         className={cn(
                           'block rounded-md px-s3 py-s2 text-small transition-colors',
@@ -268,6 +270,7 @@ export function DashboardLayoutShell({
                   {firstBreadcrumb?.href ? (
                     <Link
                       href={firstBreadcrumb.href}
+                      prefetch={false}
                       className="shrink-0 text-text-muted hover:text-text-primary"
                     >
                       {firstBreadcrumb.label}
@@ -305,6 +308,7 @@ export function DashboardLayoutShell({
                         {item.href && !isLast ? (
                           <Link
                             href={item.href}
+                            prefetch={false}
                             className="text-text-muted hover:text-text-primary"
                           >
                             {item.label}

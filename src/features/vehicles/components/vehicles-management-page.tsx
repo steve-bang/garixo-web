@@ -48,6 +48,7 @@ export function VehiclesManagementPage(): JSX.Element {
   const [brand, setBrand] = useState<BrandFilter | undefined>();
   const [status, setStatus] = useState<VehicleStatus | undefined>();
   const [customerId, setCustomerId] = useState<string | undefined>();
+  const [shouldLoadCustomers, setShouldLoadCustomers] = useState(false);
   const [page, setPage] = useState(1);
   const [drawerState, setDrawerState] = useState<DrawerState>({
     open: false,
@@ -84,18 +85,15 @@ export function VehiclesManagementPage(): JSX.Element {
     pageSize
   } as const;
   const listQuery = useVehicles(listParams);
-  const kpiQuery = useVehicles({
-    search,
-    brand,
-    status,
-    customerId,
-    page: 1,
-    pageSize: 100
-  });
 
   const detailQuery = useVehicleDetail(drawerState.vehicle?.id);
   const servicesQuery = useVehicleServices(drawerState.vehicle?.id);
-  const customersQuery = useCustomers({ page: 1, pageSize: 100 });
+  const customersQuery = useCustomers(
+    { page: 1, pageSize: 100 },
+    {
+      enabled: shouldLoadCustomers || Boolean(customerId) || drawerState.open
+    }
+  );
 
   const createMutation = useCreateVehicle();
   const updateMutation = useUpdateVehicle();
@@ -103,26 +101,30 @@ export function VehiclesManagementPage(): JSX.Element {
 
   const listItems = listQuery.data?.items ?? [];
   const meta = listQuery.data?.meta;
-  const kpis = useVehicleKpis(kpiQuery.data?.items ?? []);
+  const kpis = useVehicleKpis(listItems);
   const isTableUpdating =
     (listQuery.isFetching && !listQuery.isLoading) ||
     createMutation.isPending ||
     updateMutation.isPending ||
     deleteMutation.isPending;
 
-  const openCreate = () =>
+  const openCreate = () => {
+    setShouldLoadCustomers(true);
     setDrawerState({ open: true, mode: 'create', vehicle: null });
+  };
   const openView = (vehicle: Vehicle) =>
     setDrawerState({ open: true, mode: 'view', vehicle });
-  const openEdit = (vehicle: Vehicle) =>
+  const openEdit = (vehicle: Vehicle) => {
+    setShouldLoadCustomers(true);
     setDrawerState({ open: true, mode: 'edit', vehicle });
+  };
   const closeDrawer = () =>
     setDrawerState((prev) => ({ ...prev, open: false, vehicle: null }));
 
   const handleSave = async (payload: CreateVehicleInput) => {
     if (drawerState.mode === 'create') {
       const created = await createMutation.mutateAsync(payload);
-      await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
+      await listQuery.refetch();
       setHighlightedId(created.id);
       closeDrawer();
       toast.success('Vehicle added successfully.');
@@ -137,7 +139,7 @@ export function VehiclesManagementPage(): JSX.Element {
       id: drawerState.vehicle.id,
       payload
     });
-    await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
+    await listQuery.refetch();
     setHighlightedId(updated.id);
     closeDrawer();
     toast.success('Vehicle updated successfully.');
@@ -145,16 +147,16 @@ export function VehiclesManagementPage(): JSX.Element {
 
   const handleDelete = async (id: string) => {
     await deleteMutation.mutateAsync(id);
-    await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
+    await listQuery.refetch();
     setDeleteTarget(null);
     toast.success('Vehicle deleted successfully.');
   };
 
-  if (listQuery.isLoading || kpiQuery.isLoading) {
+  if (listQuery.isLoading) {
     return <VehiclesSkeleton />;
   }
 
-  if (listQuery.isError || kpiQuery.isError) {
+  if (listQuery.isError) {
     return (
       <Card className="m-s8 p-s6">
         <p className="text-small text-state-error">
@@ -201,6 +203,7 @@ export function VehiclesManagementPage(): JSX.Element {
           setCustomerId(value);
           setPage(1);
         }}
+        onCustomerFilterOpen={() => setShouldLoadCustomers(true)}
         onClear={() => {
           setSearchInput('');
           setSearch('');

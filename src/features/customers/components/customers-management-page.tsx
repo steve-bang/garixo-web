@@ -77,7 +77,6 @@ export function CustomersManagementPage(): JSX.Element {
 
   const listParams = { search, status, spendingTier, page, pageSize } as const;
   const listQuery = useCustomers(listParams);
-  const kpiQuery = useCustomers({ page: 1, pageSize: 20 });
 
   const detailQuery = useCustomerDetail(drawerState.customer?.id);
 
@@ -87,10 +86,7 @@ export function CustomersManagementPage(): JSX.Element {
 
   const listItems = listQuery.data?.items ?? [];
   const meta = listQuery.data?.meta;
-  const kpis = useMemo(
-    () => toCustomerKpis(kpiQuery.data?.items ?? []),
-    [kpiQuery.data?.items]
-  );
+  const kpis = useMemo(() => toCustomerKpis(listItems), [listItems]);
   const isTableUpdating =
     (listQuery.isFetching && !listQuery.isLoading) ||
     createMutation.isPending ||
@@ -118,7 +114,7 @@ export function CustomersManagementPage(): JSX.Element {
   const handleDrawerSubmit = async (payload: CreateCustomerInput) => {
     if (drawerState.mode === 'create') {
       const created = await createMutation.mutateAsync(payload);
-      await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
+      await listQuery.refetch();
       setHighlightedId(created.id);
       closeDrawer();
       toast.success('Customer added successfully.');
@@ -133,7 +129,7 @@ export function CustomersManagementPage(): JSX.Element {
       id: drawerState.customer.id,
       payload
     });
-    await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
+    await listQuery.refetch();
     setHighlightedId(updated.id);
     closeDrawer();
     toast.success('Information updated.');
@@ -141,16 +137,16 @@ export function CustomersManagementPage(): JSX.Element {
 
   const handleDelete = async (id: string) => {
     await deleteMutation.mutateAsync(id);
-    await Promise.all([listQuery.refetch(), kpiQuery.refetch()]);
+    await listQuery.refetch();
     setDeleteTarget(null);
     toast.success('Customer deleted successfully.');
   };
 
-  if (listQuery.isLoading || kpiQuery.isLoading) {
+  if (listQuery.isLoading) {
     return <CustomersSkeleton />;
   }
 
-  if (listQuery.isError || kpiQuery.isError) {
+  if (listQuery.isError) {
     return (
       <Card className="m-s8 p-s6">
         <p className="text-small text-state-error">

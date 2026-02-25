@@ -19,6 +19,7 @@ type VehiclesFiltersProps = {
   onBrandChange: (value?: BrandFilter) => void;
   onStatusChange: (value?: VehicleStatus) => void;
   onCustomerChange: (value?: string) => void;
+  onCustomerFilterOpen?: () => void;
   onClear: () => void;
 };
 
@@ -40,6 +41,7 @@ export function VehiclesFilters({
   onBrandChange,
   onStatusChange,
   onCustomerChange,
+  onCustomerFilterOpen,
   onClear
 }: VehiclesFiltersProps): JSX.Element {
   return (
@@ -95,6 +97,8 @@ export function VehiclesFilters({
           onChange={(event) =>
             onCustomerChange(event.target.value || undefined)
           }
+          onFocus={onCustomerFilterOpen}
+          onPointerDown={onCustomerFilterOpen}
         >
           <option value="">All Customers</option>
           {customers.map((customer) => (
