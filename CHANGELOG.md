@@ -10,6 +10,40 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 - No entries yet.
 
+## [0.1.6] - 2026-02-25
+
+### Added
+
+- Garage industry type model and enum (`General Repair`, `Tire Shop`, `Quick Lube`, `Mobile Mechanic`, `Other`) across onboarding, settings, and Garage persistence.
+- Automatic default seeding on onboarding garage setup:
+- Services seeded by `industryType` from `/src/features/services/default-values.ts`.
+- Inventory seeded by `industryType` from `/src/features/inventory/default-values.ts`.
+- New seeder service at `/src/services/firebase/garage-defaults-seeder.ts`.
+
+### Changed
+
+- Customer domain refactor to relation-based vehicle model:
+- Removed `customer.vehicles[]` dependency from customer type/listing and moved to `totalVehicles` + vehicle lookup by `customerId`.
+- Customer detail API now returns linked `vehicles` separately.
+- Customer vehicles CRUD now operates via vehicles collection relation.
+- Vehicles management adds customer filter (`customerId`) and supports conditional customer vehicle listing.
+- Work-order create flows updated to load customer vehicles via API relation (no in-memory `customer.vehicles[]` usage).
+- Vehicles create/edit flow now requires real `customerId` relation.
+
+- Dashboard/request optimization:
+- Customers page now uses a single customers query source for table + KPI to avoid duplicate `/api/customers` calls.
+- Vehicles page removes separate KPI fetch query, lazy-loads customer filter options, and limits customer query to needed states.
+- Dashboard sidebar/breadcrumb links use `prefetch={false}` to reduce background route traffic.
+
+### Fixed
+
+- Firestore transaction ordering in work-order completion flow:
+- Resolved `Firestore transactions require all reads to be executed before all writes`.
+- Reordered status transition transaction to perform all reads first, then writes.
+- Completion transition now safely updates customer and vehicle aggregates:
+- Customer: `totalVisits`, `totalSpent`, `lastVisit`.
+- Vehicle: `totalVisits`, `totalSpent`, `lastServiceDate`.
+
 ## [0.1.5] - 2026-02-24
 
 ### Changed
