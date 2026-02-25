@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { DashboardOnboardingState } from '@/features/onboarding/components/dashboard-onboarding-state';
@@ -9,6 +10,11 @@ import {
 } from '@/services/firebase/dashboard-summary-service';
 import { getUserDocument } from '@/services/firebase/user-sync-service';
 import { listGarageWorkOrders } from '@/services/firebase/work-orders-service';
+
+export const metadata: Metadata = {
+  title: 'Dashboard | Garixo',
+  description: 'Garage operations overview and daily performance summary.'
+};
 
 export default async function DashboardPage(): Promise<JSX.Element> {
   const session = await auth();
