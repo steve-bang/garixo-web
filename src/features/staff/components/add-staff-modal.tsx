@@ -11,7 +11,7 @@ import {
   createStaffSchema,
   type CreateStaffInput
 } from '@/features/staff/schema';
-import type { Role } from '@/features/staff/types';
+import { ROLE_VALUES } from '@/types/primitives';
 
 type AddStaffModalProps = {
   open: boolean;
@@ -118,7 +118,7 @@ export function AddStaffModal({
             className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
             {...form.register('role')}
           >
-            {(['OWNER', 'MANAGER', 'STAFF'] as Role[]).map((role) => (
+            {ROLE_VALUES.map((role) => (
               <option key={role} value={role}>
                 {role}
               </option>

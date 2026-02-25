@@ -7,13 +7,12 @@ import { Card } from '@/components/ui/card';
 import type { Customer, CustomerStatus } from '@/features/customers/types';
 import { cn } from '@/lib/utils/cn';
 import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
-
-type UserRole = 'OWNER' | 'MANAGER' | 'STAFF';
+import type { Role } from '@/types/primitives';
 
 type CustomersTableProps = {
   customers: Customer[];
   loading?: boolean;
-  currentUserRole: UserRole;
+  currentUserRole: Role;
   highlightedId?: string | null;
   onAddFirst: () => void;
   onView: (customer: Customer) => void;

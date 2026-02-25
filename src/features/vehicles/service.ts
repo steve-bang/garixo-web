@@ -3,7 +3,7 @@ import type {
   UpdateVehicleInput
 } from '@/features/vehicles/schema';
 import type {
-  ServiceRecord,
+  VehicleServiceRecord,
   Vehicle,
   VehicleListResponse,
   VehicleStatus
@@ -58,9 +58,11 @@ export async function getVehicleById(id: string): Promise<Vehicle> {
   return ensureSuccess(payload);
 }
 
-export async function getVehicleServices(id: string): Promise<ServiceRecord[]> {
+export async function getVehicleServices(
+  id: string
+): Promise<VehicleServiceRecord[]> {
   const response = await fetch(`/api/vehicles/${id}/services`);
-  const payload = await readJson<ServiceRecord[]>(response);
+  const payload = await readJson<VehicleServiceRecord[]>(response);
   return ensureSuccess(payload);
 }
 

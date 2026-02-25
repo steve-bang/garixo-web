@@ -7,14 +7,13 @@ import type { Vehicle, VehicleStatus } from '@/features/vehicles/types';
 import { formatVehicleLabel } from '@/features/vehicles/utils';
 import { cn } from '@/lib/utils/cn';
 import { formatDate } from '@/lib/utils/format';
-
-type UserRole = 'OWNER' | 'MANAGER' | 'STAFF';
+import type { Role } from '@/types/primitives';
 
 type VehiclesTableProps = {
   vehicles: Vehicle[];
   loading?: boolean;
   hasQuery: boolean;
-  currentUserRole: UserRole;
+  currentUserRole: Role;
   highlightedId?: string | null;
   onAddFirst: () => void;
   onView: (vehicle: Vehicle) => void;

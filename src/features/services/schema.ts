@@ -1,7 +1,11 @@
 import { z } from 'zod';
+import {
+  SERVICE_CATEGORY_VALUES,
+  SERVICE_STATUS_VALUES
+} from '@/features/services/types';
 
-export const serviceStatusSchema = z.enum(['ACTIVE', 'INACTIVE']);
-export const serviceCategorySchema = z.enum(['ENGINE', 'OIL', 'BRAKE', 'TIRE', 'ELECTRICAL', 'OTHER']);
+export const serviceStatusSchema = z.enum(SERVICE_STATUS_VALUES);
+export const serviceCategorySchema = z.enum(SERVICE_CATEGORY_VALUES);
 
 export const serviceSchema = z.object({
   id: z.string(),
@@ -22,7 +26,9 @@ export const serviceListQuerySchema = z.object({
   status: serviceStatusSchema.optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(50).default(20),
-  sort: z.enum(['default', 'name_asc', 'name_desc', 'price_asc', 'price_desc']).default('default')
+  sort: z
+    .enum(['default', 'name_asc', 'name_desc', 'price_asc', 'price_desc'])
+    .default('default')
 });
 
 export const createServiceSchema = z.object({
@@ -33,7 +39,10 @@ export const createServiceSchema = z.object({
     .string()
     .trim()
     .min(1, 'Estimated time is required.')
-    .regex(/^(\d+\s?(minutes?|hours?)|\d+\s?-\s?\d+\s?hours?)$/i, 'Use format like "30 minutes" or "2-3 hours".'),
+    .regex(
+      /^(\d+\s?(minutes?|hours?)|\d+\s?-\s?\d+\s?hours?)$/i,
+      'Use format like "30 minutes" or "2-3 hours".'
+    ),
   description: z.string().trim().optional(),
   status: serviceStatusSchema.default('ACTIVE'),
   usedInWorkOrder: z.boolean().optional()
@@ -47,7 +56,10 @@ export const updateServiceSchema = z.object({
   estimatedTime: z
     .string()
     .trim()
-    .regex(/^(\d+\s?(minutes?|hours?)|\d+\s?-\s?\d+\s?hours?)$/i, 'Use format like "30 minutes" or "2-3 hours".')
+    .regex(
+      /^(\d+\s?(minutes?|hours?)|\d+\s?-\s?\d+\s?hours?)$/i,
+      'Use format like "30 minutes" or "2-3 hours".'
+    )
     .optional(),
   description: z.string().trim().optional(),
   status: serviceStatusSchema.optional()

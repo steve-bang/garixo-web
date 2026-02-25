@@ -1,7 +1,9 @@
 import { z } from 'zod';
+import { ROLE_VALUES } from '@/types/primitives';
+import { STAFF_STATUS_VALUES } from '@/features/staff/types';
 
-export const roleSchema = z.enum(['OWNER', 'MANAGER', 'STAFF']);
-export const staffStatusSchema = z.enum(['ACTIVE', 'ON_LEAVE', 'INACTIVE']);
+export const roleSchema = z.enum(ROLE_VALUES);
+export const staffStatusSchema = z.enum(STAFF_STATUS_VALUES);
 
 export const staffSchema = z.object({
   id: z.string(),
@@ -29,7 +31,10 @@ export const createStaffSchema = z.object({
     .string()
     .trim()
     .optional()
-    .refine((value) => !value || z.string().email().safeParse(value).success, 'Invalid email format.'),
+    .refine(
+      (value) => !value || z.string().email().safeParse(value).success,
+      'Invalid email format.'
+    ),
   avatar: z.string().optional(),
   role: roleSchema,
   currentJobs: z.number().int().nonnegative().optional(),
@@ -51,7 +56,10 @@ export const updateStaffSchema = z.object({
     .string()
     .trim()
     .optional()
-    .refine((value) => !value || z.string().email().safeParse(value).success, 'Invalid email format.'),
+    .refine(
+      (value) => !value || z.string().email().safeParse(value).success,
+      'Invalid email format.'
+    ),
   avatar: z.string().optional(),
   role: roleSchema.optional(),
   status: staffStatusSchema.optional(),

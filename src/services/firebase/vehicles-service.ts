@@ -1,4 +1,4 @@
-import type { ServiceRecord, Vehicle } from '@/features/vehicles/types';
+import type { VehicleServiceRecord, Vehicle } from '@/features/vehicles/types';
 import { normalizePlate, toPlateDisplay } from '@/features/vehicles/utils';
 import { firebaseAdmin } from '@/lib/firebase-admin';
 
@@ -29,7 +29,7 @@ type VehicleServiceFirestoreDoc = {
   date?: string;
   serviceName?: string;
   amount?: number;
-  status?: ServiceRecord['status'];
+  status?: VehicleServiceRecord['status'];
 };
 
 function vehiclesCollection(garageId: string) {
@@ -72,7 +72,7 @@ function mapVehicleDoc(id: string, data: VehicleFirestoreDoc): Vehicle {
 function mapServiceDoc(
   id: string,
   data: VehicleServiceFirestoreDoc
-): ServiceRecord {
+): VehicleServiceRecord {
   return {
     id,
     vehicleId: data.vehicleId ?? '',
@@ -197,7 +197,7 @@ export async function deleteGarageVehicle(
 export async function listGarageVehicleServices(
   garageId: string,
   vehicleId: string
-): Promise<ServiceRecord[]> {
+): Promise<VehicleServiceRecord[]> {
   const ref = vehiclesCollection(garageId)
     .doc(vehicleId)
     .collection('services');
@@ -207,7 +207,7 @@ export async function listGarageVehicleServices(
       mapServiceDoc(doc.id, doc.data() as VehicleServiceFirestoreDoc)
     )
     .sort(
-      (a: ServiceRecord, b: ServiceRecord) =>
+      (a: VehicleServiceRecord, b: VehicleServiceRecord) =>
         new Date(b.date).getTime() - new Date(a.date).getTime()
     )
     .slice(0, 10);

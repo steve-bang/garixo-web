@@ -1,4 +1,5 @@
 import type { WorkOrderStatus } from '@/features/work-orders/types';
+import type { ISODateString } from '@/types/primitives';
 
 export type DateRange = 'today' | 'week' | 'month' | 'custom';
 
@@ -17,7 +18,7 @@ export interface SecondaryMetrics {
 }
 
 export interface RevenuePoint {
-  date: string;
+  date: ISODateString;
   revenue: number;
   previousRevenue?: number;
 }
@@ -79,7 +80,7 @@ export type WorkOrderRow = {
   service: string;
   amount: string;
   status: WorkOrderStatusLegacy;
-  updatedAt: string;
+  updatedAt: ISODateString;
   isSelected?: boolean;
 };
 

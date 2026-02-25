@@ -1,3 +1,9 @@
+import type {
+  ISODateString,
+  PaginatedResponse,
+  PaginationMeta
+} from '@/types/primitives';
+
 export const WorkOrderStatusEnum = {
   Draft: 'Draft',
   WaitingForApproval: 'WaitingForApproval',
@@ -37,7 +43,7 @@ export interface OrderPart {
 
 export interface TimelineEvent {
   status: WorkOrderStatus;
-  timestamp: string;
+  timestamp: ISODateString;
 }
 
 export interface WorkOrder {
@@ -63,8 +69,8 @@ export interface WorkOrder {
   notes?: string;
   cancellationReason?: string;
   paymentMethod?: PaymentMethod;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
 }
 
 export type WorkOrderGroup = Record<
@@ -72,18 +78,11 @@ export type WorkOrderGroup = Record<
   WorkOrder[]
 >;
 
-export type WorkOrdersMeta = {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-};
+export type WorkOrdersMeta = PaginationMeta;
 
-export type WorkOrdersResponse = {
-  items: WorkOrder[];
+export type WorkOrdersResponse = PaginatedResponse<WorkOrder> & {
   grouped: WorkOrderGroup;
   workers: Worker[];
-  meta: WorkOrdersMeta;
 };
 
 export type WorkOrderSummary = {

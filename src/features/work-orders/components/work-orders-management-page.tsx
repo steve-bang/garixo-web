@@ -40,11 +40,11 @@ import {
   groupByStatus,
   statusLabel
 } from '@/features/work-orders/utils';
+import type { Role } from '@/types/primitives';
 
 type ViewMode = 'board' | 'table';
-type UserRole = 'OWNER' | 'MANAGER' | 'STAFF';
 
-const currentUserRole: UserRole = 'OWNER';
+const currentUserRole: Role = 'OWNER';
 const pageSize = 20;
 
 export function WorkOrdersManagementPage(): JSX.Element {

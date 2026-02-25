@@ -1,3 +1,9 @@
+import type {
+  ISODateString,
+  PaginatedResponse,
+  PaginationMeta
+} from '@/types/primitives';
+
 export type CustomerStatus = 'ACTIVE' | 'INACTIVE' | 'VIP';
 
 export type SpendingTier = 'LOW' | 'MEDIUM' | 'HIGH';
@@ -9,14 +15,14 @@ export interface Vehicle {
   model?: string;
   year?: number;
   color?: string;
-  lastServiceDate?: string;
+  lastServiceDate?: ISODateString;
 }
 
 export type CustomerVehicle = Vehicle;
 
-export interface ServiceRecord {
+export interface CustomerServiceRecord {
   id: string;
-  date: string;
+  date: ISODateString;
   vehiclePlate: string;
   serviceName: string;
   amount: number;
@@ -32,28 +38,20 @@ export interface Customer {
   totalVehicles: number;
   totalVisits: number;
   totalSpent: number;
-  lastVisit?: string | null;
+  lastVisit?: ISODateString | null;
   notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
 }
 
-export type CustomerListMeta = {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-};
+export type CustomerListMeta = PaginationMeta;
 
-export type CustomerListResponse = {
-  items: Customer[];
-  meta: CustomerListMeta;
-};
+export type CustomerListResponse = PaginatedResponse<Customer>;
 
 export type CustomerDetailResponse = {
   customer: Customer;
   vehicles: CustomerVehicle[];
-  serviceHistory: ServiceRecord[];
+  serviceHistory: CustomerServiceRecord[];
 };
 
 export type CustomerKpis = {

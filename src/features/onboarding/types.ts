@@ -1,4 +1,5 @@
 import type { GarageIndustryType } from '@/types/garage';
+import type { ISODateString } from '@/types/primitives';
 
 export type GarageProfile = {
   garageName: string;
@@ -16,8 +17,8 @@ export type QuickWorkOrder = {
   totalAmount?: number;
   service?: string;
   notes?: string;
-  createdAt: string;
-  updatedAt?: string;
+  createdAt: ISODateString;
+  updatedAt?: ISODateString;
 };
 
 export type OnboardingState = {

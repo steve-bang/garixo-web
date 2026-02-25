@@ -1,4 +1,8 @@
-import type { ServiceRecord, Vehicle, VehicleKpis } from '@/features/vehicles/types';
+import type {
+  VehicleServiceRecord,
+  Vehicle,
+  VehicleKpis
+} from '@/features/vehicles/types';
 
 export function normalizePlate(value: string): string {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -9,7 +13,11 @@ export function toPlateDisplay(value: string): string {
 }
 
 export function formatVehicleLabel(vehicle: Vehicle): string {
-  const parts = [vehicle.brand, vehicle.model, vehicle.year ? String(vehicle.year) : undefined].filter(Boolean);
+  const parts = [
+    vehicle.brand,
+    vehicle.model,
+    vehicle.year ? String(vehicle.year) : undefined
+  ].filter(Boolean);
   return parts.length ? parts.join(' ') : '-';
 }
 
@@ -30,6 +38,10 @@ export function averageTicket(vehicle: Vehicle): number {
   return Math.round(vehicle.totalSpent / vehicle.totalVisits);
 }
 
-export function latestService(records: ServiceRecord[]): ServiceRecord[] {
-  return [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 10);
+export function latestService(
+  records: VehicleServiceRecord[]
+): VehicleServiceRecord[] {
+  return [...records]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 10);
 }

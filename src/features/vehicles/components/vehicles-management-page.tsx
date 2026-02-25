@@ -25,13 +25,13 @@ import {
 import type { CreateVehicleInput } from '@/features/vehicles/schema';
 import type { Vehicle, VehicleStatus } from '@/features/vehicles/types';
 import { useToast } from '@/hooks/use-toast';
+import type { Role } from '@/types/primitives';
 
-type UserRole = 'OWNER' | 'MANAGER' | 'STAFF';
 type DrawerMode = 'view' | 'create' | 'edit';
 
 type BrandFilter = 'TOYOTA' | 'HONDA' | 'HYUNDAI' | 'FORD' | 'OTHER';
 
-const currentUserRole: UserRole = 'OWNER';
+const currentUserRole: Role = 'OWNER';
 const pageSize = 20;
 
 type DrawerState = {

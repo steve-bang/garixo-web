@@ -27,11 +27,11 @@ import type {
   SpendingTier
 } from '@/features/customers/types';
 import { useToast } from '@/hooks/use-toast';
+import type { Role } from '@/types/primitives';
 
-type UserRole = 'OWNER' | 'MANAGER' | 'STAFF';
 type DrawerMode = 'view' | 'create' | 'edit';
 
-const currentUserRole: UserRole = 'OWNER';
+const currentUserRole: Role = 'OWNER';
 const pageSize = 20;
 
 type DrawerState = {

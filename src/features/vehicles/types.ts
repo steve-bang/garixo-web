@@ -1,4 +1,15 @@
-export type VehicleStatus = 'ACTIVE' | 'IN_SERVICE' | 'COMPLETED' | 'OVERDUE' | 'INACTIVE';
+import type {
+  ISODateString,
+  PaginatedResponse,
+  PaginationMeta
+} from '@/types/primitives';
+
+export type VehicleStatus =
+  | 'ACTIVE'
+  | 'IN_SERVICE'
+  | 'COMPLETED'
+  | 'OVERDUE'
+  | 'INACTIVE';
 
 export interface Vehicle {
   id: string;
@@ -14,32 +25,24 @@ export interface Vehicle {
   status: VehicleStatus;
   totalVisits: number;
   totalSpent: number;
-  lastServiceDate?: string;
+  lastServiceDate?: ISODateString;
   notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
 }
 
-export interface ServiceRecord {
+export interface VehicleServiceRecord {
   id: string;
   vehicleId: string;
-  date: string;
+  date: ISODateString;
   serviceName: string;
   amount: number;
   status: 'OPEN' | 'DONE';
 }
 
-export type VehicleListMeta = {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-};
+export type VehicleListMeta = PaginationMeta;
 
-export type VehicleListResponse = {
-  items: Vehicle[];
-  meta: VehicleListMeta;
-};
+export type VehicleListResponse = PaginatedResponse<Vehicle>;
 
 export type VehicleKpis = {
   totalVehicles: number;

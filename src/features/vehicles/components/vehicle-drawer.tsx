@@ -14,7 +14,7 @@ import {
   type CreateVehicleInput
 } from '@/features/vehicles/schema';
 import type {
-  ServiceRecord,
+  VehicleServiceRecord,
   Vehicle,
   VehicleStatus
 } from '@/features/vehicles/types';
@@ -29,7 +29,7 @@ type VehicleDrawerProps = {
   mode: DrawerMode;
   vehicle?: Vehicle | null;
   detail?: Vehicle;
-  services?: ServiceRecord[];
+  services?: VehicleServiceRecord[];
   loadingDetail?: boolean;
   customers?: Customer[];
   onClose: () => void;

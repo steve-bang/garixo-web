@@ -1,4 +1,15 @@
-export type InventoryCategory = 'ENGINE' | 'OIL' | 'TIRE' | 'BRAKE' | 'ELECTRICAL';
+import type {
+  ISODateString,
+  PaginatedResponse,
+  PaginationMeta
+} from '@/types/primitives';
+
+export type InventoryCategory =
+  | 'ENGINE'
+  | 'OIL'
+  | 'TIRE'
+  | 'BRAKE'
+  | 'ELECTRICAL';
 
 export type StockStatus = 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK';
 
@@ -11,21 +22,13 @@ export interface InventoryItem {
   minLevel: number;
   costPrice: number;
   notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
 }
 
-export type InventoryListMeta = {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-};
+export type InventoryListMeta = PaginationMeta;
 
-export type InventoryListResponse = {
-  items: InventoryItem[];
-  meta: InventoryListMeta;
-};
+export type InventoryListResponse = PaginatedResponse<InventoryItem>;
 
 export type InventoryKpis = {
   totalItems: number;

@@ -23,11 +23,14 @@ import {
   useUpdateInventoryItem
 } from '@/features/inventory/hooks';
 import type { CreateInventoryInput } from '@/features/inventory/schema';
-import type { InventoryCategory, InventoryItem, StockStatus } from '@/features/inventory/types';
+import type {
+  InventoryCategory,
+  InventoryItem,
+  StockStatus
+} from '@/features/inventory/types';
+import type { Role } from '@/types/primitives';
 
-type UserRole = 'OWNER' | 'MANAGER' | 'STAFF';
-
-const currentUserRole: UserRole = 'OWNER';
+const currentUserRole: Role = 'OWNER';
 const pageSize = 20;
 
 type DrawerState = {
@@ -43,9 +46,15 @@ export function InventoryManagementPage(): JSX.Element {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<InventoryCategory | undefined>();
   const [stockStatus, setStockStatus] = useState<StockStatus | undefined>();
-  const [sort, setSort] = useState<'default' | 'name_asc' | 'name_desc' | 'quantity_asc' | 'quantity_desc'>('default');
+  const [sort, setSort] = useState<
+    'default' | 'name_asc' | 'name_desc' | 'quantity_asc' | 'quantity_desc'
+  >('default');
   const [page, setPage] = useState(1);
-  const [drawerState, setDrawerState] = useState<DrawerState>({ open: false, mode: 'create', item: null });
+  const [drawerState, setDrawerState] = useState<DrawerState>({
+    open: false,
+    mode: 'create',
+    item: null
+  });
   const [adjustTarget, setAdjustTarget] = useState<InventoryItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<InventoryItem | null>(null);
 
@@ -58,9 +67,23 @@ export function InventoryManagementPage(): JSX.Element {
     return () => window.clearTimeout(timer);
   }, [searchInput]);
 
-  const listParams = { search, category, stockStatus, sort, page, pageSize } as const;
+  const listParams = {
+    search,
+    category,
+    stockStatus,
+    sort,
+    page,
+    pageSize
+  } as const;
   const listQuery = useInventory(listParams);
-  const kpiQuery = useInventory({ search, category, stockStatus, sort, page: 1, pageSize: 20 });
+  const kpiQuery = useInventory({
+    search,
+    category,
+    stockStatus,
+    sort,
+    page: 1,
+    pageSize: 20
+  });
 
   const createMutation = useCreateInventoryItem();
   const updateMutation = useUpdateInventoryItem();
@@ -89,7 +112,12 @@ export function InventoryManagementPage(): JSX.Element {
     setDrawerState((prev) => ({ ...prev, open: false, item: null }));
   };
 
-  const handleAdjustStock = async (payload: { id: string; type: 'ADD' | 'REDUCE'; amount: number; reason?: string }) => {
+  const handleAdjustStock = async (payload: {
+    id: string;
+    type: 'ADD' | 'REDUCE';
+    amount: number;
+    reason?: string;
+  }) => {
     await adjustMutation.mutateAsync(payload);
     toast.success('Stock updated successfully.');
     setAdjustTarget(null);
@@ -108,7 +136,9 @@ export function InventoryManagementPage(): JSX.Element {
   if (listQuery.isError || kpiQuery.isError) {
     return (
       <Card className="m-s8 p-s6">
-        <p className="text-small text-state-error">Could not load inventory data.</p>
+        <p className="text-small text-state-error">
+          Could not load inventory data.
+        </p>
       </Card>
     );
   }
@@ -118,7 +148,9 @@ export function InventoryManagementPage(): JSX.Element {
       <header className="flex flex-col items-start justify-between gap-s3 md:flex-row md:items-center">
         <div>
           <h1 className="text-h1">Inventory</h1>
-          <p className="text-small text-text-muted">Manage parts and supplies in your garage.</p>
+          <p className="text-small text-text-muted">
+            Manage parts and supplies in your garage.
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-s2">
@@ -126,7 +158,11 @@ export function InventoryManagementPage(): JSX.Element {
             <Upload className="size-4" />
             Import
           </Button>
-          <Button onClick={() => setDrawerState({ open: true, mode: 'create', item: null })}>
+          <Button
+            onClick={() =>
+              setDrawerState({ open: true, mode: 'create', item: null })
+            }
+          >
             <Plus className="size-4" />
             Add Item
           </Button>
@@ -166,7 +202,9 @@ export function InventoryManagementPage(): JSX.Element {
       <InventoryTable
         items={listItems}
         currentUserRole={currentUserRole}
-        onAddFirst={() => setDrawerState({ open: true, mode: 'create', item: null })}
+        onAddFirst={() =>
+          setDrawerState({ open: true, mode: 'create', item: null })
+        }
         onEdit={(item) => setDrawerState({ open: true, mode: 'edit', item })}
         onAdjust={setAdjustTarget}
         onDelete={setDeleteTarget}
@@ -179,7 +217,12 @@ export function InventoryManagementPage(): JSX.Element {
           </p>
 
           <div className="flex items-center gap-s2">
-            <Button variant="secondary" size="sm" disabled={meta.page <= 1} onClick={() => setPage((prev) => Math.max(prev - 1, 1))}>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={meta.page <= 1}
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            >
               Previous
             </Button>
             <Badge variant="default">{meta.page}</Badge>
@@ -187,7 +230,9 @@ export function InventoryManagementPage(): JSX.Element {
               variant="secondary"
               size="sm"
               disabled={meta.page >= meta.totalPages}
-              onClick={() => setPage((prev) => Math.min(prev + 1, meta.totalPages))}
+              onClick={() =>
+                setPage((prev) => Math.min(prev + 1, meta.totalPages))
+              }
             >
               Next
             </Button>
@@ -199,11 +244,18 @@ export function InventoryManagementPage(): JSX.Element {
         open={drawerState.open}
         mode={drawerState.mode}
         item={drawerState.item}
-        onClose={() => setDrawerState((prev) => ({ ...prev, open: false, item: null }))}
+        onClose={() =>
+          setDrawerState((prev) => ({ ...prev, open: false, item: null }))
+        }
         onSubmit={handleSaveItem}
       />
 
-      <AdjustStockModal open={Boolean(adjustTarget)} item={adjustTarget} onClose={() => setAdjustTarget(null)} onConfirm={handleAdjustStock} />
+      <AdjustStockModal
+        open={Boolean(adjustTarget)}
+        item={adjustTarget}
+        onClose={() => setAdjustTarget(null)}
+        onConfirm={handleAdjustStock}
+      />
 
       <DeleteItemModal
         open={Boolean(deleteTarget)}

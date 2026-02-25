@@ -5,14 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { WorkOrder } from '@/features/work-orders/types';
-import {
-  statusLabel
-} from '@/features/work-orders/utils';
+import { statusLabel } from '@/features/work-orders/utils';
 import { formatCurrencyUsd, formatDateTime } from '@/lib/utils/format';
+import type { Role } from '@/types/primitives';
 
 type Props = {
   items: WorkOrder[];
-  currentUserRole: 'OWNER' | 'MANAGER' | 'STAFF';
+  currentUserRole: Role;
   onView: (item: WorkOrder) => void;
   onEdit: (item: WorkOrder) => void;
   onCancel: (item: WorkOrder) => void;

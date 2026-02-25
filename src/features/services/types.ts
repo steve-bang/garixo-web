@@ -1,6 +1,22 @@
-export type ServiceStatus = 'ACTIVE' | 'INACTIVE';
+import type {
+  ISODateString,
+  PaginatedResponse,
+  PaginationMeta
+} from '@/types/primitives';
 
-export type ServiceCategory = 'ENGINE' | 'OIL' | 'BRAKE' | 'TIRE' | 'ELECTRICAL' | 'OTHER';
+export const SERVICE_STATUS_VALUES = ['ACTIVE', 'INACTIVE'] as const;
+export type ServiceStatus = (typeof SERVICE_STATUS_VALUES)[number];
+
+export const SERVICE_CATEGORY_VALUES = [
+  'ENGINE',
+  'OIL',
+  'BRAKE',
+  'TIRE',
+  'ELECTRICAL',
+  'OTHER'
+] as const;
+
+export type ServiceCategory = (typeof SERVICE_CATEGORY_VALUES)[number];
 
 export interface Service {
   id: string;
@@ -10,22 +26,14 @@ export interface Service {
   estimatedTime: string;
   description?: string;
   status: ServiceStatus;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
   usedInWorkOrder?: boolean;
 }
 
-export type ServiceListMeta = {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-};
+export type ServiceListMeta = PaginationMeta;
 
-export type ServiceListResponse = {
-  items: Service[];
-  meta: ServiceListMeta;
-};
+export type ServiceListResponse = PaginatedResponse<Service>;
 
 export type ServiceKpis = {
   totalServices: number;

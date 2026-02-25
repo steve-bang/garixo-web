@@ -1,7 +1,7 @@
 import type {
   Customer,
   CustomerVehicle,
-  ServiceRecord
+  CustomerServiceRecord
 } from '@/features/customers/types';
 import type { Vehicle } from '@/features/vehicles/types';
 import { toPlateDisplay } from '@/features/vehicles/utils';
@@ -68,7 +68,7 @@ function mapCustomerDoc(id: string, data: CustomerFirestoreDoc): Customer {
 function mapHistoryDoc(
   id: string,
   data: CustomerHistoryFirestoreDoc
-): ServiceRecord {
+): CustomerServiceRecord {
   return {
     id,
     date: data.date ?? new Date().toISOString(),
@@ -209,7 +209,7 @@ export async function deleteGarageCustomer(
 export async function listGarageCustomerServiceHistory(
   garageId: string,
   customerId: string
-): Promise<ServiceRecord[]> {
+): Promise<CustomerServiceRecord[]> {
   const ref = customersCollection(garageId)
     .doc(customerId)
     .collection('serviceHistory');
@@ -219,7 +219,7 @@ export async function listGarageCustomerServiceHistory(
       mapHistoryDoc(doc.id, doc.data() as CustomerHistoryFirestoreDoc)
     )
     .sort(
-      (a: ServiceRecord, b: ServiceRecord) =>
+      (a: CustomerServiceRecord, b: CustomerServiceRecord) =>
         new Date(b.date).getTime() - new Date(a.date).getTime()
     )
     .slice(0, 10);

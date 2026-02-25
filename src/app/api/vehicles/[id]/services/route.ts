@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import type { ServiceRecord } from '@/features/vehicles/types';
+import type { VehicleServiceRecord } from '@/features/vehicles/types';
 import { auth } from '@/lib/auth';
 import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
@@ -23,7 +23,7 @@ type RouteContext = {
 export async function GET(
   _request: Request,
   context: RouteContext
-): Promise<NextResponse<ApiResponse<ServiceRecord[]>>> {
+): Promise<NextResponse<ApiResponse<VehicleServiceRecord[]>>> {
   const session = await auth();
   if (!session?.user?.id) {
     return response({ success: false, error: 'Unauthorized' }, 401);

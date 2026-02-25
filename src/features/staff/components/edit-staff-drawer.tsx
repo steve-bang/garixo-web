@@ -12,7 +12,8 @@ import {
   updateStaffSchema,
   type UpdateStaffInput
 } from '@/features/staff/schema';
-import type { Role, Staff, StaffStatus } from '@/features/staff/types';
+import { STAFF_STATUS_VALUES, type Staff } from '@/features/staff/types';
+import { ROLE_VALUES, type Role } from '@/types/primitives';
 
 type EditStaffDrawerProps = {
   open: boolean;
@@ -184,7 +185,7 @@ export function EditStaffDrawer({
               disabled={!canEdit}
               {...form.register('role')}
             >
-              {(['OWNER', 'MANAGER', 'STAFF'] as Role[]).map((role) => (
+              {ROLE_VALUES.map((role) => (
                 <option key={role} value={role}>
                   {role}
                 </option>
@@ -204,13 +205,11 @@ export function EditStaffDrawer({
             disabled={!canEdit}
             {...form.register('status')}
           >
-            {(['ACTIVE', 'ON_LEAVE', 'INACTIVE'] as StaffStatus[]).map(
-              (status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              )
-            )}
+            {STAFF_STATUS_VALUES.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
           </select>
         </div>
 
