@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { auth } from '@/lib/auth';
 import type { OnboardingState } from '@/features/onboarding/types';
+import { seedGarageDefaults } from '@/services/firebase/garage-defaults-seeder';
 import { createGarageForOwner } from '@/services/firebase/garage-service';
 import { garageIndustryTypes } from '@/types/garage';
 import type { ApiResponse } from '@/types/api';
@@ -48,6 +49,10 @@ export async function POST(
     address: parsed.data.address ?? '',
     phone: parsed.data.phone ?? '',
     email: session.user.email ?? ''
+  });
+  await seedGarageDefaults({
+    garageId: garage.id,
+    industryType: garage.industryType
   });
 
   const next: OnboardingState = {
