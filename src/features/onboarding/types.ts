@@ -8,7 +8,7 @@ export type QuickWorkOrder = {
   id: string;
   orderCode?: string;
   customerName: string;
-  licensePlate: string;
+  plateNumber: string;
   status?: string;
   totalAmount?: number;
   service?: string;

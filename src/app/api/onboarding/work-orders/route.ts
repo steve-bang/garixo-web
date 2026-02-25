@@ -35,7 +35,7 @@ export async function GET(): Promise<
   const items = (await listGarageWorkOrders(garageId)).map((order) => ({
     id: order.id,
     customerName: order.customerName,
-    licensePlate: order.licensePlate,
+    plateNumber: order.plateNumber,
     service: order.service,
     notes: order.notes,
     createdAt: order.createdAt
@@ -71,7 +71,7 @@ export async function POST(
 
   const order = await createGarageWorkOrder(garageId, {
     customerName: body.customerName,
-    licensePlate: body.licensePlate,
+    plateNumber: body.licensePlate,
     service: body.service,
     notes: body.notes
   });
@@ -79,7 +79,7 @@ export async function POST(
   const payload: QuickWorkOrder = {
     id: order.id,
     customerName: order.customerName,
-    licensePlate: order.licensePlate,
+    plateNumber: order.plateNumber,
     service: order.service,
     notes: order.notes,
     createdAt: order.createdAt

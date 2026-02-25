@@ -30,7 +30,7 @@ export async function createGarageWorkOrder(
   garageId: string,
   input: Pick<
     GarageWorkOrderDocument,
-    'customerName' | 'licensePlate' | 'service' | 'notes'
+    'customerName' | 'plateNumber' | 'service' | 'notes'
   >
 ): Promise<GarageWorkOrderDocument> {
   const ref = firebaseAdmin.db
@@ -41,7 +41,7 @@ export async function createGarageWorkOrder(
   const now = new Date().toISOString();
   const payload: Omit<GarageWorkOrderDocument, 'id'> = {
     customerName: input.customerName,
-    licensePlate: input.licensePlate.toUpperCase(),
+    plateNumber: input.plateNumber.toUpperCase(),
     service: input.service ?? '',
     notes: input.notes ?? '',
     status: WorkOrderStatusEnum.Draft,

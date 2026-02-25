@@ -19,6 +19,7 @@ import { useSoftOnboardingTooltip } from '@/features/onboarding/hooks/use-soft-o
 import type { QuickWorkOrder } from '@/features/onboarding/types';
 import { FirstWorkOrderDrawer } from '@/features/work-orders/components/first-work-order-drawer';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
+import { formatCurrencyUsd } from '@/lib/utils/format';
 
 type DashboardOnboardingStateProps = {
   metrics: {
@@ -37,13 +38,6 @@ type DashboardOnboardingStateProps = {
   ownerCreatedAt?: string;
   ownerEmailVerifiedAt?: string | null;
 };
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(value);
-}
 
 function timeGreeting(value: Date): 'morning' | 'afternoon' | 'night' {
   const hour = value.getHours();
@@ -80,13 +74,6 @@ function statusTone(status?: string): string {
   if (status === WorkOrderStatusEnum.Cancelled)
     return 'bg-error-100 text-error-800';
   return 'bg-surface-hover text-text-secondary';
-}
-
-function ageInDays(createdAt: string): number {
-  const created = new Date(createdAt).getTime();
-  const now = Date.now();
-  if (Number.isNaN(created)) return 0;
-  return Math.max(0, Math.floor((now - created) / (1000 * 60 * 60 * 24)));
 }
 
 function shouldShowVerificationNotice(input: {
@@ -201,7 +188,7 @@ export function DashboardOnboardingState({
     {
       key: 'today-revenue',
       label: 'Today Revenue',
-      value: formatCurrency(metrics.todayRevenue),
+      value: formatCurrencyUsd(metrics.todayRevenue),
       meta: 'Cash collected today',
       icon: CircleDollarSign,
       href: '/dashboard/work-orders?status=Paid&dateFilter=today',
@@ -376,7 +363,6 @@ export function DashboardOnboardingState({
                       <th className="px-s4 py-s3 font-medium">Vehicle</th>
                       <th className="px-s4 py-s3 font-medium">Status</th>
                       <th className="px-s4 py-s3 font-medium">Total</th>
-                      <th className="px-s4 py-s3 font-medium">Age</th>
                       <th className="px-s4 py-s3 font-medium">Action</th>
                     </tr>
                   </thead>
@@ -389,7 +375,7 @@ export function DashboardOnboardingState({
                               `WO-${order.id.slice(0, 6).toUpperCase()}`}
                           </td>
                           <td className="px-s4 py-s3">{order.customerName}</td>
-                          <td className="px-s4 py-s3">{order.licensePlate}</td>
+                          <td className="px-s4 py-s3">{order.plateNumber}</td>
                           <td className="px-s4 py-s3">
                             <span
                               className={`rounded-full px-s2 py-1 text-caption ${statusTone(order.status)}`}
@@ -398,10 +384,7 @@ export function DashboardOnboardingState({
                             </span>
                           </td>
                           <td className="px-s4 py-s3 font-medium">
-                            {formatCurrency(order.totalAmount ?? 0)}
-                          </td>
-                          <td className="px-s4 py-s3 text-text-secondary">
-                            {ageInDays(order.createdAt)} days
+                            {formatCurrencyUsd(order.totalAmount ?? 0)}
                           </td>
                           <td className="px-s4 py-s3">
                             <Link href={`/dashboard/work-orders/${order.id}`}>
@@ -445,14 +428,11 @@ export function DashboardOnboardingState({
                         {order.customerName}
                       </p>
                       <p className="text-small text-text-secondary">
-                        {order.licensePlate}
+                        {order.plateNumber}
                       </p>
                       <div className="flex items-center justify-between text-small">
                         <span className="font-medium text-text-primary">
-                          {formatCurrency(order.totalAmount ?? 0)}
-                        </span>
-                        <span className="text-text-muted">
-                          {ageInDays(order.createdAt)} days
+                          {formatCurrencyUsd(order.totalAmount ?? 0)}
                         </span>
                       </div>
                       <Link href={`/dashboard/work-orders/${order.id}`}>
@@ -481,7 +461,7 @@ export function DashboardOnboardingState({
               <Card className="space-y-s2 p-s4">
                 <p className="text-small text-text-secondary">Today Revenue</p>
                 <p className="text-h2 font-bold text-success-700">
-                  {formatCurrency(metrics.todayRevenue)}
+                  {formatCurrencyUsd(metrics.todayRevenue)}
                 </p>
               </Card>
               <Card className="space-y-s2 p-s4">
@@ -489,7 +469,7 @@ export function DashboardOnboardingState({
                   This Week Revenue
                 </p>
                 <p className="text-h2 font-bold text-text-primary">
-                  {formatCurrency(metrics.weekRevenue)}
+                  {formatCurrencyUsd(metrics.weekRevenue)}
                 </p>
               </Card>
               <Card className="space-y-s2 p-s4">
@@ -497,7 +477,7 @@ export function DashboardOnboardingState({
                   This Month Revenue
                 </p>
                 <p className="text-h2 font-bold text-text-primary">
-                  {formatCurrency(metrics.monthRevenue)}
+                  {formatCurrencyUsd(metrics.monthRevenue)}
                 </p>
               </Card>
             </div>

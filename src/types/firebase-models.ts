@@ -46,13 +46,17 @@ export type WorkOrderStatus = UnifiedWorkOrderStatus;
 export interface GarageWorkOrderDocument {
   id: string;
   orderCode?: string;
+  customerId?: string;
   customerName: string;
-  licensePlate: string;
+  plateNumber: string;
   totalAmount?: number;
   serviceId?: string;
   service?: string;
   notes?: string;
   status: WorkOrderStatus;
+  vehicleId?: string;
+  vehicleModel?: string;
+  isOverdue?: boolean;
   createdAt: string;
   updatedAt: string;
 }

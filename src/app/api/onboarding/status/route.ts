@@ -25,8 +25,11 @@ export async function GET(): Promise<
   const workOrders = garage
     ? (await listGarageWorkOrders(garage.id)).map((order) => ({
         id: order.id,
+        customerId: order.customerId,
         customerName: order.customerName,
-        licensePlate: order.licensePlate,
+        plateNumber: order.plateNumber,
+        vehicleId: order.vehicleId,
+        vehicleModel: order.vehicleModel,
         service: order.service,
         notes: order.notes,
         createdAt: order.createdAt

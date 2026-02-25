@@ -29,12 +29,17 @@ function ensureState(userId: string): OnboardingState {
   return onboardingDb.get(userId) as OnboardingState;
 }
 
-export async function getOnboardingState(userId: string): Promise<OnboardingState> {
+export async function getOnboardingState(
+  userId: string
+): Promise<OnboardingState> {
   await wait(180);
   return ensureState(userId);
 }
 
-export async function setupGarage(userId: string, input: SetupGarageInput): Promise<OnboardingState> {
+export async function setupGarage(
+  userId: string,
+  input: SetupGarageInput
+): Promise<OnboardingState> {
   await wait(500);
   const current = ensureState(userId);
   const next: OnboardingState = {
@@ -50,18 +55,25 @@ export async function setupGarage(userId: string, input: SetupGarageInput): Prom
   return next;
 }
 
-export async function listQuickWorkOrders(userId: string): Promise<QuickWorkOrder[]> {
+export async function listQuickWorkOrders(
+  userId: string
+): Promise<QuickWorkOrder[]> {
   await wait(200);
-  return [...ensureState(userId).workOrders].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return [...ensureState(userId).workOrders].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt)
+  );
 }
 
-export async function createQuickWorkOrder(userId: string, input: CreateQuickWorkOrderInput): Promise<QuickWorkOrder> {
+export async function createQuickWorkOrder(
+  userId: string,
+  input: CreateQuickWorkOrderInput
+): Promise<QuickWorkOrder> {
   await wait(450);
   const current = ensureState(userId);
   const order: QuickWorkOrder = {
     id: `qwo-${Date.now()}`,
     customerName: input.customerName.trim(),
-    licensePlate: input.licensePlate.trim().toUpperCase(),
+    plateNumber: input.licensePlate.trim().toUpperCase(),
     service: input.service?.trim() ?? '',
     notes: input.notes?.trim() ?? '',
     createdAt: new Date().toISOString()
