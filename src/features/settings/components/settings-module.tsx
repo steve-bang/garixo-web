@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { GarageInformationForm } from '@/features/settings/components/garage-information-form';
+import { SubscriptionSettings } from '@/features/settings/components/subscription-settings';
 import type { SettingsSection } from '@/features/settings/types';
 
 type SettingsModuleProps = {
@@ -14,6 +15,8 @@ export function SettingsModule({ section }: SettingsModuleProps): JSX.Element {
 
       {section.key === 'garage-information' ? (
         <GarageInformationForm />
+      ) : section.key === 'subscription' ? (
+        <SubscriptionSettings />
       ) : (
         <div className="mx-auto max-w-[820px] space-y-s4">
           <header className="space-y-s1">

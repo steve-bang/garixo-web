@@ -30,6 +30,12 @@ const settingsSections: Record<SettingsSectionKey, SettingsSection> = {
         ]
       }
     ]
+  },
+  subscription: {
+    key: 'subscription',
+    title: 'Subscription',
+    description: 'Plans and billing options for your garage.',
+    cards: []
   }
 };
 

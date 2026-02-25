@@ -62,6 +62,10 @@ const menuItems: SidebarItem[] = [
       {
         href: '/dashboard/settings/garage-information',
         label: 'Garage Information'
+      },
+      {
+        href: '/dashboard/settings/subscription',
+        label: 'Subscription'
       }
     ]
   }
