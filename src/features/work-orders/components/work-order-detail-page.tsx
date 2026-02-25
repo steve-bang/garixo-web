@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Modal } from '@/components/ui/modal';
 import { Textarea } from '@/components/ui/textarea';
+import { Select } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { getServices } from '@/features/services/service';
 import { workOrdersQueryKey } from '@/features/work-orders/api';
@@ -630,7 +631,7 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
               <p className="text-small text-text-muted">
                 No worker assigned yet.
               </p>
-              <select
+              <Select
                 className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small"
                 value={assignWorkerId}
                 disabled={isFinalStatus || isMutating || workersQuery.isLoading}
@@ -642,7 +643,7 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
                     {worker.name}
                   </option>
                 ))}
-              </select>
+              </Select>
               <Button
                 type="button"
                 className="w-full"

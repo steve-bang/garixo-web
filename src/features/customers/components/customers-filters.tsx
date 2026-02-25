@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import type { CustomerStatus, SpendingTier } from '@/features/customers/types';
 
 type CustomersFiltersProps = {
@@ -50,27 +51,35 @@ export function CustomersFilters({
           />
         </div>
 
-        <select
+        <Select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={status ?? ''}
-          onChange={(event) => onStatusChange((event.target.value || undefined) as CustomerStatus | undefined)}
+          onChange={(event) =>
+            onStatusChange(
+              (event.target.value || undefined) as CustomerStatus | undefined
+            )
+          }
         >
           <option value="">All Status</option>
           <option value="ACTIVE">Active</option>
           <option value="INACTIVE">Inactive</option>
           <option value="VIP">VIP</option>
-        </select>
+        </Select>
 
-        <select
+        <Select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={spendingTier ?? ''}
-          onChange={(event) => onSpendingTierChange((event.target.value || undefined) as SpendingTier | undefined)}
+          onChange={(event) =>
+            onSpendingTierChange(
+              (event.target.value || undefined) as SpendingTier | undefined
+            )
+          }
         >
           <option value="">All Spending Tiers</option>
           <option value="LOW">Low</option>
           <option value="MEDIUM">Medium</option>
           <option value="HIGH">High</option>
-        </select>
+        </Select>
 
         <Button variant="secondary" className="h-11" onClick={onClear}>
           Clear All

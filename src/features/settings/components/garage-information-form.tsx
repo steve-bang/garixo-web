@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -358,7 +359,7 @@ export function GarageInformationForm(): JSX.Element {
               >
                 Industry Type
               </label>
-              <select
+              <Select
                 id="industryType"
                 className="h-12 w-full rounded-md border border-input-border bg-input px-s3 text-[15px] text-input-foreground"
                 {...form.register('industryType')}
@@ -368,7 +369,7 @@ export function GarageInformationForm(): JSX.Element {
                     {industryType}
                   </option>
                 ))}
-              </select>
+              </Select>
               {form.formState.errors.industryType ? (
                 <p className="text-caption text-state-error">
                   {form.formState.errors.industryType.message}

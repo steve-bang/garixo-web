@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import type { Customer } from '@/features/customers/types';
 import type { VehicleStatus } from '@/features/vehicles/types';
 
@@ -57,7 +58,7 @@ export function VehiclesFilters({
           />
         </div>
 
-        <select
+        <Select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={brand ?? ''}
           onChange={(event) =>
@@ -72,9 +73,9 @@ export function VehiclesFilters({
           <option value="HYUNDAI">Hyundai</option>
           <option value="FORD">Ford</option>
           <option value="OTHER">Other</option>
-        </select>
+        </Select>
 
-        <select
+        <Select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={status ?? ''}
           onChange={(event) =>
@@ -89,9 +90,9 @@ export function VehiclesFilters({
           <option value="OVERDUE">Overdue</option>
           <option value="ACTIVE">Active</option>
           <option value="INACTIVE">Inactive</option>
-        </select>
+        </Select>
 
-        <select
+        <Select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={customerId ?? ''}
           onChange={(event) =>
@@ -106,7 +107,7 @@ export function VehiclesFilters({
               {customer.name}
             </option>
           ))}
-        </select>
+        </Select>
 
         <Button variant="secondary" className="h-11" onClick={onClear}>
           Clear All
