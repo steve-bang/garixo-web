@@ -78,6 +78,22 @@ function overviewRef(garageId: string) {
     .doc('overview');
 }
 
+function customerRef(garageId: string, customerId: string) {
+  return firebaseAdmin.db
+    .collection('garages')
+    .doc(garageId)
+    .collection('customers')
+    .doc(customerId);
+}
+
+function vehicleRef(garageId: string, vehicleId: string) {
+  return firebaseAdmin.db
+    .collection('garages')
+    .doc(garageId)
+    .collection('vehicles')
+    .doc(vehicleId);
+}
+
 function revenueDailyRef(garageId: string, dateKey: string) {
   return firebaseAdmin.db
     .collection('garages')
@@ -353,6 +369,7 @@ export async function applyWorkOrderStatusTransition(
       return currentOrder;
     }
 
+    const inventoryAdjustments: Array<{ ref: any; quantity: number }> = [];
     if (
       input.nextStatus === WorkOrderStatusEnum.Completed &&
       input.deductInventoryOnComplete &&
@@ -375,16 +392,18 @@ export async function applyWorkOrderStatusTransition(
           throw new Error(`Not enough quantity for ${part.partName}.`);
         }
 
-        transaction.set(
-          inventoryRef,
-          {
-            quantity: quantity - part.quantity,
-            updatedAt: nowIso
-          },
-          { merge: true }
-        );
+        inventoryAdjustments.push({
+          ref: inventoryRef,
+          quantity: quantity - part.quantity
+        });
       }
     }
+
+    const becomesCompleted =
+      currentOrder.status !== WorkOrderStatusEnum.Completed &&
+      currentOrder.status !== WorkOrderStatusEnum.Paid &&
+      currentOrder.status !== WorkOrderStatusEnum.Cancelled &&
+      input.nextStatus === WorkOrderStatusEnum.Completed;
 
     const delta = computeOverviewDelta(
       currentOrder.status,
@@ -400,6 +419,43 @@ export async function applyWorkOrderStatusTransition(
         : undefined
     );
     const safeDelta = applyOverviewDeltaSafe(overviewCurrent, delta);
+
+    for (const adjustment of inventoryAdjustments) {
+      transaction.set(
+        adjustment.ref,
+        {
+          quantity: adjustment.quantity,
+          updatedAt: nowIso
+        },
+        { merge: true }
+      );
+    }
+
+    if (becomesCompleted && currentOrder.customerId) {
+      transaction.set(
+        customerRef(input.garageId, currentOrder.customerId),
+        {
+          totalVisits: FieldValue.increment(1),
+          totalSpent: FieldValue.increment(currentOrder.totalAmount),
+          lastVisit: nowIso,
+          updatedAt: nowIso
+        },
+        { merge: true }
+      );
+    }
+
+    if (becomesCompleted && currentOrder.vehicleId) {
+      transaction.set(
+        vehicleRef(input.garageId, currentOrder.vehicleId),
+        {
+          totalVisits: FieldValue.increment(1),
+          totalSpent: FieldValue.increment(currentOrder.totalAmount),
+          lastServiceDate: nowIso,
+          updatedAt: nowIso
+        },
+        { merge: true }
+      );
+    }
 
     transaction.set(
       overviewReference,
