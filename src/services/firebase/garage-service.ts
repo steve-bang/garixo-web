@@ -1,6 +1,7 @@
 import { cache } from 'react';
 
 import { firebaseAdmin } from '@/lib/firebase-admin';
+import type { GarageIndustryType } from '@/types/garage';
 import type { GarageDocument } from '@/types/firebase-models';
 
 function mapDoc(id: string, data: Omit<GarageDocument, 'id'>): GarageDocument {
@@ -34,6 +35,7 @@ export const getGarageByIdCached = cache(getGarageById);
 export async function createGarageForOwner(input: {
   ownerId: string;
   name: string;
+  industryType?: GarageIndustryType;
   address?: string;
   phone?: string;
   email?: string;
@@ -47,6 +49,7 @@ export async function createGarageForOwner(input: {
   const payload: Omit<GarageDocument, 'id'> = {
     ownerUserId: input.ownerId,
     name: input.name,
+    industryType: input.industryType ?? 'General Repair',
     address: input.address ?? '',
     phone: input.phone ?? '',
     email: input.email ?? '',

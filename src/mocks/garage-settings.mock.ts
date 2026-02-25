@@ -2,6 +2,7 @@ import type { GarageSettings } from '@/features/settings/garage-information.type
 
 let garageSettingsDb: GarageSettings = {
   garageName: 'Garixo Auto Center',
+  industryType: 'General Repair',
   logoUrl: '',
   phone: '5553021188',
   email: 'owner@garixo.com',
@@ -19,7 +20,9 @@ export async function getMockGarageSettings(): Promise<GarageSettings> {
   return garageSettingsDb;
 }
 
-export async function updateMockGarageSettings(input: Omit<GarageSettings, 'updatedAt'>): Promise<GarageSettings> {
+export async function updateMockGarageSettings(
+  input: Omit<GarageSettings, 'updatedAt'>
+): Promise<GarageSettings> {
   await delay(700);
   garageSettingsDb = {
     ...input,

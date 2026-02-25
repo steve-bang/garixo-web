@@ -1,5 +1,6 @@
 import type { UserRole } from '@/types/user';
 import type { WorkOrderStatus as UnifiedWorkOrderStatus } from '@/features/work-orders/types';
+import type { GarageIndustryType } from '@/types/garage';
 
 export type FirebaseRole = UserRole;
 
@@ -22,6 +23,7 @@ export interface GarageDocument {
   id: string;
   ownerUserId: string;
   name: string;
+  industryType?: GarageIndustryType;
   address?: string;
   phone?: string;
   email?: string;

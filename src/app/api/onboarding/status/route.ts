@@ -41,6 +41,7 @@ export async function GET(): Promise<
     garage: garage
       ? {
           garageName: garage.name,
+          industryType: garage.industryType ?? 'General Repair',
           address: garage.address ?? '',
           phone: garage.phone ?? ''
         }

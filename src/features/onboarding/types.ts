@@ -1,5 +1,8 @@
+import type { GarageIndustryType } from '@/types/garage';
+
 export type GarageProfile = {
   garageName: string;
+  industryType: GarageIndustryType;
   address?: string;
   phone: string;
 };
@@ -25,6 +28,7 @@ export type OnboardingState = {
 
 export type SetupGarageInput = {
   garageName: string;
+  industryType: GarageIndustryType;
   address?: string;
   phone: string;
 };

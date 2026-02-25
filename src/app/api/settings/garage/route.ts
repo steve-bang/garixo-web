@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
 import { auth } from '@/lib/auth';
 import { getRequestGarage } from '@/lib/auth/garage-context';
 import type { GarageSettings } from '@/features/settings/garage-information.types';
 import { firebaseAdmin } from '@/lib/firebase-admin';
 import { updateGarage } from '@/services/firebase/garage-service';
+import { garageIndustryTypes } from '@/types/garage';
 import type { ApiResponse } from '@/types/api';
+
+const industryTypeSchema = z.enum(garageIndustryTypes);
 
 function response<T>(
   payload: ApiResponse<T>,
@@ -36,6 +40,7 @@ export async function GET(): Promise<
     success: true,
     data: {
       garageName: garage.name,
+      industryType: garage.industryType ?? 'General Repair',
       logoUrl: garage.logoUrl ?? '',
       phone: garage.phone ?? '',
       email: garage.email ?? session.user.email ?? '',
@@ -68,6 +73,9 @@ export async function PUT(
 
   const formData = await request.formData();
   const garageName = String(formData.get('garageName') ?? '').trim();
+  const industryTypeRaw = String(
+    formData.get('industryType') ?? 'General Repair'
+  ).trim();
   const phone = String(formData.get('phone') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim();
   const address = String(formData.get('address') ?? '').trim();
@@ -77,6 +85,14 @@ export async function PUT(
 
   if (!garageName) {
     return response({ success: false, error: 'Garage name is required.' }, 400);
+  }
+
+  const parsedIndustryType = industryTypeSchema.safeParse(industryTypeRaw);
+  if (!parsedIndustryType.success) {
+    return response(
+      { success: false, error: 'Industry type is invalid.' },
+      400
+    );
   }
 
   let nextLogoUrl = garage.logoUrl ?? '';
@@ -121,6 +137,7 @@ export async function PUT(
 
   const updatedGarage = await updateGarage(garage.id, {
     name: garageName,
+    industryType: parsedIndustryType.data,
     address,
     phone,
     email,
@@ -132,6 +149,7 @@ export async function PUT(
     success: true,
     data: {
       garageName: updatedGarage.name,
+      industryType: updatedGarage.industryType ?? parsedIndustryType.data,
       logoUrl: updatedGarage.logoUrl ?? '',
       phone: updatedGarage.phone ?? '',
       email: updatedGarage.email ?? email,

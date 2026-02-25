@@ -11,9 +11,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { submitGarageSetup } from '@/features/onboarding/service';
+import { garageIndustryTypes } from '@/types/garage';
 
 const setupSchema = z.object({
   garageName: z.string().trim().min(1, 'Garage name is required.'),
+  industryType: z.enum(garageIndustryTypes),
   address: z.string().trim().optional(),
   phone: z.string().trim().min(1, 'Phone is required.')
 });
@@ -73,6 +75,7 @@ export function SetupGarageForm({
     resolver: zodResolver(setupSchema),
     defaultValues: {
       garageName: initialGarageName?.trim() ?? '',
+      industryType: 'General Repair',
       address: '',
       phone: ''
     }
@@ -136,6 +139,27 @@ export function SetupGarageForm({
             ) : null}
           </div>
         )}
+
+        <div className="space-y-s1">
+          <label className="text-small font-medium text-text-secondary">
+            Industry Type
+          </label>
+          <select
+            className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
+            {...form.register('industryType')}
+          >
+            {garageIndustryTypes.map((industryType) => (
+              <option key={industryType} value={industryType}>
+                {industryType}
+              </option>
+            ))}
+          </select>
+          {form.formState.errors.industryType ? (
+            <p className="text-caption text-state-error">
+              {form.formState.errors.industryType.message}
+            </p>
+          ) : null}
+        </div>
 
         <div className="space-y-s1">
           <label className="text-small font-medium text-text-secondary">

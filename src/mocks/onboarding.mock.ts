@@ -19,6 +19,7 @@ function ensureState(userId: string): OnboardingState {
       garageConfigured: true,
       garage: {
         garageName: '',
+        industryType: 'General Repair',
         address: '',
         phone: defaultPhone
       },
@@ -47,6 +48,7 @@ export async function setupGarage(
     garageConfigured: true,
     garage: {
       garageName: input.garageName.trim(),
+      industryType: input.industryType,
       address: input.address?.trim() ?? '',
       phone: input.phone.trim() || defaultPhone
     }

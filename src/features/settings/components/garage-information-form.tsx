@@ -3,7 +3,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Building, Image as ImageIcon, Upload, X } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type DragEvent
+} from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Badge } from '@/components/ui/badge';
@@ -12,21 +19,30 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { garageInformationSchema, type GarageInformationFormValues } from '@/features/settings/garage-information.schema';
-import { getGarageSettings, updateGarageSettings } from '@/features/settings/garage-information.service';
+import {
+  garageInformationSchema,
+  type GarageInformationFormValues
+} from '@/features/settings/garage-information.schema';
+import {
+  getGarageSettings,
+  updateGarageSettings
+} from '@/features/settings/garage-information.service';
 import type { GarageSettings } from '@/features/settings/garage-information.types';
+import { garageIndustryTypes } from '@/types/garage';
 
 function formatPhoneInput(input: string): string {
   const digits = input.replace(/\D/g, '').slice(0, 15);
   if (digits.length <= 3) return digits;
   if (digits.length <= 6) return `${digits.slice(0, 3)} ${digits.slice(3)}`;
-  if (digits.length <= 10) return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+  if (digits.length <= 10)
+    return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
   return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 10)} ${digits.slice(10)}`;
 }
 
 function toDefaults(settings: GarageSettings): GarageInformationFormValues {
   return {
     garageName: settings.garageName,
+    industryType: settings.industryType,
     phone: settings.phone ?? '',
     email: settings.email ?? '',
     address: settings.address ?? '',
@@ -41,7 +57,9 @@ export function GarageInformationForm(): JSX.Element {
 
   const [isLoading, setLoading] = useState(true);
   const [isLoadError, setLoadError] = useState(false);
-  const [savedSettings, setSavedSettings] = useState<GarageSettings | null>(null);
+  const [savedSettings, setSavedSettings] = useState<GarageSettings | null>(
+    null
+  );
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string>('');
   const [selectedLogoFile, setSelectedLogoFile] = useState<File | null>(null);
   const [removeLogo, setRemoveLogo] = useState(false);
@@ -51,6 +69,7 @@ export function GarageInformationForm(): JSX.Element {
     resolver: zodResolver(garageInformationSchema),
     defaultValues: {
       garageName: '',
+      industryType: 'General Repair',
       phone: '',
       email: '',
       address: '',
@@ -60,7 +79,8 @@ export function GarageInformationForm(): JSX.Element {
     mode: 'onChange'
   });
 
-  const isDirty = form.formState.isDirty || selectedLogoFile !== null || removeLogo;
+  const isDirty =
+    form.formState.isDirty || selectedLogoFile !== null || removeLogo;
 
   const loadSettings = async () => {
     setLoadError(false);
@@ -153,6 +173,7 @@ export function GarageInformationForm(): JSX.Element {
     try {
       const updated = await updateGarageSettings({
         garageName: values.garageName.trim(),
+        industryType: values.industryType,
         phone: values.phone?.trim() ?? '',
         email: values.email?.trim().toLowerCase() ?? '',
         address: values.address?.trim() ?? '',
@@ -171,11 +192,17 @@ export function GarageInformationForm(): JSX.Element {
       if (selectedLogoFile || removeLogo) {
         setLogoPreviewUrl(previousLogoUrl);
       }
-      toast.error(error instanceof Error ? error.message : 'Could not update garage information.');
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Could not update garage information.'
+      );
     }
   });
 
-  const emailError = form.formState.touchedFields.email ? form.formState.errors.email?.message : undefined;
+  const emailError = form.formState.touchedFields.email
+    ? form.formState.errors.email?.message
+    : undefined;
 
   const saveDisabled = !isDirty || form.formState.isSubmitting;
 
@@ -205,7 +232,9 @@ export function GarageInformationForm(): JSX.Element {
     return (
       <div className="mx-auto max-w-[720px]">
         <Card className="space-y-s3 p-s6">
-          <p className="text-small text-state-error">Could not load garage information.</p>
+          <p className="text-small text-state-error">
+            Could not load garage information.
+          </p>
           <Button type="button" onClick={() => void loadSettings()}>
             Try Again
           </Button>
@@ -221,7 +250,9 @@ export function GarageInformationForm(): JSX.Element {
           <Building className="size-5 text-text-secondary" />
           <h2 className="text-h2">Garage Information</h2>
         </div>
-        <p className="text-small text-text-muted">This information will appear on invoices and system records.</p>
+        <p className="text-small text-text-muted">
+          This information will appear on invoices and system records.
+        </p>
       </header>
 
       <Card className="p-s6">
@@ -242,7 +273,13 @@ export function GarageInformationForm(): JSX.Element {
               >
                 {logoPreviewUrl ? (
                   <>
-                    <Image src={logoPreviewUrl} alt="Garage logo preview" width={120} height={120} className="h-full w-full object-cover" />
+                    <Image
+                      src={logoPreviewUrl}
+                      alt="Garage logo preview"
+                      width={120}
+                      height={120}
+                      className="h-full w-full object-cover"
+                    />
                     <span className="absolute inset-0 hidden place-items-center bg-black/40 text-caption font-medium text-white group-hover:grid">
                       Change Logo
                     </span>
@@ -254,7 +291,9 @@ export function GarageInformationForm(): JSX.Element {
                   </div>
                 )}
 
-                {isDragging ? <span className="absolute inset-0 border-2 border-dashed border-primary-600" /> : null}
+                {isDragging ? (
+                  <span className="absolute inset-0 border-2 border-dashed border-primary-600" />
+                ) : null}
               </button>
 
               <input
@@ -265,13 +304,24 @@ export function GarageInformationForm(): JSX.Element {
                 onChange={onSelectLogo}
               />
 
-              <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()} className='text-xs'>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-xs"
+              >
                 <Upload className="size-4" />
                 {logoLabel}
               </Button>
 
               {logoPreviewUrl ? (
-                <Button type="button" variant="ghost" size="sm" onClick={removeSelectedLogo}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={removeSelectedLogo}
+                >
                   <X className="size-4" />
                   Remove
                 </Button>
@@ -281,7 +331,10 @@ export function GarageInformationForm(): JSX.Element {
             </div>
 
             <div className="space-y-s1">
-              <label htmlFor="garageName" className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="garageName"
+                className="text-small font-medium text-text-secondary"
+              >
                 Garage Name
               </label>
               <Input
@@ -292,23 +345,63 @@ export function GarageInformationForm(): JSX.Element {
                 aria-invalid={Boolean(form.formState.errors.garageName)}
               />
               {form.formState.errors.garageName ? (
-                <p className="text-caption text-state-error">{form.formState.errors.garageName.message}</p>
+                <p className="text-caption text-state-error">
+                  {form.formState.errors.garageName.message}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="space-y-s1 lg:col-span-2">
+              <label
+                htmlFor="industryType"
+                className="text-small font-medium text-text-secondary"
+              >
+                Industry Type
+              </label>
+              <select
+                id="industryType"
+                className="h-12 w-full rounded-md border border-input-border bg-input px-s3 text-[15px] text-input-foreground"
+                {...form.register('industryType')}
+              >
+                {garageIndustryTypes.map((industryType) => (
+                  <option key={industryType} value={industryType}>
+                    {industryType}
+                  </option>
+                ))}
+              </select>
+              {form.formState.errors.industryType ? (
+                <p className="text-caption text-state-error">
+                  {form.formState.errors.industryType.message}
+                </p>
               ) : null}
             </div>
           </section>
 
           <section className="space-y-s4">
-            <h3 className="text-small font-semibold text-text-primary">Contact Information</h3>
+            <h3 className="text-small font-semibold text-text-primary">
+              Contact Information
+            </h3>
 
             <div className="space-y-s1">
-              <label htmlFor="address" className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="address"
+                className="text-small font-medium text-text-secondary"
+              >
                 Address
               </label>
-              <Textarea id="address" rows={2} placeholder="Garage address" {...form.register('address')} />
+              <Textarea
+                id="address"
+                rows={2}
+                placeholder="Garage address"
+                {...form.register('address')}
+              />
             </div>
 
             <div className="space-y-s1">
-              <label htmlFor="phone" className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="phone"
+                className="text-small font-medium text-text-secondary"
+              >
                 Phone
               </label>
               <Input
@@ -317,36 +410,66 @@ export function GarageInformationForm(): JSX.Element {
                 inputMode="tel"
                 placeholder="0901234567"
                 value={form.watch('phone') ?? ''}
-                onChange={(event) => form.setValue('phone', formatPhoneInput(event.target.value), { shouldDirty: true, shouldTouch: true })}
+                onChange={(event) =>
+                  form.setValue('phone', formatPhoneInput(event.target.value), {
+                    shouldDirty: true,
+                    shouldTouch: true
+                  })
+                }
               />
             </div>
 
             <div className="space-y-s1">
-              <label htmlFor="email" className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="email"
+                className="text-small font-medium text-text-secondary"
+              >
                 Email
               </label>
-              <Input id="email" className="h-11" type="email" placeholder="owner@garage.com" {...form.register('email')} />
+              <Input
+                id="email"
+                className="h-11"
+                type="email"
+                placeholder="owner@garage.com"
+                {...form.register('email')}
+              />
               {emailError ? (
                 <p className="text-caption text-state-error">{emailError}</p>
               ) : (
-                <p className="text-caption text-text-muted">Use a valid email for invoices and notifications.</p>
+                <p className="text-caption text-text-muted">
+                  Use a valid email for invoices and notifications.
+                </p>
               )}
             </div>
           </section>
 
           <section className="space-y-s4">
-            <h3 className="text-small font-semibold text-text-primary">Working Hours</h3>
+            <h3 className="text-small font-semibold text-text-primary">
+              Working Hours
+            </h3>
             <div className="space-y-s1">
-              <label htmlFor="workingHours" className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="workingHours"
+                className="text-small font-medium text-text-secondary"
+              >
                 Working Hours
               </label>
-              <Input id="workingHours" className="h-11" placeholder="Mon - Sat: 8:00 AM - 6:00 PM" {...form.register('workingHours')} />
+              <Input
+                id="workingHours"
+                className="h-11"
+                placeholder="Mon - Sat: 8:00 AM - 6:00 PM"
+                {...form.register('workingHours')}
+              />
             </div>
           </section>
 
           <div className="space-y-s2 border-t border-border pt-s4">
             {isDirty ? <Badge variant="warning">Unsaved changes</Badge> : null}
-            <Button type="submit" className="h-11 w-full" disabled={saveDisabled}>
+            <Button
+              type="submit"
+              className="h-11 w-full"
+              disabled={saveDisabled}
+            >
               {form.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
