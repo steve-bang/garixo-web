@@ -1,7 +1,8 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { JSX, useEffect, useState } from 'react';
+import { JSX, useCallback, useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,14 +31,64 @@ import type {
   ServiceCategory,
   ServiceStatus
 } from '@/features/services/types';
+import {
+  SERVICE_CATEGORY_VALUES,
+  SERVICE_STATUS_VALUES
+} from '@/features/services/types';
 
 const pageSize = 20;
+const sort = 'default' as const;
+type QueryValue = string | null | undefined;
 
 type DrawerState = {
   open: boolean;
   mode: 'create' | 'edit' | 'duplicate';
   service: Service | null;
 };
+
+function parsePositiveInt(value: string | null, fallback = 1): number {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
+function toQueryStringValue(value: QueryValue): string | undefined {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+  return normalized ? normalized : undefined;
+}
+
+function parseServiceCategory(
+  value: string | null
+): ServiceCategory | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return SERVICE_CATEGORY_VALUES.includes(value as ServiceCategory)
+    ? (value as ServiceCategory)
+    : undefined;
+}
+
+function parseServiceStatus(value: string | null): ServiceStatus | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return SERVICE_STATUS_VALUES.includes(value as ServiceStatus)
+    ? (value as ServiceStatus)
+    : undefined;
+}
 
 function ServicesFiltersSkeleton(): JSX.Element {
   return (
@@ -54,13 +105,11 @@ function ServicesFiltersSkeleton(): JSX.Element {
 
 export function ServicesManagementPage(): JSX.Element {
   const toast = useToast();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState<ServiceCategory | undefined>();
-  const [status, setStatus] = useState<ServiceStatus | undefined>();
-  const [page, setPage] = useState(1);
-  const [sort] = useState<'default'>('default');
   const [drawerState, setDrawerState] = useState<DrawerState>({
     open: false,
     mode: 'create',
@@ -70,32 +119,91 @@ export function ServicesManagementPage(): JSX.Element {
   const [deleteTarget, setDeleteTarget] = useState<Service | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
+  const search = toQueryStringValue(searchParams.get('search')) ?? '';
+  const category = parseServiceCategory(searchParams.get('category'));
+  const status = parseServiceStatus(searchParams.get('status'));
+  const page = parsePositiveInt(searchParams.get('page'), 1);
+
+  const setQueryParams = useCallback(
+    (updates: Record<string, QueryValue>) => {
+      const nextParams = new URLSearchParams(searchParams.toString());
+
+      Object.entries(updates).forEach(([key, value]) => {
+        const normalized = toQueryStringValue(value);
+        if (!normalized) {
+          nextParams.delete(key);
+          return;
+        }
+
+        nextParams.set(key, normalized);
+      });
+
+      const nextQuery = nextParams.toString();
+      const currentQuery = searchParams.toString();
+      if (nextQuery === currentQuery) {
+        return;
+      }
+
+      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+        scroll: false
+      });
+    },
+    [pathname, router, searchParams]
+  );
+
+  const setQueryPage = useCallback(
+    (nextPage: number) => {
+      setQueryParams({ page: nextPage <= 1 ? undefined : String(nextPage) });
+    },
+    [setQueryParams]
+  );
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setSearch(searchInput.trim());
-      setPage(1);
+      if (searchInput.trim() === search) {
+        return;
+      }
+
+      setQueryParams({
+        search: searchInput,
+        page: '1'
+      });
     }, 300);
 
     return () => window.clearTimeout(timer);
-  }, [searchInput]);
+  }, [search, searchInput, setQueryParams]);
 
-  const listParams = {
-    search,
-    category,
-    status,
-    page,
-    pageSize,
-    sort
-  } as const;
+  const listParams = useMemo(
+    () =>
+      ({
+        search: search || undefined,
+        category,
+        status,
+        page,
+        pageSize,
+        sort
+      }) as const,
+    [category, page, search, status]
+  );
   const listQuery = useServices(listParams);
-  const kpiQuery = useServices({
-    search,
-    category,
-    status,
-    page: 1,
-    pageSize: 20,
-    sort
-  });
+  const kpiQuery = useServices(
+    useMemo(
+      () =>
+        ({
+          search: search || undefined,
+          category,
+          status,
+          page: 1,
+          pageSize: 20,
+          sort
+        }) as const,
+      [category, search, status]
+    )
+  );
 
   const createMutation = useCreateService();
   const updateMutation = useUpdateService();
@@ -235,27 +343,37 @@ export function ServicesManagementPage(): JSX.Element {
           category={category}
           status={status}
           onCategoryChange={(value) => {
-            setCategory(value);
-            setPage(1);
+            setQueryParams({
+              category: value,
+              page: '1'
+            });
           }}
           onStatusChange={(value) => {
-            setStatus(value);
-            setPage(1);
+            setQueryParams({
+              status: value,
+              page: '1'
+            });
           }}
           onRemoveCategory={() => {
-            setCategory(undefined);
-            setPage(1);
+            setQueryParams({
+              category: undefined,
+              page: '1'
+            });
           }}
           onRemoveStatus={() => {
-            setStatus(undefined);
-            setPage(1);
+            setQueryParams({
+              status: undefined,
+              page: '1'
+            });
           }}
           onClear={() => {
             setSearchInput('');
-            setSearch('');
-            setCategory(undefined);
-            setStatus(undefined);
-            setPage(1);
+            setQueryParams({
+              search: undefined,
+              category: undefined,
+              status: undefined,
+              page: undefined
+            });
           }}
         />
       )}
@@ -281,7 +399,7 @@ export function ServicesManagementPage(): JSX.Element {
               variant="secondary"
               size="sm"
               disabled={meta.page <= 1}
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              onClick={() => setQueryPage(Math.max(meta.page - 1, 1))}
             >
               Previous
             </Button>
@@ -291,7 +409,7 @@ export function ServicesManagementPage(): JSX.Element {
               size="sm"
               disabled={meta.page >= meta.totalPages}
               onClick={() =>
-                setPage((prev) => Math.min(prev + 1, meta.totalPages))
+                setQueryPage(Math.min(meta.page + 1, meta.totalPages))
               }
             >
               Next

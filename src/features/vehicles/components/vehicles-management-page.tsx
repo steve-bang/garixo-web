@@ -1,7 +1,8 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,9 +31,24 @@ import type { Role } from '@/types/primitives';
 type DrawerMode = 'view' | 'create' | 'edit';
 
 type BrandFilter = 'TOYOTA' | 'HONDA' | 'HYUNDAI' | 'FORD' | 'OTHER';
+type QueryValue = string | null | undefined;
 
 const currentUserRole: Role = 'OWNER';
 const pageSize = 20;
+const validBrands: BrandFilter[] = [
+  'TOYOTA',
+  'HONDA',
+  'HYUNDAI',
+  'FORD',
+  'OTHER'
+];
+const validVehicleStatuses: VehicleStatus[] = [
+  'ACTIVE',
+  'IN_SERVICE',
+  'COMPLETED',
+  'OVERDUE',
+  'INACTIVE'
+];
 
 type DrawerState = {
   open: boolean;
@@ -40,16 +56,56 @@ type DrawerState = {
   vehicle: Vehicle | null;
 };
 
+function parsePositiveInt(value: string | null, fallback = 1): number {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
+function toQueryStringValue(value: QueryValue): string | undefined {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+  return normalized ? normalized : undefined;
+}
+
+function parseBrand(value: string | null): BrandFilter | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return validBrands.includes(value as BrandFilter)
+    ? (value as BrandFilter)
+    : undefined;
+}
+
+function parseVehicleStatus(value: string | null): VehicleStatus | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return validVehicleStatuses.includes(value as VehicleStatus)
+    ? (value as VehicleStatus)
+    : undefined;
+}
+
 export function VehiclesManagementPage(): JSX.Element {
   const toast = useToast();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
-  const [brand, setBrand] = useState<BrandFilter | undefined>();
-  const [status, setStatus] = useState<VehicleStatus | undefined>();
-  const [customerId, setCustomerId] = useState<string | undefined>();
   const [shouldLoadCustomers, setShouldLoadCustomers] = useState(false);
-  const [page, setPage] = useState(1);
   const [drawerState, setDrawerState] = useState<DrawerState>({
     open: false,
     mode: 'view',
@@ -58,14 +114,64 @@ export function VehiclesManagementPage(): JSX.Element {
   const [deleteTarget, setDeleteTarget] = useState<Vehicle | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
+  const search = toQueryStringValue(searchParams.get('search')) ?? '';
+  const brand = parseBrand(searchParams.get('brand'));
+  const status = parseVehicleStatus(searchParams.get('status'));
+  const customerId = toQueryStringValue(searchParams.get('customerId'));
+  const page = parsePositiveInt(searchParams.get('page'), 1);
+
+  const setQueryParams = useCallback(
+    (updates: Record<string, QueryValue>) => {
+      const nextParams = new URLSearchParams(searchParams.toString());
+
+      Object.entries(updates).forEach(([key, value]) => {
+        const normalized = toQueryStringValue(value);
+        if (!normalized) {
+          nextParams.delete(key);
+          return;
+        }
+
+        nextParams.set(key, normalized);
+      });
+
+      const nextQuery = nextParams.toString();
+      const currentQuery = searchParams.toString();
+      if (nextQuery === currentQuery) {
+        return;
+      }
+
+      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+        scroll: false
+      });
+    },
+    [pathname, router, searchParams]
+  );
+
+  const setQueryPage = useCallback(
+    (nextPage: number) => {
+      setQueryParams({ page: nextPage <= 1 ? undefined : String(nextPage) });
+    },
+    [setQueryParams]
+  );
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setSearch(searchInput.trim());
-      setPage(1);
+      if (searchInput.trim() === search) {
+        return;
+      }
+
+      setQueryParams({
+        search: searchInput,
+        page: '1'
+      });
     }, 300);
 
     return () => window.clearTimeout(timer);
-  }, [searchInput]);
+  }, [search, searchInput, setQueryParams]);
 
   useEffect(() => {
     if (!highlightedId) {
@@ -76,14 +182,18 @@ export function VehiclesManagementPage(): JSX.Element {
     return () => window.clearTimeout(timer);
   }, [highlightedId]);
 
-  const listParams = {
-    search,
-    brand,
-    status,
-    customerId,
-    page,
-    pageSize
-  } as const;
+  const listParams = useMemo(
+    () =>
+      ({
+        search: search || undefined,
+        brand,
+        status,
+        customerId,
+        page,
+        pageSize
+      }) as const,
+    [brand, customerId, page, search, status]
+  );
   const listQuery = useVehicles(listParams);
 
   const detailQuery = useVehicleDetail(drawerState.vehicle?.id);
@@ -192,25 +302,33 @@ export function VehiclesManagementPage(): JSX.Element {
         customers={customersQuery.data?.items ?? []}
         onSearchInputChange={setSearchInput}
         onBrandChange={(value) => {
-          setBrand(value);
-          setPage(1);
+          setQueryParams({
+            brand: value,
+            page: '1'
+          });
         }}
         onStatusChange={(value) => {
-          setStatus(value);
-          setPage(1);
+          setQueryParams({
+            status: value,
+            page: '1'
+          });
         }}
         onCustomerChange={(value) => {
-          setCustomerId(value);
-          setPage(1);
+          setQueryParams({
+            customerId: value,
+            page: '1'
+          });
         }}
         onCustomerFilterOpen={() => setShouldLoadCustomers(true)}
         onClear={() => {
           setSearchInput('');
-          setSearch('');
-          setBrand(undefined);
-          setStatus(undefined);
-          setCustomerId(undefined);
-          setPage(1);
+          setQueryParams({
+            search: undefined,
+            brand: undefined,
+            status: undefined,
+            customerId: undefined,
+            page: undefined
+          });
         }}
       />
 
@@ -237,7 +355,7 @@ export function VehiclesManagementPage(): JSX.Element {
               variant="secondary"
               size="sm"
               disabled={meta.page <= 1}
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              onClick={() => setQueryPage(Math.max(meta.page - 1, 1))}
             >
               Previous
             </Button>
@@ -247,7 +365,7 @@ export function VehiclesManagementPage(): JSX.Element {
               size="sm"
               disabled={meta.page >= meta.totalPages}
               onClick={() =>
-                setPage((prev) => Math.min(prev + 1, meta.totalPages))
+                setQueryPage(Math.min(meta.page + 1, meta.totalPages))
               }
             >
               Next

@@ -1,6 +1,4 @@
-export type SettingsSectionKey =
-  | 'garage-information'
-  | 'service-configuration';
+export type SettingsSectionKey = 'garage-information';
 
 export type SettingsField = {
   label: string;

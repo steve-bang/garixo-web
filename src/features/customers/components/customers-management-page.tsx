@@ -1,7 +1,8 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,10 @@ type DrawerMode = 'view' | 'create' | 'edit';
 
 const currentUserRole: Role = 'OWNER';
 const pageSize = 20;
+const validCustomerStatuses: CustomerStatus[] = ['ACTIVE', 'INACTIVE', 'VIP'];
+const validSpendingTiers: SpendingTier[] = ['LOW', 'MEDIUM', 'HIGH'];
+
+type QueryValue = string | null | undefined;
 
 type DrawerState = {
   open: boolean;
@@ -40,14 +45,55 @@ type DrawerState = {
   customer: Customer | null;
 };
 
+function parsePositiveInt(value: string | null, fallback = 1): number {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
+function toQueryStringValue(value: QueryValue): string | undefined {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+  return normalized ? normalized : undefined;
+}
+
+function parseCustomerStatus(value: string | null): CustomerStatus | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return validCustomerStatuses.includes(value as CustomerStatus)
+    ? (value as CustomerStatus)
+    : undefined;
+}
+
+function parseSpendingTier(value: string | null): SpendingTier | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return validSpendingTiers.includes(value as SpendingTier)
+    ? (value as SpendingTier)
+    : undefined;
+}
+
 export function CustomersManagementPage(): JSX.Element {
   const toast = useToast();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<CustomerStatus | undefined>();
-  const [spendingTier, setSpendingTier] = useState<SpendingTier | undefined>();
-  const [page, setPage] = useState(1);
 
   const [drawerState, setDrawerState] = useState<DrawerState>({
     open: false,
@@ -57,14 +103,63 @@ export function CustomersManagementPage(): JSX.Element {
   const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
+  const search = toQueryStringValue(searchParams.get('search')) ?? '';
+  const status = parseCustomerStatus(searchParams.get('status'));
+  const spendingTier = parseSpendingTier(searchParams.get('spendingTier'));
+  const page = parsePositiveInt(searchParams.get('page'), 1);
+
+  const setQueryParams = useCallback(
+    (updates: Record<string, QueryValue>) => {
+      const nextParams = new URLSearchParams(searchParams.toString());
+
+      Object.entries(updates).forEach(([key, value]) => {
+        const normalized = toQueryStringValue(value);
+        if (!normalized) {
+          nextParams.delete(key);
+          return;
+        }
+
+        nextParams.set(key, normalized);
+      });
+
+      const nextQuery = nextParams.toString();
+      const currentQuery = searchParams.toString();
+      if (nextQuery === currentQuery) {
+        return;
+      }
+
+      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+        scroll: false
+      });
+    },
+    [pathname, router, searchParams]
+  );
+
+  const setQueryPage = useCallback(
+    (nextPage: number) => {
+      setQueryParams({ page: nextPage <= 1 ? undefined : String(nextPage) });
+    },
+    [setQueryParams]
+  );
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setSearch(searchInput.trim());
-      setPage(1);
+      if (searchInput.trim() === search) {
+        return;
+      }
+
+      setQueryParams({
+        search: searchInput,
+        page: '1'
+      });
     }, 300);
 
     return () => window.clearTimeout(timer);
-  }, [searchInput]);
+  }, [search, searchInput, setQueryParams]);
 
   useEffect(() => {
     if (!highlightedId) {
@@ -75,7 +170,17 @@ export function CustomersManagementPage(): JSX.Element {
     return () => window.clearTimeout(timer);
   }, [highlightedId]);
 
-  const listParams = { search, status, spendingTier, page, pageSize } as const;
+  const listParams = useMemo(
+    () =>
+      ({
+        search: search || undefined,
+        status,
+        spendingTier,
+        page,
+        pageSize
+      }) as const,
+    [page, search, spendingTier, status]
+  );
   const listQuery = useCustomers(listParams);
 
   const detailQuery = useCustomerDetail(drawerState.customer?.id);
@@ -180,27 +285,37 @@ export function CustomersManagementPage(): JSX.Element {
         spendingTier={spendingTier}
         onSearchInputChange={setSearchInput}
         onStatusChange={(value) => {
-          setStatus(value);
-          setPage(1);
+          setQueryParams({
+            status: value,
+            page: '1'
+          });
         }}
         onSpendingTierChange={(value) => {
-          setSpendingTier(value);
-          setPage(1);
+          setQueryParams({
+            spendingTier: value,
+            page: '1'
+          });
         }}
         onRemoveStatus={() => {
-          setStatus(undefined);
-          setPage(1);
+          setQueryParams({
+            status: undefined,
+            page: '1'
+          });
         }}
         onRemoveSpendingTier={() => {
-          setSpendingTier(undefined);
-          setPage(1);
+          setQueryParams({
+            spendingTier: undefined,
+            page: '1'
+          });
         }}
         onClear={() => {
           setSearchInput('');
-          setSearch('');
-          setStatus(undefined);
-          setSpendingTier(undefined);
-          setPage(1);
+          setQueryParams({
+            search: undefined,
+            status: undefined,
+            spendingTier: undefined,
+            page: undefined
+          });
         }}
       />
 
@@ -227,7 +342,7 @@ export function CustomersManagementPage(): JSX.Element {
               variant="secondary"
               size="sm"
               disabled={meta.page <= 1}
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              onClick={() => setQueryPage(Math.max(meta.page - 1, 1))}
             >
               Previous
             </Button>
@@ -237,7 +352,7 @@ export function CustomersManagementPage(): JSX.Element {
               size="sm"
               disabled={meta.page >= meta.totalPages}
               onClick={() =>
-                setPage((prev) => Math.min(prev + 1, meta.totalPages))
+                setQueryPage(Math.min(meta.page + 1, meta.totalPages))
               }
             >
               Next
