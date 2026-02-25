@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Modal } from '@/components/ui/modal';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { getServices } from '@/features/services/service';
+import { workOrdersQueryKey } from '@/features/work-orders/api';
 import {
   useUpdateWorkOrder,
   useUpdateWorkOrderStatus,
@@ -19,10 +20,12 @@ import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type {
   OrderPart,
   OrderService,
+  WorkOrder,
   WorkOrderStatus
 } from '@/features/work-orders/types';
 import {
   allowedTransitions,
+  computeTotalAmount,
   statusLabel
 } from '@/features/work-orders/utils';
 import type { InventoryItem } from '@/features/inventory/types';
@@ -63,6 +66,8 @@ async function getWorkers(): Promise<Worker[]> {
 
 export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
   const toast = useToast();
+  const queryClient = useQueryClient();
+  const detailQueryKey = [...workOrdersQueryKey, 'detail', orderId] as const;
 
   const orderQuery = useWorkOrder(orderId);
   const servicesQuery = useQuery({
@@ -87,8 +92,11 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
   const [pendingStatus, setPendingStatus] = useState<WorkOrderStatus | null>(
     null
   );
-  const [saving, setSaving] = useState(false);
-  const [showChangeSkeleton, setShowChangeSkeleton] = useState(false);
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [isSavingWorker, setIsSavingWorker] = useState(false);
+  const [isSavingStatus, setIsSavingStatus] = useState(false);
+  const [isSavingServices, setIsSavingServices] = useState(false);
+  const [isSavingParts, setIsSavingParts] = useState(false);
 
   const order = orderQuery.data;
 
@@ -98,7 +106,7 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
     setAssignWorkerId(order.workerId ?? '');
   }, [order]);
 
-  if (orderQuery.isLoading || showChangeSkeleton) {
+  if (orderQuery.isLoading) {
     return <WorkOrderDetailSkeleton />;
   }
 
@@ -118,26 +126,43 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
     order.status === WorkOrderStatusEnum.Cancelled;
   const nextStatuses = allowedTransitions[order.status] ?? [];
 
-  const runWithChangeSkeleton = async (
-    action: () => Promise<void>
-  ): Promise<void> => {
-    setShowChangeSkeleton(true);
-    try {
-      await action();
-    } finally {
-      setShowChangeSkeleton(false);
-    }
+  const setOrderCache = (updater: (current: WorkOrder) => WorkOrder): void => {
+    queryClient.setQueryData<WorkOrder | undefined>(
+      detailQueryKey,
+      (current) => (current ? updater(current) : current)
+    );
+  };
+
+  const invalidateWorkOrderQueries = (): void => {
+    void queryClient.invalidateQueries({ queryKey: workOrdersQueryKey });
   };
 
   const handleSaveNotes = async (): Promise<void> => {
     if (notes.trim() === (order.notes ?? '').trim()) {
       return;
     }
-    await runWithChangeSkeleton(async () => {
-      await updateMutation.mutateAsync({ id: order.id, payload: { notes } });
+
+    const previousNotes = order.notes ?? '';
+    setIsSavingNotes(true);
+    setOrderCache((current) => ({ ...current, notes }));
+
+    try {
+      const updated = await updateMutation.mutateAsync({
+        id: order.id,
+        payload: { notes }
+      });
+      queryClient.setQueryData(detailQueryKey, updated);
       toast.success('Notes updated.');
-      await orderQuery.refetch();
-    });
+    } catch (error) {
+      setOrderCache((current) => ({ ...current, notes: previousNotes }));
+      setNotes(previousNotes);
+      toast.error(
+        error instanceof Error ? error.message : 'Could not update notes.'
+      );
+    } finally {
+      setIsSavingNotes(false);
+      invalidateWorkOrderQueries();
+    }
   };
 
   const handleAssignWorker = async (): Promise<void> => {
@@ -159,17 +184,39 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
       return;
     }
 
-    await runWithChangeSkeleton(async () => {
-      await updateMutation.mutateAsync({
+    const previousWorkerId = order.workerId ?? '';
+    const previousWorkerName = order.workerName ?? '';
+    setIsSavingWorker(true);
+    setOrderCache((current) => ({
+      ...current,
+      workerId: selectedWorker.id,
+      workerName: selectedWorker.name
+    }));
+
+    try {
+      const updated = await updateMutation.mutateAsync({
         id: order.id,
         payload: {
           workerId: selectedWorker.id,
           workerName: selectedWorker.name
         }
       });
+      queryClient.setQueryData(detailQueryKey, updated);
       toast.success('Worker assigned.');
-      await orderQuery.refetch();
-    });
+    } catch (error) {
+      setOrderCache((current) => ({
+        ...current,
+        workerId: previousWorkerId,
+        workerName: previousWorkerName
+      }));
+      setAssignWorkerId(previousWorkerId);
+      toast.error(
+        error instanceof Error ? error.message : 'Could not assign worker.'
+      );
+    } finally {
+      setIsSavingWorker(false);
+      invalidateWorkOrderQueries();
+    }
   };
 
   const handleChangeStatus = async (status: WorkOrderStatus): Promise<void> => {
@@ -179,10 +226,32 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
       );
       return;
     }
-    await statusMutation.mutateAsync({ id: order.id, payload: { status } });
-    await orderQuery.refetch();
-    if (status === WorkOrderStatusEnum.Completed) {
-      await inventoryQuery.refetch();
+
+    const previousStatus = order.status;
+    setIsSavingStatus(true);
+    setOrderCache((current) => ({ ...current, status }));
+
+    try {
+      const updated = await statusMutation.mutateAsync({
+        id: order.id,
+        payload: { status }
+      });
+      queryClient.setQueryData(detailQueryKey, updated);
+      toast.success(`Status updated to ${statusLabel(status)}.`);
+      setPendingStatus(null);
+
+      if (status === WorkOrderStatusEnum.Completed) {
+        void inventoryQuery.refetch();
+      }
+    } catch (error) {
+      setOrderCache((current) => ({ ...current, status: previousStatus }));
+      setPendingStatus(null);
+      toast.error(
+        error instanceof Error ? error.message : 'Could not update status.'
+      );
+    } finally {
+      setIsSavingStatus(false);
+      invalidateWorkOrderQueries();
     }
   };
 
@@ -190,20 +259,7 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
     if (!pendingStatus) {
       return;
     }
-    setSaving(true);
-    await runWithChangeSkeleton(async () => {
-      try {
-        await handleChangeStatus(pendingStatus);
-        toast.success(`Status updated to ${statusLabel(pendingStatus)}.`);
-        setPendingStatus(null);
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : 'Could not update status.'
-        );
-      } finally {
-        setSaving(false);
-      }
-    });
+    await handleChangeStatus(pendingStatus);
   };
 
   const handleApplyServices = async (serviceIds: string[]): Promise<void> => {
@@ -237,8 +293,17 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
       })
       .filter((service): service is OrderService => service !== null);
 
-    await runWithChangeSkeleton(async () => {
-      await updateMutation.mutateAsync({
+    const previousServices = order.services;
+    const previousTotalAmount = order.totalAmount;
+    setIsSavingServices(true);
+    setOrderCache((current) => ({
+      ...current,
+      services: nextServices,
+      totalAmount: computeTotalAmount(nextServices, current.parts)
+    }));
+
+    try {
+      const updated = await updateMutation.mutateAsync({
         id: order.id,
         payload: {
           services: nextServices,
@@ -249,10 +314,22 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
           priority: order.priority
         }
       });
+      queryClient.setQueryData(detailQueryKey, updated);
 
       toast.success('Services updated.');
-      await orderQuery.refetch();
-    });
+    } catch (error) {
+      setOrderCache((current) => ({
+        ...current,
+        services: previousServices,
+        totalAmount: previousTotalAmount
+      }));
+      toast.error(
+        error instanceof Error ? error.message : 'Could not update services.'
+      );
+    } finally {
+      setIsSavingServices(false);
+      invalidateWorkOrderQueries();
+    }
   };
 
   const handleUpdateServicePrice = async (
@@ -271,14 +348,34 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
       service.id === serviceId ? { ...service, price: nextPrice } : service
     );
 
-    await runWithChangeSkeleton(async () => {
-      await updateMutation.mutateAsync({
+    const previousServices = order.services;
+    const previousTotalAmount = order.totalAmount;
+    setIsSavingServices(true);
+    setOrderCache((current) => ({
+      ...current,
+      services: nextServices,
+      totalAmount: computeTotalAmount(nextServices, current.parts)
+    }));
+
+    try {
+      const updated = await updateMutation.mutateAsync({
         id: order.id,
         payload: { services: nextServices, parts: order.parts }
       });
-
-      await orderQuery.refetch();
-    });
+      queryClient.setQueryData(detailQueryKey, updated);
+    } catch (error) {
+      setOrderCache((current) => ({
+        ...current,
+        services: previousServices,
+        totalAmount: previousTotalAmount
+      }));
+      toast.error(
+        error instanceof Error ? error.message : 'Could not update service.'
+      );
+    } finally {
+      setIsSavingServices(false);
+      invalidateWorkOrderQueries();
+    }
   };
 
   const handleRemoveService = async (serviceId: string): Promise<void> => {
@@ -289,14 +386,35 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
     const nextServices = order.services.filter(
       (service) => service.id !== serviceId
     );
-    await runWithChangeSkeleton(async () => {
-      await updateMutation.mutateAsync({
+    const previousServices = order.services;
+    const previousTotalAmount = order.totalAmount;
+    setIsSavingServices(true);
+    setOrderCache((current) => ({
+      ...current,
+      services: nextServices,
+      totalAmount: computeTotalAmount(nextServices, current.parts)
+    }));
+
+    try {
+      const updated = await updateMutation.mutateAsync({
         id: order.id,
         payload: { services: nextServices, parts: order.parts }
       });
+      queryClient.setQueryData(detailQueryKey, updated);
       toast.success('Service removed.');
-      await orderQuery.refetch();
-    });
+    } catch (error) {
+      setOrderCache((current) => ({
+        ...current,
+        services: previousServices,
+        totalAmount: previousTotalAmount
+      }));
+      toast.error(
+        error instanceof Error ? error.message : 'Could not remove service.'
+      );
+    } finally {
+      setIsSavingServices(false);
+      invalidateWorkOrderQueries();
+    }
   };
 
   const handleAddPart = async (partId: string): Promise<void> => {
@@ -323,8 +441,17 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
       }
     ];
 
-    await runWithChangeSkeleton(async () => {
-      await updateMutation.mutateAsync({
+    const previousParts = order.parts;
+    const previousTotalAmount = order.totalAmount;
+    setIsSavingParts(true);
+    setOrderCache((current) => ({
+      ...current,
+      parts: nextParts,
+      totalAmount: computeTotalAmount(current.services, nextParts)
+    }));
+
+    try {
+      const updated = await updateMutation.mutateAsync({
         id: order.id,
         payload: {
           services: order.services,
@@ -335,10 +462,22 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
           priority: order.priority
         }
       });
+      queryClient.setQueryData(detailQueryKey, updated);
 
       toast.success('Part added.');
-      await orderQuery.refetch();
-    });
+    } catch (error) {
+      setOrderCache((current) => ({
+        ...current,
+        parts: previousParts,
+        totalAmount: previousTotalAmount
+      }));
+      toast.error(
+        error instanceof Error ? error.message : 'Could not add part.'
+      );
+    } finally {
+      setIsSavingParts(false);
+      invalidateWorkOrderQueries();
+    }
   };
 
   const handleUpdatePartQuantity = async (
@@ -357,14 +496,34 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
       part.id === partId ? { ...part, quantity } : part
     );
 
-    await runWithChangeSkeleton(async () => {
-      await updateMutation.mutateAsync({
+    const previousParts = order.parts;
+    const previousTotalAmount = order.totalAmount;
+    setIsSavingParts(true);
+    setOrderCache((current) => ({
+      ...current,
+      parts: nextParts,
+      totalAmount: computeTotalAmount(current.services, nextParts)
+    }));
+
+    try {
+      const updated = await updateMutation.mutateAsync({
         id: order.id,
         payload: { services: order.services, parts: nextParts }
       });
-
-      await orderQuery.refetch();
-    });
+      queryClient.setQueryData(detailQueryKey, updated);
+    } catch (error) {
+      setOrderCache((current) => ({
+        ...current,
+        parts: previousParts,
+        totalAmount: previousTotalAmount
+      }));
+      toast.error(
+        error instanceof Error ? error.message : 'Could not update part.'
+      );
+    } finally {
+      setIsSavingParts(false);
+      invalidateWorkOrderQueries();
+    }
   };
 
   const handleRemovePart = async (partId: string): Promise<void> => {
@@ -373,14 +532,35 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
       return;
     }
     const nextParts = order.parts.filter((part) => part.id !== partId);
-    await runWithChangeSkeleton(async () => {
-      await updateMutation.mutateAsync({
+    const previousParts = order.parts;
+    const previousTotalAmount = order.totalAmount;
+    setIsSavingParts(true);
+    setOrderCache((current) => ({
+      ...current,
+      parts: nextParts,
+      totalAmount: computeTotalAmount(current.services, nextParts)
+    }));
+
+    try {
+      const updated = await updateMutation.mutateAsync({
         id: order.id,
         payload: { services: order.services, parts: nextParts }
       });
+      queryClient.setQueryData(detailQueryKey, updated);
       toast.success('Part removed.');
-      await orderQuery.refetch();
-    });
+    } catch (error) {
+      setOrderCache((current) => ({
+        ...current,
+        parts: previousParts,
+        totalAmount: previousTotalAmount
+      }));
+      toast.error(
+        error instanceof Error ? error.message : 'Could not remove part.'
+      );
+    } finally {
+      setIsSavingParts(false);
+      invalidateWorkOrderQueries();
+    }
   };
 
   const completedAt =
@@ -392,8 +572,7 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
           event.status === WorkOrderStatusEnum.Paid
       )?.timestamp ?? undefined;
 
-  const isMutating =
-    saving || updateMutation.isPending || statusMutation.isPending;
+  const isMutating = isSavingWorker || isSavingStatus;
 
   return (
     <div className="grid gap-s4 p-s4 pb-24 md:p-s6 xl:grid-cols-[280px_minmax(0,1fr)_320px] xl:gap-s6 xl:p-s8 xl:pb-s8">
@@ -476,8 +655,13 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
                 }
                 onClick={() => void handleAssignWorker()}
               >
-                Assign Worker
+                {isSavingWorker ? 'Assigning...' : 'Assign Worker'}
               </Button>
+              {isSavingWorker ? (
+                <p className="text-caption text-text-muted">
+                  Assigning worker...
+                </p>
+              ) : null}
             </>
           )}
         </Card>
@@ -487,22 +671,28 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
         <WorkOrderServicesList
           services={order.services}
           availableServices={servicesQuery.data?.items ?? []}
-          isSaving={isMutating}
+          isSaving={isSavingServices}
           readOnly={isReadOnlyContent}
           onApplyServices={handleApplyServices}
           onUpdateServicePrice={handleUpdateServicePrice}
           onRemoveService={handleRemoveService}
         />
+        {isSavingServices ? (
+          <p className="text-caption text-text-muted">Updating services...</p>
+        ) : null}
 
         <WorkOrderPartsList
           parts={order.parts}
           inventoryItems={inventoryQuery.data ?? []}
-          isSaving={isMutating}
+          isSaving={isSavingParts}
           readOnly={isReadOnlyContent}
           onAddPart={handleAddPart}
           onUpdatePartQuantity={handleUpdatePartQuantity}
           onRemovePart={handleRemovePart}
         />
+        {isSavingParts ? (
+          <p className="text-caption text-text-muted">Updating parts...</p>
+        ) : null}
 
         <Card className="p-s4">
           <h3 className="text-small font-semibold">Notes</h3>
@@ -511,10 +701,15 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
             rows={4}
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
+            disabled={isSavingNotes}
           />
           <div className="mt-s3 flex justify-end">
-            <Button size="sm" onClick={() => void handleSaveNotes()}>
-              Save Notes
+            <Button
+              size="sm"
+              disabled={isSavingNotes}
+              onClick={() => void handleSaveNotes()}
+            >
+              {isSavingNotes ? 'Saving...' : 'Save Notes'}
             </Button>
           </div>
         </Card>
@@ -550,10 +745,13 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
           status={order.status}
           totalAmount={order.totalAmount}
           completedAt={completedAt}
-          isSaving={isMutating}
+          isSaving={isSavingStatus}
           nextStatuses={nextStatuses}
           onRequestStatusChange={setPendingStatus}
         />
+        {isSavingStatus ? (
+          <p className="text-caption text-text-muted">Updating status...</p>
+        ) : null}
       </aside>
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-white/95 px-s4 py-s3 shadow-sm xl:hidden">
@@ -572,9 +770,9 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
             <Button
               className="h-11 min-w-[160px]"
               onClick={() => setPendingStatus(nextStatuses[0] ?? null)}
-              disabled={isMutating}
+              disabled={isSavingStatus}
             >
-              {statusLabel(nextStatuses[0])}
+              {isSavingStatus ? 'Updating...' : statusLabel(nextStatuses[0])}
             </Button>
           )}
         </div>
@@ -590,15 +788,15 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
             <Button
               variant="secondary"
               onClick={() => setPendingStatus(null)}
-              disabled={saving}
+              disabled={isSavingStatus}
             >
               Cancel
             </Button>
             <Button
               onClick={() => void handleConfirmStatusChange()}
-              disabled={saving || !pendingStatus}
+              disabled={isSavingStatus || !pendingStatus}
             >
-              {saving ? 'Updating...' : 'Confirm'}
+              {isSavingStatus ? 'Updating...' : 'Confirm'}
             </Button>
           </>
         }
