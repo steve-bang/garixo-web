@@ -64,7 +64,9 @@ export function CustomerAutocomplete({
 
         {!loading
           ? items.map((customer) => {
-              const latestPlate = customer.vehicles[0]?.plate ?? '-';
+              const vehicleSummary = `${customer.totalVehicles} vehicle${
+                customer.totalVehicles === 1 ? '' : 's'
+              }`;
               const active = selectedCustomerId === customer.id;
 
               return (
@@ -84,7 +86,9 @@ export function CustomerAutocomplete({
                       {customer.phone}
                     </p>
                   </div>
-                  <p className="text-caption text-text-muted">{latestPlate}</p>
+                  <p className="text-caption text-text-muted">
+                    {vehicleSummary}
+                  </p>
                 </button>
               );
             })

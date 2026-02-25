@@ -12,6 +12,8 @@ export interface Vehicle {
   lastServiceDate?: string;
 }
 
+export type CustomerVehicle = Vehicle;
+
 export interface ServiceRecord {
   id: string;
   date: string;
@@ -27,7 +29,7 @@ export interface Customer {
   email?: string;
   address?: string;
   status: CustomerStatus;
-  vehicles: Vehicle[];
+  totalVehicles: number;
   totalVisits: number;
   totalSpent: number;
   lastVisit?: string | null;
@@ -50,6 +52,7 @@ export type CustomerListResponse = {
 
 export type CustomerDetailResponse = {
   customer: Customer;
+  vehicles: CustomerVehicle[];
   serviceHistory: ServiceRecord[];
 };
 

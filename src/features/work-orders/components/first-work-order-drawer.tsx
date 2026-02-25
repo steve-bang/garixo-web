@@ -9,11 +9,9 @@ import { Drawer } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { CustomerAutocomplete } from '@/features/work-orders/components/customer-autocomplete';
-import {
-  createWorkOrder
-} from '@/features/work-orders/service';
+import { createWorkOrder } from '@/features/work-orders/service';
 import type { CreateWorkOrderInput } from '@/features/work-orders/schema';
-import type { Customer } from '@/features/customers/types';
+import type { Customer, CustomerVehicle } from '@/features/customers/types';
 import type { InventoryItem } from '@/features/inventory/types';
 import type { Service } from '@/features/services/types';
 import type { OrderPart, OrderService } from '@/features/work-orders/types';
@@ -151,6 +149,9 @@ export function FirstWorkOrderDrawer({
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
   );
+  const [customerVehicles, setCustomerVehicles] = useState<CustomerVehicle[]>(
+    []
+  );
   const [lockCustomerSelection, setLockCustomerSelection] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [selectedServices, setSelectedServices] = useState<OrderService[]>([]);
@@ -211,6 +212,7 @@ export function FirstWorkOrderDrawer({
     setSelectedCustomer(null);
     setLockCustomerSelection(false);
     setSelectedVehicleId('');
+    setCustomerVehicles([]);
     setSelectedServices([]);
     setSelectedParts([]);
     setNotes('');
@@ -235,11 +237,40 @@ export function FirstWorkOrderDrawer({
     }
 
     return (
-      selectedCustomer.vehicles.find(
-        (vehicle) => vehicle.id === selectedVehicleId
-      ) ?? null
+      customerVehicles.find((vehicle) => vehicle.id === selectedVehicleId) ??
+      null
     );
-  }, [selectedCustomer, selectedVehicleId]);
+  }, [customerVehicles, selectedCustomer, selectedVehicleId]);
+
+  useEffect(() => {
+    if (!selectedCustomer) {
+      setCustomerVehicles([]);
+      return;
+    }
+
+    void fetch(`/api/customers/${selectedCustomer.id}/vehicles`)
+      .then(async (response) => {
+        const payload = (await response.json()) as {
+          success: boolean;
+          data?: CustomerVehicle[];
+        };
+        if (!payload.success || !payload.data) {
+          setCustomerVehicles([]);
+          return;
+        }
+        setCustomerVehicles(payload.data);
+      })
+      .catch(() => setCustomerVehicles([]));
+  }, [selectedCustomer]);
+
+  useEffect(() => {
+    if (selectedVehicleId || customerVehicles.length === 0) {
+      return;
+    }
+
+    setSelectedVehicleId(customerVehicles[0]?.id ?? '');
+    setShowCreateVehicle(false);
+  }, [customerVehicles, selectedVehicleId]);
 
   const totalPrice = useMemo(() => {
     const servicesTotal = selectedServices.reduce(
@@ -365,10 +396,10 @@ export function FirstWorkOrderDrawer({
       model: payload.data.model
     };
 
-    setSelectedCustomer((prev) => {
-      if (!prev) return prev;
-      return { ...prev, vehicles: [vehicle, ...prev.vehicles] };
-    });
+    setCustomerVehicles((prev) => [vehicle, ...prev]);
+    setSelectedCustomer((prev) =>
+      prev ? { ...prev, totalVehicles: prev.totalVehicles + 1 } : prev
+    );
     setSelectedVehicleId(vehicle.id);
     setSubmitError('');
     setQuickVehiclePlate('');
@@ -528,8 +559,8 @@ export function FirstWorkOrderDrawer({
                     {selectedCustomer.phone || 'No phone number'}
                   </p>
                   <p className="text-caption text-text-muted">
-                    {selectedCustomer.vehicles.length > 0
-                      ? `${selectedCustomer.vehicles.length} vehicle(s)`
+                    {selectedCustomer.totalVehicles > 0
+                      ? `${selectedCustomer.totalVehicles} vehicle(s)`
                       : 'No vehicles yet'}
                   </p>
                 </div>
@@ -552,8 +583,8 @@ export function FirstWorkOrderDrawer({
               onQueryChange={setCustomerQuery}
               onSelect={(customer) => {
                 setSelectedCustomer(customer);
-                setSelectedVehicleId(customer.vehicles[0]?.id ?? '');
-                setShowCreateVehicle(customer.vehicles.length === 0);
+                setSelectedVehicleId('');
+                setShowCreateVehicle(customer.totalVehicles === 0);
                 setLockCustomerSelection(true);
                 setSubmitError('');
               }}
@@ -615,14 +646,14 @@ export function FirstWorkOrderDrawer({
               </Button>
             </div>
 
-            {selectedCustomer.vehicles.length > 0 ? (
+            {customerVehicles.length > 0 ? (
               <select
                 className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small"
                 value={selectedVehicleId}
                 onChange={(event) => setSelectedVehicleId(event.target.value)}
               >
                 <option value="">Select vehicle</option>
-                {selectedCustomer.vehicles.map((vehicle) => (
+                {customerVehicles.map((vehicle) => (
                   <option key={vehicle.id} value={vehicle.id}>
                     {vehicle.plate} {vehicle.model ? `• ${vehicle.model}` : ''}
                   </option>

@@ -65,6 +65,7 @@ export async function GET(
     search: url.searchParams.get('search') ?? undefined,
     brand: url.searchParams.get('brand') ?? undefined,
     status: url.searchParams.get('status') ?? undefined,
+    customerId: url.searchParams.get('customerId') ?? undefined,
     page: url.searchParams.get('page') ?? undefined,
     pageSize: url.searchParams.get('pageSize') ?? undefined
   });
@@ -79,7 +80,7 @@ export async function GET(
     );
   }
 
-  const { search, brand, status, page, pageSize } = parsed.data;
+  const { search, brand, status, customerId, page, pageSize } = parsed.data;
 
   let filtered = await listGarageVehicles(garageId);
 
@@ -140,6 +141,10 @@ export async function GET(
 
   if (status) {
     filtered = filtered.filter((item) => item.status === status);
+  }
+
+  if (customerId) {
+    filtered = filtered.filter((item) => item.customerId === customerId);
   }
 
   const total = filtered.length;
@@ -207,9 +212,7 @@ export async function POST(
     year: parsed.data.year,
     color: parsed.data.color,
     vin: parsed.data.vin,
-    customerId:
-      parsed.data.customerId ||
-      `cus-${parsed.data.customerPhone.replace(/\D/g, '').slice(-6)}`,
+    customerId: parsed.data.customerId,
     customerName: parsed.data.customerName,
     customerPhone: parsed.data.customerPhone,
     status: parsed.data.status,

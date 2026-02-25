@@ -1,5 +1,19 @@
-import type { Customer, ServiceRecord } from '@/features/customers/types';
+import type {
+  Customer,
+  CustomerVehicle,
+  ServiceRecord
+} from '@/features/customers/types';
+import type { Vehicle } from '@/features/vehicles/types';
+import { toPlateDisplay } from '@/features/vehicles/utils';
 import { firebaseAdmin } from '@/lib/firebase-admin';
+import {
+  createGarageVehicle,
+  deleteGarageVehicle,
+  findGarageVehicleById,
+  findGarageVehicleByNormalizedPlate,
+  listGarageVehicles,
+  updateGarageVehicle
+} from '@/services/firebase/vehicles-service';
 
 type CustomerFirestoreDoc = {
   id?: string;
@@ -9,7 +23,6 @@ type CustomerFirestoreDoc = {
   email?: string;
   address?: string;
   status?: Customer['status'];
-  vehicles?: Customer['vehicles'];
   totalVisits?: number;
   totalSpent?: number;
   lastVisit?: string | null;
@@ -26,34 +39,11 @@ type CustomerHistoryFirestoreDoc = {
   amount?: number;
 };
 
-type CustomerVehicleFirestoreDoc = {
-  id?: string;
-  plate?: string;
-  brand?: string;
-  model?: string;
-  year?: number;
-  color?: string;
-  lastServiceDate?: string;
-  createdAt?: string;
-  updatedAt?: string;
-};
-
 function customersCollection(garageId: string) {
   return firebaseAdmin.db
     .collection('garages')
     .doc(garageId)
     .collection('customers');
-}
-
-function customerVehiclesCollection(garageId: string, customerId: string) {
-  return customersCollection(garageId).doc(customerId).collection('vehicles');
-}
-
-function withoutUndefined<T extends Record<string, unknown>>(value: T): T {
-  const entries = Object.entries(value).filter(
-    ([, entry]) => entry !== undefined
-  );
-  return Object.fromEntries(entries) as T;
 }
 
 function mapCustomerDoc(id: string, data: CustomerFirestoreDoc): Customer {
@@ -65,7 +55,7 @@ function mapCustomerDoc(id: string, data: CustomerFirestoreDoc): Customer {
     email: data.email ?? '',
     address: data.address ?? '',
     status: data.status ?? 'ACTIVE',
-    vehicles: data.vehicles ?? [],
+    totalVehicles: 0,
     totalVisits: data.totalVisits ?? 0,
     totalSpent: data.totalSpent ?? 0,
     lastVisit: data.lastVisit,
@@ -88,18 +78,15 @@ function mapHistoryDoc(
   };
 }
 
-function mapVehicleDoc(
-  id: string,
-  data: CustomerVehicleFirestoreDoc
-): Customer['vehicles'][number] {
+function mapGarageVehicleToCustomerVehicle(vehicle: Vehicle): CustomerVehicle {
   return {
-    id,
-    plate: data.plate ?? '',
-    brand: data.brand ?? '',
-    model: data.model ?? '',
-    year: data.year,
-    color: data.color ?? '',
-    lastServiceDate: data.lastServiceDate
+    id: vehicle.id,
+    plate: toPlateDisplay(vehicle.plateNumber),
+    brand: vehicle.brand ?? '',
+    model: vehicle.model ?? '',
+    year: vehicle.year,
+    color: vehicle.color ?? '',
+    lastServiceDate: vehicle.lastServiceDate
   };
 }
 
@@ -158,7 +145,6 @@ export async function createGarageCustomer(
     email: input.email ?? '',
     address: input.address ?? '',
     status: input.status,
-    vehicles: input.vehicles,
     totalVisits: input.totalVisits,
     totalSpent: input.totalSpent,
     lastVisit: input.lastVisit,
@@ -174,7 +160,9 @@ export async function createGarageCustomer(
 export async function updateGarageCustomer(
   garageId: string,
   customerId: string,
-  input: Partial<Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>>
+  input: Partial<
+    Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'totalVehicles'>
+  >
 ): Promise<Customer | null> {
   const ref = customersCollection(garageId).doc(customerId);
   const existing = await ref.get();
@@ -240,12 +228,10 @@ export async function listGarageCustomerServiceHistory(
 export async function listGarageCustomerVehicles(
   garageId: string,
   customerId: string
-): Promise<Customer['vehicles']> {
-  const snap = await customerVehiclesCollection(garageId, customerId).get();
-  return snap.docs
-    .map((doc: { id: string; data: () => unknown }) =>
-      mapVehicleDoc(doc.id, doc.data() as CustomerVehicleFirestoreDoc)
-    )
+): Promise<CustomerVehicle[]> {
+  const vehicles = await listGarageVehicles(garageId);
+  return vehicles
+    .filter((vehicle) => vehicle.customerId === customerId)
     .sort((a, b) => {
       const aTime = a.lastServiceDate
         ? new Date(a.lastServiceDate).getTime()
@@ -254,32 +240,8 @@ export async function listGarageCustomerVehicles(
         ? new Date(b.lastServiceDate).getTime()
         : 0;
       return bTime - aTime;
-    });
-}
-
-export async function syncGarageCustomerVehiclesSnapshot(
-  garageId: string,
-  customerId: string
-): Promise<void> {
-  const vehicles = (await listGarageCustomerVehicles(garageId, customerId)).map(
-    (vehicle) =>
-      withoutUndefined({
-        id: vehicle.id,
-        plate: vehicle.plate,
-        brand: vehicle.brand,
-        model: vehicle.model,
-        year: vehicle.year,
-        color: vehicle.color,
-        lastServiceDate: vehicle.lastServiceDate
-      })
-  );
-  await customersCollection(garageId).doc(customerId).set(
-    {
-      vehicles,
-      updatedAt: new Date().toISOString()
-    },
-    { merge: true }
-  );
+    })
+    .map(mapGarageVehicleToCustomerVehicle);
 }
 
 export async function createGarageCustomerVehicle(
@@ -293,23 +255,30 @@ export async function createGarageCustomerVehicle(
     color?: string;
     lastServiceDate?: string;
   }
-): Promise<Customer['vehicles'][number]> {
-  const ref = customerVehiclesCollection(garageId, customerId).doc();
-  const payload: CustomerVehicleFirestoreDoc = {
-    plate: input.plate,
+): Promise<CustomerVehicle> {
+  const customer = await findGarageCustomerById(garageId, customerId);
+  if (!customer) {
+    throw new Error('Customer not found.');
+  }
+
+  const created = await createGarageVehicle(garageId, {
+    plateNumber: toPlateDisplay(input.plate),
     brand: input.brand,
     model: input.model ?? '',
     year: input.year,
     color: input.color ?? '',
+    vin: '',
+    customerId,
+    customerName: customer.name,
+    customerPhone: customer.phone,
+    status: 'ACTIVE',
+    totalVisits: 0,
+    totalSpent: 0,
     lastServiceDate: input.lastServiceDate,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
+    notes: ''
+  });
 
-  const safePayload = withoutUndefined(payload);
-  await ref.set(safePayload);
-  await syncGarageCustomerVehiclesSnapshot(garageId, customerId);
-  return mapVehicleDoc(ref.id, safePayload);
+  return mapGarageVehicleToCustomerVehicle(created);
 }
 
 export async function updateGarageCustomerVehicle(
@@ -324,48 +293,73 @@ export async function updateGarageCustomerVehicle(
     color?: string;
     lastServiceDate?: string;
   }>
-): Promise<Customer['vehicles'][number] | null> {
-  const ref = customerVehiclesCollection(garageId, customerId).doc(vehicleId);
-  const existing = await ref.get();
-  if (!existing.exists) {
+): Promise<CustomerVehicle | null> {
+  const existing = await findGarageVehicleById(garageId, vehicleId);
+  if (!existing || existing.customerId !== customerId) {
     return null;
   }
 
-  const safePayload = withoutUndefined({
-    ...input,
-    updatedAt: new Date().toISOString()
+  const updated = await updateGarageVehicle(garageId, vehicleId, {
+    plateNumber: input.plate,
+    brand: input.brand,
+    model: input.model,
+    year: input.year,
+    color: input.color,
+    lastServiceDate: input.lastServiceDate
   });
 
-  await ref.set(safePayload, { merge: true });
-
-  const updated = await ref.get();
-  if (!updated.exists) {
+  if (!updated) {
     return null;
   }
 
-  await syncGarageCustomerVehiclesSnapshot(garageId, customerId);
-  return mapVehicleDoc(
-    updated.id,
-    updated.data() as CustomerVehicleFirestoreDoc
-  );
+  return mapGarageVehicleToCustomerVehicle(updated);
 }
 
 export async function deleteGarageCustomerVehicle(
   garageId: string,
   customerId: string,
   vehicleId: string
-): Promise<Customer['vehicles'][number] | null> {
-  const ref = customerVehiclesCollection(garageId, customerId).doc(vehicleId);
-  const existing = await ref.get();
-  if (!existing.exists) {
+): Promise<CustomerVehicle | null> {
+  const existing = await findGarageVehicleById(garageId, vehicleId);
+  if (!existing || existing.customerId !== customerId) {
     return null;
   }
 
-  const vehicle = mapVehicleDoc(
-    existing.id,
-    existing.data() as CustomerVehicleFirestoreDoc
-  );
-  await ref.delete();
-  await syncGarageCustomerVehiclesSnapshot(garageId, customerId);
-  return vehicle;
+  const deleted = await deleteGarageVehicle(garageId, vehicleId);
+  if (!deleted) {
+    return null;
+  }
+
+  return mapGarageVehicleToCustomerVehicle(deleted);
+}
+
+export async function isGarageCustomerVehiclePlateExists(
+  garageId: string,
+  customerId: string,
+  plate: string,
+  excludeVehicleId?: string
+): Promise<boolean> {
+  const existing = await findGarageVehicleByNormalizedPlate(garageId, plate);
+  if (!existing) {
+    return false;
+  }
+
+  if (excludeVehicleId && existing.id === excludeVehicleId) {
+    return false;
+  }
+
+  return existing.customerId === customerId;
+}
+
+export async function getGarageCustomerVehicleCounts(
+  garageId: string
+): Promise<Map<string, number>> {
+  const vehicles = await listGarageVehicles(garageId);
+  return vehicles.reduce((acc, vehicle) => {
+    const customerId = vehicle.customerId;
+    if (!customerId) return acc;
+
+    acc.set(customerId, (acc.get(customerId) ?? 0) + 1);
+    return acc;
+  }, new Map<string, number>());
 }

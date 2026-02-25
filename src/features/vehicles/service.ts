@@ -1,11 +1,20 @@
-import type { CreateVehicleInput, UpdateVehicleInput } from '@/features/vehicles/schema';
-import type { ServiceRecord, Vehicle, VehicleListResponse, VehicleStatus } from '@/features/vehicles/types';
+import type {
+  CreateVehicleInput,
+  UpdateVehicleInput
+} from '@/features/vehicles/schema';
+import type {
+  ServiceRecord,
+  Vehicle,
+  VehicleListResponse,
+  VehicleStatus
+} from '@/features/vehicles/types';
 import type { ApiResponse } from '@/types/api';
 
 export type GetVehiclesParams = {
   search?: string;
   brand?: 'TOYOTA' | 'HONDA' | 'HYUNDAI' | 'FORD' | 'OTHER';
   status?: VehicleStatus;
+  customerId?: string;
   page?: number;
   pageSize?: number;
 };
@@ -34,7 +43,9 @@ function toQuery(params: GetVehiclesParams): string {
   return search.toString();
 }
 
-export async function getVehicles(params: GetVehiclesParams): Promise<VehicleListResponse> {
+export async function getVehicles(
+  params: GetVehiclesParams
+): Promise<VehicleListResponse> {
   const query = toQuery(params);
   const response = await fetch(`/api/vehicles${query ? `?${query}` : ''}`);
   const payload = await readJson<VehicleListResponse>(response);
@@ -53,7 +64,9 @@ export async function getVehicleServices(id: string): Promise<ServiceRecord[]> {
   return ensureSuccess(payload);
 }
 
-export async function createVehicle(input: CreateVehicleInput): Promise<Vehicle> {
+export async function createVehicle(
+  input: CreateVehicleInput
+): Promise<Vehicle> {
   const response = await fetch('/api/vehicles', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -64,7 +77,10 @@ export async function createVehicle(input: CreateVehicleInput): Promise<Vehicle>
   return ensureSuccess(payload);
 }
 
-export async function updateVehicle(id: string, input: Omit<UpdateVehicleInput, 'id'>): Promise<Vehicle> {
+export async function updateVehicle(
+  id: string,
+  input: Omit<UpdateVehicleInput, 'id'>
+): Promise<Vehicle> {
   const response = await fetch(`/api/vehicles/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

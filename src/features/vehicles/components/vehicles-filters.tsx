@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import type { Customer } from '@/features/customers/types';
 import type { VehicleStatus } from '@/features/vehicles/types';
 
 type BrandFilter = 'TOYOTA' | 'HONDA' | 'HYUNDAI' | 'FORD' | 'OTHER';
@@ -12,9 +13,12 @@ type VehiclesFiltersProps = {
   searchInput: string;
   brand?: BrandFilter;
   status?: VehicleStatus;
+  customerId?: string;
+  customers?: Customer[];
   onSearchInputChange: (value: string) => void;
   onBrandChange: (value?: BrandFilter) => void;
   onStatusChange: (value?: VehicleStatus) => void;
+  onCustomerChange: (value?: string) => void;
   onClear: () => void;
 };
 
@@ -30,14 +34,17 @@ export function VehiclesFilters({
   searchInput,
   brand,
   status,
+  customerId,
+  customers = [],
   onSearchInputChange,
   onBrandChange,
   onStatusChange,
+  onCustomerChange,
   onClear
 }: VehiclesFiltersProps): JSX.Element {
   return (
     <Card className="space-y-s3 p-s4">
-      <div className="grid gap-s3 md:grid-cols-[1fr_180px_200px_auto] md:items-center">
+      <div className="grid gap-s3 md:grid-cols-[1fr_180px_200px_220px_auto] md:items-center">
         <div className="relative">
           <Search className="pointer-events-none absolute left-s3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
           <Input
@@ -51,7 +58,11 @@ export function VehiclesFilters({
         <select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={brand ?? ''}
-          onChange={(event) => onBrandChange((event.target.value || undefined) as BrandFilter | undefined)}
+          onChange={(event) =>
+            onBrandChange(
+              (event.target.value || undefined) as BrandFilter | undefined
+            )
+          }
         >
           <option value="">All Brands</option>
           <option value="TOYOTA">Toyota</option>
@@ -64,7 +75,11 @@ export function VehiclesFilters({
         <select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={status ?? ''}
-          onChange={(event) => onStatusChange((event.target.value || undefined) as VehicleStatus | undefined)}
+          onChange={(event) =>
+            onStatusChange(
+              (event.target.value || undefined) as VehicleStatus | undefined
+            )
+          }
         >
           <option value="">All Status</option>
           <option value="IN_SERVICE">In Service</option>
@@ -74,15 +89,36 @@ export function VehiclesFilters({
           <option value="INACTIVE">Inactive</option>
         </select>
 
+        <select
+          className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
+          value={customerId ?? ''}
+          onChange={(event) =>
+            onCustomerChange(event.target.value || undefined)
+          }
+        >
+          <option value="">All Customers</option>
+          {customers.map((customer) => (
+            <option key={customer.id} value={customer.id}>
+              {customer.name}
+            </option>
+          ))}
+        </select>
+
         <Button variant="secondary" className="h-11" onClick={onClear}>
           Clear All
         </Button>
       </div>
 
-      {brand || status ? (
+      {brand || status || customerId ? (
         <div className="flex flex-wrap items-center gap-s2">
           {brand ? <Badge variant="default">{labelize(brand)}</Badge> : null}
           {status ? <Badge variant="default">{labelize(status)}</Badge> : null}
+          {customerId ? (
+            <Badge variant="default">
+              {customers.find((customer) => customer.id === customerId)?.name ??
+                'Selected customer'}
+            </Badge>
+          ) : null}
         </div>
       ) : null}
     </Card>

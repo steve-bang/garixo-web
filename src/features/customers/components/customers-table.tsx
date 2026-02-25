@@ -167,11 +167,7 @@ export function CustomersTable({
           <tbody>
             {customers.map((customer) => {
               const badge = statusTone(customer.status);
-              const vehicleLabel = `${customer.vehicles.length} vehicle${customer.vehicles.length === 1 ? '' : 's'}`;
-              const vehicleTooltip =
-                customer.vehicles.length > 0
-                  ? customer.vehicles.map((v) => v.plate).join(', ')
-                  : 'No vehicles';
+              const vehicleLabel = `${customer.totalVehicles} vehicle${customer.totalVehicles === 1 ? '' : 's'}`;
 
               return (
                 <tr
@@ -206,9 +202,7 @@ export function CustomersTable({
                       </button>
                     </div>
                   </td>
-                  <td className="px-s4 py-s3" title={vehicleTooltip}>
-                    {vehicleLabel}
-                  </td>
+                  <td className="px-s4 py-s3">{vehicleLabel}</td>
                   <td className="px-s4 py-s3 text-right tabular-nums">
                     {customer.totalVisits}
                   </td>

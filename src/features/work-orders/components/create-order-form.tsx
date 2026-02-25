@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import type { CreateWorkOrderInput } from '@/features/work-orders/schema';
-import type { Customer } from '@/features/customers/types';
+import type { Customer, CustomerVehicle } from '@/features/customers/types';
 import type {
   OrderService,
   PriorityLevel,
@@ -43,6 +43,9 @@ export function CreateOrderForm({
   const [showCustomerResults, setShowCustomerResults] = useState(true);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
+  );
+  const [customerVehicles, setCustomerVehicles] = useState<CustomerVehicle[]>(
+    []
   );
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [showCreateCustomer, setShowCreateCustomer] = useState(false);
@@ -160,6 +163,37 @@ export function CreateOrderForm({
   }, [debouncedCustomerSearch, step]);
 
   useEffect(() => {
+    if (!selectedCustomer) {
+      setCustomerVehicles([]);
+      return;
+    }
+
+    void fetch(`/api/customers/${selectedCustomer.id}/vehicles`)
+      .then(async (response) => {
+        const payload = (await response.json()) as {
+          success: boolean;
+          data?: CustomerVehicle[];
+        };
+        if (!payload.success || !payload.data) {
+          setCustomerVehicles([]);
+          return;
+        }
+        setCustomerVehicles(payload.data);
+      })
+      .catch(() => setCustomerVehicles([]));
+  }, [selectedCustomer]);
+
+  useEffect(() => {
+    if (selectedVehicleId || customerVehicles.length === 0) {
+      return;
+    }
+
+    setSelectedVehicleId(customerVehicles[0]?.id ?? '');
+    setPlateNumber(customerVehicles[0]?.plate ?? '');
+    setShowCreateVehicle(false);
+  }, [customerVehicles, selectedVehicleId]);
+
+  useEffect(() => {
     if (step !== 2) {
       return;
     }
@@ -174,6 +208,7 @@ export function CreateOrderForm({
     setLoadingCustomers(false);
     setShowCustomerResults(true);
     setSelectedCustomer(null);
+    setCustomerVehicles([]);
     setSelectedVehicleId('');
     setShowCreateCustomer(false);
     setQuickCustomerName('');
@@ -209,9 +244,8 @@ export function CreateOrderForm({
       }
 
       const selectedVehicle =
-        selectedCustomer.vehicles.find(
-          (item) => item.id === selectedVehicleId
-        ) ?? undefined;
+        customerVehicles.find((item) => item.id === selectedVehicleId) ??
+        undefined;
       const vehicleModel =
         selectedVehicle?.model || quickVehicleModel.trim() || undefined;
 
@@ -357,7 +391,7 @@ export function CreateOrderForm({
       setQuickCustomerPhone('');
       setCustomerSearch(payload.data.name);
       setCustomerResults((prev) => [payload.data as Customer, ...prev]);
-      if (payload.data.vehicles.length === 0) {
+      if (payload.data.totalVehicles === 0) {
         setShowCreateVehicle(true);
       }
     } finally {
@@ -393,7 +427,7 @@ export function CreateOrderForm({
 
     const payload = (await response.json()) as {
       success: boolean;
-      data?: Customer['vehicles'][number];
+      data?: CustomerVehicle;
       error?: string;
     };
 
@@ -402,16 +436,10 @@ export function CreateOrderForm({
       return;
     }
 
-    setSelectedCustomer((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        vehicles: [
-          payload.data as Customer['vehicles'][number],
-          ...prev.vehicles
-        ]
-      };
-    });
+    setCustomerVehicles((prev) => [payload.data as CustomerVehicle, ...prev]);
+    setSelectedCustomer((prev) =>
+      prev ? { ...prev, totalVehicles: prev.totalVehicles + 1 } : prev
+    );
     setSelectedVehicleId(payload.data.id);
     setPlateNumber(payload.data.plate);
     setShowCreateVehicle(false);
@@ -454,7 +482,8 @@ export function CreateOrderForm({
                       {selectedCustomer.phone}
                     </p>
                     <p className="text-caption text-text-muted">
-                      Latest plate: {selectedCustomer.vehicles[0]?.plate ?? '-'}
+                      {selectedCustomer.totalVehicles} vehicle
+                      {selectedCustomer.totalVehicles === 1 ? '' : 's'}
                     </p>
                   </div>
                   <Button
@@ -486,9 +515,9 @@ export function CreateOrderForm({
                         onClick={() => {
                           setSelectedCustomer(customer);
                           setShowCustomerResults(false);
-                          setSelectedVehicleId(customer.vehicles[0]?.id ?? '');
-                          setPlateNumber(customer.vehicles[0]?.plate ?? '');
-                          setShowCreateVehicle(customer.vehicles.length === 0);
+                          setSelectedVehicleId('');
+                          setPlateNumber('');
+                          setShowCreateVehicle(customer.totalVehicles === 0);
                           setShowCreateCustomer(false);
                         }}
                       >
@@ -501,7 +530,8 @@ export function CreateOrderForm({
                           </p>
                         </div>
                         <p className="text-caption text-text-muted">
-                          {customer.vehicles[0]?.plate ?? '-'}
+                          {customer.totalVehicles} vehicle
+                          {customer.totalVehicles === 1 ? '' : 's'}
                         </p>
                       </button>
                     ))
@@ -570,21 +600,21 @@ export function CreateOrderForm({
                 </Button>
               </div>
 
-              {selectedCustomer.vehicles.length > 0 ? (
+              {customerVehicles.length > 0 ? (
                 <select
                   className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small"
                   value={selectedVehicleId}
                   onChange={(event) => {
                     const id = event.target.value;
                     setSelectedVehicleId(id);
-                    const vehicle = selectedCustomer.vehicles.find(
+                    const vehicle = customerVehicles.find(
                       (item) => item.id === id
                     );
                     setPlateNumber(vehicle?.plate ?? '');
                   }}
                 >
                   <option value="">Select vehicle</option>
-                  {selectedCustomer.vehicles.map((vehicle) => (
+                  {customerVehicles.map((vehicle) => (
                     <option key={vehicle.id} value={vehicle.id}>
                       {vehicle.plate}{' '}
                       {vehicle.model ? `• ${vehicle.model}` : ''}

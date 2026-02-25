@@ -13,9 +13,11 @@ import { auth } from '@/lib/auth';
 import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
   createGarageCustomer,
+  getGarageCustomerVehicleCounts,
   isGarageCustomerPhoneExists,
   listGarageCustomers
 } from '@/services/firebase/customers-service';
+import { listGarageVehicles } from '@/services/firebase/vehicles-service';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -87,13 +89,24 @@ export async function GET(
 
   const { search, status, spendingTier, page, pageSize } = parsedQuery.data;
 
-  let filtered = await listGarageCustomers(garageId);
+  const [customers, vehicles, countsByCustomerId] = await Promise.all([
+    listGarageCustomers(garageId),
+    listGarageVehicles(garageId),
+    getGarageCustomerVehicleCounts(garageId)
+  ]);
+
+  let filtered = customers.map((customer) => ({
+    ...customer,
+    totalVehicles: countsByCustomerId.get(customer.id) ?? 0
+  }));
 
   if (search) {
     const needle = search.toLowerCase();
     filtered = filtered.filter((customer) => {
-      const plateMatch = customer.vehicles.some((vehicle) =>
-        vehicle.plate.toLowerCase().includes(needle)
+      const plateMatch = vehicles.some(
+        (vehicle) =>
+          vehicle.customerId === customer.id &&
+          vehicle.plateNumber.toLowerCase().includes(needle)
       );
       return (
         customer.name.toLowerCase().includes(needle) ||
@@ -190,7 +203,7 @@ export async function POST(
     email: parsed.data.email,
     address: parsed.data.address,
     status: parsed.data.status,
-    vehicles: [],
+    totalVehicles: 0,
     totalVisits: 0,
     totalSpent: 0,
     lastVisit: null,

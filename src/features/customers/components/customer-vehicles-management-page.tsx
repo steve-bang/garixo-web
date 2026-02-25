@@ -21,7 +21,7 @@ import {
   getCustomerVehicles,
   updateCustomerVehicle
 } from '@/features/customers/service';
-import type { Customer } from '@/features/customers/types';
+import type { CustomerVehicle } from '@/features/customers/types';
 import { useToast } from '@/hooks/use-toast';
 import { formatDate } from '@/lib/utils/format';
 
@@ -46,7 +46,6 @@ const customerVehicleSchema = z.object({
 });
 
 type CustomerVehicleForm = z.infer<typeof customerVehicleSchema>;
-type CustomerVehicle = Customer['vehicles'][number];
 type DrawerMode = 'create' | 'edit';
 
 function defaults(vehicle?: CustomerVehicle | null): CustomerVehicleForm {

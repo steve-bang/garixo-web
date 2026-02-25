@@ -11,6 +11,7 @@ import {
   deleteGarageCustomer,
   findGarageCustomerById,
   isGarageCustomerPhoneExists,
+  listGarageCustomerVehicles,
   listGarageCustomerServiceHistory,
   updateGarageCustomer
 } from '@/services/firebase/customers-service';
@@ -48,12 +49,19 @@ export async function GET(
     return response({ success: false, error: 'Customer not found.' }, 404);
   }
 
-  const serviceHistory = await listGarageCustomerServiceHistory(garageId, id);
+  const [vehicles, serviceHistory] = await Promise.all([
+    listGarageCustomerVehicles(garageId, id),
+    listGarageCustomerServiceHistory(garageId, id)
+  ]);
 
   return response({
     success: true,
     data: {
-      customer,
+      customer: {
+        ...customer,
+        totalVehicles: vehicles.length
+      },
+      vehicles,
       serviceHistory
     }
   });

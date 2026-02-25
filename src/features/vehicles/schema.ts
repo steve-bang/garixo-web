@@ -1,6 +1,12 @@
 import { z } from 'zod';
 
-export const vehicleStatusSchema = z.enum(['ACTIVE', 'IN_SERVICE', 'COMPLETED', 'OVERDUE', 'INACTIVE']);
+export const vehicleStatusSchema = z.enum([
+  'ACTIVE',
+  'IN_SERVICE',
+  'COMPLETED',
+  'OVERDUE',
+  'INACTIVE'
+]);
 
 export const serviceStatusSchema = z.enum(['OPEN', 'DONE']);
 
@@ -37,6 +43,7 @@ export const vehiclesListQuerySchema = z.object({
   search: z.string().optional(),
   brand: z.enum(['TOYOTA', 'HONDA', 'HYUNDAI', 'FORD', 'OTHER']).optional(),
   status: vehicleStatusSchema.optional(),
+  customerId: z.string().trim().optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20)
 });
@@ -48,7 +55,7 @@ export const createVehicleSchema = z.object({
   year: z.coerce.number().int().min(1900).max(2100).optional(),
   color: z.string().trim().optional(),
   vin: z.string().trim().optional(),
-  customerId: z.string().trim().optional(),
+  customerId: z.string().trim().min(1, 'Customer is required.'),
   customerName: z.string().trim().min(1, 'Customer is required.'),
   customerPhone: z.string().trim().min(9, 'Customer phone is required.'),
   status: vehicleStatusSchema.default('ACTIVE'),

@@ -18,10 +18,7 @@ import type {
   Vehicle,
   VehicleStatus
 } from '@/features/vehicles/types';
-import {
-  averageTicket,
-  toPlateDisplay
-} from '@/features/vehicles/utils';
+import { averageTicket, toPlateDisplay } from '@/features/vehicles/utils';
 import type { Customer } from '@/features/customers/types';
 import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
 
@@ -123,7 +120,6 @@ export function VehicleDrawer({
   const plateField = form.register('plateNumber');
   const selectedCustomerId =
     useWatch({ control: form.control, name: 'customerId' }) ?? '';
-  const isAddNewCustomer = selectedCustomerId === '__add_new__';
 
   useEffect(() => {
     if (!open) {
@@ -156,7 +152,7 @@ export function VehicleDrawer({
       await onSubmit({
         ...values,
         plateNumber: toPlateDisplay(values.plateNumber),
-        customerId: values.customerId === '__add_new__' ? '' : values.customerId
+        customerId: values.customerId
       });
     } catch (error) {
       const message =
@@ -174,13 +170,6 @@ export function VehicleDrawer({
   const detailVehicle = detail ?? vehicle;
 
   const handleCustomerChange = (value: string): void => {
-    if (value === '__add_new__') {
-      form.setValue('customerId', '__add_new__', { shouldDirty: true });
-      form.setValue('customerName', '', { shouldDirty: true });
-      form.setValue('customerPhone', '', { shouldDirty: true });
-      return;
-    }
-
     if (!value) {
       form.setValue('customerId', '', { shouldDirty: true });
       form.setValue('customerName', '', { shouldDirty: true });
@@ -475,11 +464,10 @@ export function VehicleDrawer({
                     {customer.name} - {customer.phone}
                   </option>
                 ))}
-                <option value="__add_new__">+ Add new customer</option>
               </select>
               {!customers.length ? (
                 <p className="text-caption text-text-muted">
-                  No customers found yet. Choose &quot;Add new customer&quot;.
+                  No customers found yet. Create one from Customers first.
                 </p>
               ) : null}
             </div>
@@ -490,11 +478,8 @@ export function VehicleDrawer({
               </label>
               <Input
                 className="h-11"
-                readOnly={
-                  !isAddNewCustomer &&
-                  Boolean(selectedCustomerId) &&
-                  selectedCustomerId !== '__add_new__'
-                }
+                readOnly
+                disabled={!selectedCustomerId}
                 {...form.register('customerName')}
               />
               {form.formState.errors.customerName ? (
@@ -511,11 +496,8 @@ export function VehicleDrawer({
               <Input
                 className="h-11"
                 inputMode="numeric"
-                readOnly={
-                  !isAddNewCustomer &&
-                  Boolean(selectedCustomerId) &&
-                  selectedCustomerId !== '__add_new__'
-                }
+                readOnly
+                disabled={!selectedCustomerId}
                 {...form.register('customerPhone')}
               />
               {form.formState.errors.customerPhone ? (

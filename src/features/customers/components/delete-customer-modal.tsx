@@ -61,7 +61,7 @@ export function DeleteCustomerModal({
     }
   };
 
-  const vehicleCount = customer.vehicles.length;
+  const vehicleCount = customer.totalVehicles;
   const vehicleLabel = `${vehicleCount} vehicle${vehicleCount === 1 ? '' : 's'}`;
 
   return (

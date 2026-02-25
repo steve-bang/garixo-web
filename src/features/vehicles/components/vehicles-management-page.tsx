@@ -47,6 +47,7 @@ export function VehiclesManagementPage(): JSX.Element {
   const [search, setSearch] = useState('');
   const [brand, setBrand] = useState<BrandFilter | undefined>();
   const [status, setStatus] = useState<VehicleStatus | undefined>();
+  const [customerId, setCustomerId] = useState<string | undefined>();
   const [page, setPage] = useState(1);
   const [drawerState, setDrawerState] = useState<DrawerState>({
     open: false,
@@ -74,12 +75,20 @@ export function VehiclesManagementPage(): JSX.Element {
     return () => window.clearTimeout(timer);
   }, [highlightedId]);
 
-  const listParams = { search, brand, status, page, pageSize } as const;
+  const listParams = {
+    search,
+    brand,
+    status,
+    customerId,
+    page,
+    pageSize
+  } as const;
   const listQuery = useVehicles(listParams);
   const kpiQuery = useVehicles({
     search,
     brand,
     status,
+    customerId,
     page: 1,
     pageSize: 100
   });
@@ -177,6 +186,8 @@ export function VehiclesManagementPage(): JSX.Element {
         searchInput={searchInput}
         brand={brand}
         status={status}
+        customerId={customerId}
+        customers={customersQuery.data?.items ?? []}
         onSearchInputChange={setSearchInput}
         onBrandChange={(value) => {
           setBrand(value);
@@ -186,11 +197,16 @@ export function VehiclesManagementPage(): JSX.Element {
           setStatus(value);
           setPage(1);
         }}
+        onCustomerChange={(value) => {
+          setCustomerId(value);
+          setPage(1);
+        }}
         onClear={() => {
           setSearchInput('');
           setSearch('');
           setBrand(undefined);
           setStatus(undefined);
+          setCustomerId(undefined);
           setPage(1);
         }}
       />
@@ -198,7 +214,7 @@ export function VehiclesManagementPage(): JSX.Element {
       <VehiclesTable
         loading={isTableUpdating}
         vehicles={listItems}
-        hasQuery={Boolean(search || brand || status)}
+        hasQuery={Boolean(search || brand || status || customerId)}
         currentUserRole={currentUserRole}
         highlightedId={highlightedId}
         onAddFirst={openCreate}

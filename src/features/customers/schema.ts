@@ -27,7 +27,7 @@ export const customerSchema = z.object({
   email: z.string().optional(),
   address: z.string().optional(),
   status: customerStatusSchema,
-  vehicles: z.array(vehicleSchema),
+  totalVehicles: z.number(),
   totalVisits: z.number(),
   totalSpent: z.number(),
   lastVisit: z.string().optional(),
@@ -55,7 +55,10 @@ export const createCustomerSchema = z.object({
     .string()
     .trim()
     .optional()
-    .refine((value) => !value || z.string().email().safeParse(value).success, 'Invalid email format.'),
+    .refine(
+      (value) => !value || z.string().email().safeParse(value).success,
+      'Invalid email format.'
+    ),
   address: z.string().trim().optional(),
   notes: z.string().trim().optional(),
   status: customerStatusSchema.default('ACTIVE')
@@ -65,7 +68,10 @@ export const updateCustomerSchema = createCustomerSchema.partial().extend({
   id: z.string().min(1)
 });
 
-export function matchesSpendingTier(totalSpent: number, tier?: 'LOW' | 'MEDIUM' | 'HIGH'): boolean {
+export function matchesSpendingTier(
+  totalSpent: number,
+  tier?: 'LOW' | 'MEDIUM' | 'HIGH'
+): boolean {
   if (!tier) {
     return true;
   }

@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import type { Customer } from '@/features/customers/types';
+import type { CustomerVehicle } from '@/features/customers/types';
 import { auth } from '@/lib/auth';
 import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
   deleteGarageCustomerVehicle,
   findGarageCustomerById,
+  isGarageCustomerVehiclePlateExists,
   updateGarageCustomerVehicle
 } from '@/services/firebase/customers-service';
 import type { ApiResponse } from '@/types/api';
@@ -34,7 +35,7 @@ function response<T>(
 export async function PUT(
   request: Request,
   context: RouteContext
-): Promise<NextResponse<ApiResponse<Customer['vehicles'][number]>>> {
+): Promise<NextResponse<ApiResponse<CustomerVehicle>>> {
   const session = await auth();
   if (!session?.user?.id) {
     return response({ success: false, error: 'Unauthorized' }, 401);
@@ -64,11 +65,11 @@ export async function PUT(
   }
 
   if (parsed.data.plate) {
-    const duplicatePlate = customer.vehicles.some(
-      (vehicle) =>
-        vehicle.id !== vehicleId &&
-        vehicle.plate.trim().toLowerCase() ===
-          parsed.data.plate?.trim().toLowerCase()
+    const duplicatePlate = await isGarageCustomerVehiclePlateExists(
+      garageId,
+      id,
+      parsed.data.plate,
+      vehicleId
     );
     if (duplicatePlate) {
       return response(
@@ -94,7 +95,7 @@ export async function PUT(
 export async function DELETE(
   _request: Request,
   context: RouteContext
-): Promise<NextResponse<ApiResponse<Customer['vehicles'][number]>>> {
+): Promise<NextResponse<ApiResponse<CustomerVehicle>>> {
   const session = await auth();
   if (!session?.user?.id) {
     return response({ success: false, error: 'Unauthorized' }, 401);

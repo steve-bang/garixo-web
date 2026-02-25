@@ -3,6 +3,7 @@ import type {
   UpdateCustomerInput
 } from '@/features/customers/schema';
 import type {
+  CustomerVehicle,
   Customer,
   CustomerDetailResponse,
   CustomerListResponse,
@@ -100,11 +101,11 @@ export async function deleteCustomer(id: string): Promise<Customer> {
 
 export async function getCustomerVehicles(
   customerId: string
-): Promise<Customer['vehicles']> {
+): Promise<CustomerVehicle[]> {
   const response = await fetch(`/api/customers/${customerId}/vehicles`, {
     method: 'GET'
   });
-  const payload = await readJson<Customer['vehicles']>(response);
+  const payload = await readJson<CustomerVehicle[]>(response);
   return ensureSuccess(payload);
 }
 
@@ -118,13 +119,13 @@ export async function createCustomerVehicle(
     color?: string;
     lastServiceDate?: string;
   }
-): Promise<Customer['vehicles'][number]> {
+): Promise<CustomerVehicle> {
   const response = await fetch(`/api/customers/${customerId}/vehicles`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input)
   });
-  const payload = await readJson<Customer['vehicles'][number]>(response);
+  const payload = await readJson<CustomerVehicle>(response);
   return ensureSuccess(payload);
 }
 
@@ -139,7 +140,7 @@ export async function updateCustomerVehicle(
     color?: string;
     lastServiceDate?: string;
   }
-): Promise<Customer['vehicles'][number]> {
+): Promise<CustomerVehicle> {
   const response = await fetch(
     `/api/customers/${customerId}/vehicles/${vehicleId}`,
     {
@@ -148,20 +149,20 @@ export async function updateCustomerVehicle(
       body: JSON.stringify(input)
     }
   );
-  const payload = await readJson<Customer['vehicles'][number]>(response);
+  const payload = await readJson<CustomerVehicle>(response);
   return ensureSuccess(payload);
 }
 
 export async function deleteCustomerVehicle(
   customerId: string,
   vehicleId: string
-): Promise<Customer['vehicles'][number]> {
+): Promise<CustomerVehicle> {
   const response = await fetch(
     `/api/customers/${customerId}/vehicles/${vehicleId}`,
     {
       method: 'DELETE'
     }
   );
-  const payload = await readJson<Customer['vehicles'][number]>(response);
+  const payload = await readJson<CustomerVehicle>(response);
   return ensureSuccess(payload);
 }

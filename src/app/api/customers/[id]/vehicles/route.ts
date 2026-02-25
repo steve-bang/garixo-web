@@ -6,10 +6,11 @@ import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
   createGarageCustomerVehicle,
   findGarageCustomerById,
+  isGarageCustomerVehiclePlateExists,
   listGarageCustomerVehicles
 } from '@/services/firebase/customers-service';
 import type { ApiResponse } from '@/types/api';
-import type { Customer } from '@/features/customers/types';
+import type { CustomerVehicle } from '@/features/customers/types';
 
 const createCustomerVehicleSchema = z.object({
   plate: z.string().trim().min(1, 'Plate number is required.'),
@@ -34,7 +35,7 @@ function response<T>(
 export async function GET(
   _request: Request,
   context: RouteContext
-): Promise<NextResponse<ApiResponse<Customer['vehicles']>>> {
+): Promise<NextResponse<ApiResponse<CustomerVehicle[]>>> {
   const session = await auth();
   if (!session?.user?.id) {
     return response({ success: false, error: 'Unauthorized' }, 401);
@@ -58,7 +59,7 @@ export async function GET(
 export async function POST(
   request: Request,
   context: RouteContext
-): Promise<NextResponse<ApiResponse<Customer['vehicles'][number]>>> {
+): Promise<NextResponse<ApiResponse<CustomerVehicle>>> {
   const session = await auth();
   if (!session?.user?.id) {
     return response({ success: false, error: 'Unauthorized' }, 401);
@@ -87,10 +88,10 @@ export async function POST(
     );
   }
 
-  const duplicatePlate = customer.vehicles.some(
-    (vehicle) =>
-      vehicle.plate.trim().toLowerCase() ===
-      parsed.data.plate.trim().toLowerCase()
+  const duplicatePlate = await isGarageCustomerVehiclePlateExists(
+    garageId,
+    id,
+    parsed.data.plate
   );
   if (duplicatePlate) {
     return response(
