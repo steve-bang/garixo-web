@@ -8,7 +8,36 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 ### Added
 
-- No entries yet.
+- Billing and PayPal backend foundation:
+- Billing config map for plan/cycle -> PayPal plan id in `/src/config/billing.ts`.
+- Billing domain schemas and types in `/src/features/billing/*`.
+- Firestore billing model fields for PayPal subscription lifecycle in `/src/types/firebase-models.ts`.
+- PayPal client service in `/src/services/paypal/paypal-client.ts` (token, create/get/cancel subscription, webhook signature verification).
+- Billing APIs:
+- `POST /api/billing/paypal/create-subscription`
+- `POST /api/billing/paypal/capture-approval`
+- `POST /api/billing/paypal/cancel`
+- `POST /api/billing/paypal/webhook`
+- `GET /api/billing/subscription`
+- Billing architecture documentation at `/docs/billing-subscription-flow.md` with webhook lifecycle/event handling.
+
+### Changed
+
+- Subscription settings page at `/dashboard/settings/subscription` now supports:
+- PayPal checkout redirect from CTA.
+- PayPal callback handling (`paypal=success|cancelled`) with capture-approval call and URL cleanup.
+- Status-driven top billing card from Firestore snapshot (`trialing`, `active`, `past_due`, `cancelled`, `suspended`).
+- Friendly, owner-focused status copy and CTA text.
+- Loading skeleton and safe empty state (`No subscription yet`).
+- Trial messaging driven by per-plan `trialDays` field.
+- Refactored subscription UI format helpers to shared utilities in `/src/lib/utils/format.ts`.
+
+### Fixed
+
+- Trialing reconciliation for PayPal plans with `TRIAL` + `REGULAR` billing cycles:
+- Capture-approval and webhook handlers now derive `trialing` from PayPal cycle executions.
+- `trialEndsAt/currentPeriodEnd` are aligned with PayPal `next_billing_time` during trial tenure.
+- Added `lastPaidAt` billing field and update logic on successful payment events for clearer state transitions.
 
 ## [0.1.6] - 2026-02-25
 
