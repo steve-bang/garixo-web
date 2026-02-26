@@ -317,16 +317,18 @@ export async function POST(request: Request): Promise<NextResponse> {
     !certUrl ||
     !authAlgo
   ) {
-    console.warn(
-      '[billing][webhook] missing required PayPal signature headers',
-      {
-        transmissionId,
-        transmissionTime,
-        transmissionSigPresent: Boolean(transmissionSig),
-        certUrl,
-        authAlgo
-      }
-    );
+    if (WEBHOOK_DEBUG_ENABLED) {
+      console.warn(
+        '[billing][webhook] missing required PayPal signature headers',
+        {
+          transmissionId,
+          transmissionTime,
+          transmissionSigPresent: Boolean(transmissionSig),
+          certUrl,
+          authAlgo
+        }
+      );
+    }
     return NextResponse.json(
       { success: false, error: 'Invalid webhook.' },
       { status: 400 }
@@ -344,11 +346,13 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   if (!signatureValid) {
     // Reject unsigned/untrusted events before touching persistence.
-    console.warn('[billing][webhook] signature verification failed', {
-      transmissionId,
-      eventId: event.id ?? null,
-      eventType: event.event_type ?? null
-    });
+    if (WEBHOOK_DEBUG_ENABLED) {
+      console.warn('[billing][webhook] signature verification failed', {
+        transmissionId,
+        eventId: event.id ?? null,
+        eventType: event.event_type ?? null
+      });
+    }
     return NextResponse.json(
       { success: false, error: 'Invalid webhook.' },
       { status: 400 }
@@ -359,11 +363,13 @@ export async function POST(request: Request): Promise<NextResponse> {
   const eventType = event.event_type?.trim();
   const subscriptionId = resolveSubscriptionId(event);
   if (!eventId || !eventType || !subscriptionId) {
-    console.warn('[billing][webhook] missing required event fields', {
-      eventId,
-      eventType,
-      subscriptionId
-    });
+    if (WEBHOOK_DEBUG_ENABLED) {
+      console.warn('[billing][webhook] missing required event fields', {
+        eventId,
+        eventType,
+        subscriptionId
+      });
+    }
     return NextResponse.json({ success: true });
   }
 
@@ -469,20 +475,24 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     transaction.set(billingRef, updates, { merge: true });
 
-    console.info('[billing][webhook] billing updated', {
-      eventId,
-      eventType,
-      subscriptionId,
-      nextStatus,
-      nextPeriodEnd: updates.currentPeriodEnd ?? null,
-      lastPaidAt: updates.lastPaidAt ?? null
-    });
+    if (WEBHOOK_DEBUG_ENABLED) {
+      console.info('[billing][webhook] billing updated', {
+        eventId,
+        eventType,
+        subscriptionId,
+        nextStatus,
+        nextPeriodEnd: updates.currentPeriodEnd ?? null,
+        lastPaidAt: updates.lastPaidAt ?? null
+      });
+    }
   });
 
-  console.info('[billing][webhook] processed successfully', {
-    eventId,
-    eventType,
-    subscriptionId
-  });
+  if (WEBHOOK_DEBUG_ENABLED) {
+    console.info('[billing][webhook] processed successfully', {
+      eventId,
+      eventType,
+      subscriptionId
+    });
+  }
   return NextResponse.json({ success: true });
 }
