@@ -21,6 +21,7 @@ type Plan = {
   priceMonthly: number;
   priceAnnual: number;
   annualDiscountPercent: number;
+  trialDays: number;
   subtitle: string;
   ctaLabel: string;
   isRecommended?: boolean;
@@ -35,8 +36,9 @@ const plans: Plan[] = [
     priceMonthly: 79,
     priceAnnual: 790,
     annualDiscountPercent: 17,
-    subtitle: 'Best for owner-operated shops with 1-5 mechanics.',
-    ctaLabel: 'Upgrade with PayPal',
+    trialDays: 14,
+    subtitle: 'For shop owners who want better control and fewer mistakes.',
+    ctaLabel: 'Start Free for 14 Days',
     isRecommended: true,
     features: [
       'Up to 5 users',
@@ -54,8 +56,9 @@ const plans: Plan[] = [
     priceMonthly: 129,
     priceAnnual: 1290,
     annualDiscountPercent: 17,
-    subtitle: 'For growing independent shops with 6-12 mechanics.',
-    ctaLabel: 'Upgrade with PayPal',
+    trialDays: 14,
+    subtitle: 'For busy garages that need structure and team accountability.',
+    ctaLabel: 'Scale My Shop',
     features: [
       'Up to 12 users',
       '1 location',
@@ -158,6 +161,8 @@ export function SubscriptionSettings(): JSX.Element {
     }
   };
 
+  const maxTrialDays = Math.max(...plans.map((plan) => plan.trialDays));
+
   return (
     <div className="mx-auto max-w-[920px] space-y-s4">
       {isHandlingCallback ? (
@@ -255,6 +260,9 @@ export function SubscriptionSettings(): JSX.Element {
               </ul>
 
               <div className="mt-auto space-y-s2 pt-s4">
+                <p className="text-caption text-text-muted">
+                  {plan.trialDays}-day free trial included
+                </p>
                 <Button
                   type="button"
                   className="w-full"
@@ -262,7 +270,7 @@ export function SubscriptionSettings(): JSX.Element {
                   disabled={pendingPlan !== null || isHandlingCallback}
                   onClick={() => void onUpgrade(plan.id)}
                 >
-                  {isPending ? 'Redirecting to PayPal...' : plan.ctaLabel}
+                  {isPending ? 'Opening secure checkout...' : plan.ctaLabel}
                 </Button>
               </div>
             </Card>
