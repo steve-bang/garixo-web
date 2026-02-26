@@ -6,6 +6,9 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import type { PlanCode } from '@/features/billing/types';
+import { createSubscription } from '@/features/settings/subscription.service';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils/cn';
 
 type Plan = {
@@ -29,7 +32,7 @@ const plans: Plan[] = [
     priceAnnual: 790,
     annualDiscountPercent: 17,
     subtitle: 'Best for owner-operated shops with 1-5 mechanics.',
-    ctaLabel: 'Start 30-Day Free Trial',
+    ctaLabel: 'Upgrade with PayPal',
     isRecommended: true,
     features: [
       'Up to 5 users',
@@ -48,7 +51,7 @@ const plans: Plan[] = [
     priceAnnual: 1290,
     annualDiscountPercent: 17,
     subtitle: 'For growing independent shops with 6-12 mechanics.',
-    ctaLabel: 'Start 30-Day Free Trial',
+    ctaLabel: 'Upgrade with PayPal',
     features: [
       'Up to 12 users',
       '1 location',
@@ -69,7 +72,29 @@ function formatUsd(value: number): string {
 }
 
 export function SubscriptionSettings(): JSX.Element {
+  const toast = useToast();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
+  const [pendingPlan, setPendingPlan] = useState<string | null>(null);
+
+  const onUpgrade = async (planCode: PlanCode) => {
+    const pendingKey = `${planCode}-${billingCycle}`;
+    setPendingPlan(pendingKey);
+
+    try {
+      const result = await createSubscription({
+        planCode,
+        billingCycle
+      });
+      window.location.assign(result.approveUrl);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Unable to continue to payment. Please try again.'
+      );
+      setPendingPlan(null);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-[920px] space-y-s4">
@@ -105,6 +130,8 @@ export function SubscriptionSettings(): JSX.Element {
         {plans.map((plan) => {
           const currentPrice =
             billingCycle === 'monthly' ? plan.priceMonthly : plan.priceAnnual;
+          const pendingKey = `${plan.id}-${billingCycle}`;
+          const isPending = pendingPlan === pendingKey;
 
           return (
             <Card
@@ -159,8 +186,10 @@ export function SubscriptionSettings(): JSX.Element {
                   type="button"
                   className="w-full"
                   variant={plan.isRecommended ? 'default' : 'secondary'}
+                  disabled={pendingPlan !== null}
+                  onClick={() => void onUpgrade(plan.id)}
                 >
-                  {plan.ctaLabel}
+                  {isPending ? 'Redirecting to PayPal...' : plan.ctaLabel}
                 </Button>
               </div>
             </Card>

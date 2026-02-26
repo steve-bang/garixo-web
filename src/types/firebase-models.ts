@@ -1,6 +1,12 @@
 import type { UserRole } from '@/types/user';
 import type { WorkOrderStatus as UnifiedWorkOrderStatus } from '@/features/work-orders/types';
 import type { GarageIndustryType } from '@/types/garage';
+import type {
+  BillingCycle,
+  BillingProvider,
+  BillingStatus,
+  PlanCode
+} from '@/features/billing/types';
 
 export type FirebaseRole = UserRole;
 
@@ -29,6 +35,26 @@ export interface GarageDocument {
   email?: string;
   workingHours?: string;
   logoUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GarageBillingDocument {
+  provider: BillingProvider;
+  planCode: PlanCode;
+  billingCycle: BillingCycle;
+  status: BillingStatus;
+  trialEndsAt: string | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  paypalSubscriptionId: string | null;
+  paypalPlanId: string | null;
+  paypalCustomerId: string | null;
+  payerId: string | null;
+  founderEligible: boolean;
+  founderLockedUntil: string | null;
+  lastWebhookEventId: string | null;
+  webhookEventIdsRecent: string[];
   createdAt: string;
   updatedAt: string;
 }
