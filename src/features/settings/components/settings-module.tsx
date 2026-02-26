@@ -11,8 +11,6 @@ type SettingsModuleProps = {
 export function SettingsModule({ section }: SettingsModuleProps): JSX.Element {
   return (
     <div className="space-y-s4">
-      <h1 className="text-h1">Settings</h1>
-
       {section.key === 'garage-information' ? (
         <GarageInformationForm />
       ) : section.key === 'subscription' ? (

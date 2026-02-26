@@ -10,10 +10,13 @@ import { Card } from '@/components/ui/card';
 import type { PlanCode } from '@/features/billing/types';
 import {
   captureSubscriptionApproval,
-  createSubscription
+  createSubscription,
+  getBillingSnapshot,
+  type BillingSnapshotResult
 } from '@/features/settings/subscription.service';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils/cn';
+import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
 
 type Plan = {
   id: 'starter' | 'growth';
@@ -70,12 +73,72 @@ const plans: Plan[] = [
   }
 ];
 
-function formatUsd(value: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0
-  }).format(value);
+function isNoSubscriptionYet(snapshot: BillingSnapshotResult): boolean {
+  return (
+    snapshot.paypalSubscriptionId == null &&
+    snapshot.trialEndsAt == null &&
+    snapshot.currentPeriodEnd == null &&
+    snapshot.lastPaidAt == null
+  );
+}
+
+function getStatusMessage(snapshot: BillingSnapshotResult): string {
+  if (isNoSubscriptionYet(snapshot)) {
+    return 'You are almost ready. Pick a plan to start running your shop with Garixo.';
+  }
+
+  if (snapshot.status === 'trialing') {
+    const trialEnd = formatDate(snapshot.trialEndsAt, {
+      fallback: '',
+      options: {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }
+    });
+    return trialEnd
+      ? `Your free trial is active through ${trialEnd}. Explore everything before you decide.`
+      : 'Your free trial is active. You can explore all features now.';
+  }
+
+  if (snapshot.status === 'active') {
+    const nextBilling = formatDate(snapshot.currentPeriodEnd, {
+      fallback: '',
+      options: {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }
+    });
+    return nextBilling
+      ? `Your plan is active. Next billing date: ${nextBilling}.`
+      : 'Your plan is active and your shop is fully set.';
+  }
+
+  if (snapshot.status === 'past_due') {
+    return 'We could not process your latest payment. Update billing to keep your shop running smoothly.';
+  }
+
+  if (snapshot.status === 'cancelled') {
+    return 'Your subscription is canceled. Restart anytime when you are ready.';
+  }
+
+  return 'Your subscription is temporarily paused. Review billing to restore full access.';
+}
+
+function getStatusBadgeVariant(
+  status: BillingSnapshotResult['status']
+): 'default' | 'success' | 'warning' | 'info' {
+  if (status === 'trialing' || status === 'active') {
+    return 'success';
+  }
+  if (status === 'past_due') {
+    return 'warning';
+  }
+  if (status === 'suspended') {
+    return 'info';
+  }
+  return 'default';
 }
 
 export function SubscriptionSettings(): JSX.Element {
@@ -84,7 +147,26 @@ export function SubscriptionSettings(): JSX.Element {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
   const [isHandlingCallback, setIsHandlingCallback] = useState(false);
+  const [billingSnapshot, setBillingSnapshot] =
+    useState<BillingSnapshotResult | null>(null);
+  const [isBillingLoading, setBillingLoading] = useState(true);
   const callbackHandledRef = useRef(false);
+
+  const loadBillingSnapshot = async () => {
+    setBillingLoading(true);
+    try {
+      const data = await getBillingSnapshot();
+      setBillingSnapshot(data);
+    } catch {
+      setBillingSnapshot(null);
+    } finally {
+      setBillingLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadBillingSnapshot();
+  }, []);
 
   useEffect(() => {
     if (callbackHandledRef.current) {
@@ -122,23 +204,24 @@ export function SubscriptionSettings(): JSX.Element {
     // Defer state update to avoid sync setState in effect body lint violation.
     queueMicrotask(() => setIsHandlingCallback(true));
 
-    void captureSubscriptionApproval({
-      subscriptionId: callbackSubscriptionId
-    })
-      .then(() => {
+    void (async () => {
+      try {
+        await captureSubscriptionApproval({
+          subscriptionId: callbackSubscriptionId
+        });
+        await loadBillingSnapshot();
         toast.success('Your subscription has been confirmed.');
-      })
-      .catch((error) => {
+      } catch (error) {
         toast.error(
           error instanceof Error
             ? error.message
             : 'Could not confirm payment. Please try again.'
         );
-      })
-      .finally(() => {
+      } finally {
         setIsHandlingCallback(false);
         finishCallback();
-      });
+      }
+    })();
   }, [router, toast]);
 
   const onUpgrade = async (planCode: PlanCode) => {
@@ -165,6 +248,28 @@ export function SubscriptionSettings(): JSX.Element {
 
   return (
     <div className="mx-auto max-w-[920px] space-y-s4">
+      {isBillingLoading ? (
+        <Card className="p-s3">
+          <div className="h-5 w-48 animate-pulse rounded-md bg-surface-hover" />
+        </Card>
+      ) : billingSnapshot ? (
+        <Card className="flex items-center justify-between gap-s3 p-s3">
+          <p className="text-small text-text-secondary">
+            {getStatusMessage(billingSnapshot)}
+          </p>
+          {isNoSubscriptionYet(billingSnapshot) ? (
+            <Badge variant="default">Not started</Badge>
+          ) : (
+            <Badge
+              variant={getStatusBadgeVariant(billingSnapshot.status)}
+              className="capitalize"
+            >
+              {billingSnapshot.status.replace('_', ' ')}
+            </Badge>
+          )}
+        </Card>
+      ) : null}
+
       {isHandlingCallback ? (
         <Card className="p-s3">
           <div className="flex items-center gap-s2">
@@ -235,15 +340,15 @@ export function SubscriptionSettings(): JSX.Element {
 
               <div className="mt-s3 rounded-md border border-border bg-surface-default p-s3">
                 <p className="text-h2 font-bold text-text-primary">
-                  {formatUsd(currentPrice)}
+                  {formatCurrencyUsd(currentPrice)}
                   <span className="ml-1 text-small font-medium text-text-muted">
                     /{billingCycle === 'monthly' ? 'month' : 'year'}
                   </span>
                 </p>
                 <p className="text-caption text-text-muted">
                   {billingCycle === 'monthly'
-                    ? `${formatUsd(plan.priceAnnual)}/year • save ${plan.annualDiscountPercent}%`
-                    : `${formatUsd(plan.priceMonthly)}/month equivalent`}
+                    ? `${formatCurrencyUsd(plan.priceAnnual)}/year • save ${plan.annualDiscountPercent}%`
+                    : `${formatCurrencyUsd(plan.priceMonthly)}/month equivalent`}
                 </p>
               </div>
 

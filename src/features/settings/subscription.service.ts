@@ -21,6 +21,23 @@ export type CaptureApprovalResult = {
   subscriptionId: string;
 };
 
+export type BillingSnapshotResult = {
+  provider: 'paypal';
+  planCode: PlanCode;
+  billingCycle: BillingCycle;
+  status: 'trialing' | 'active' | 'past_due' | 'cancelled' | 'suspended';
+  trialEndsAt: string | null;
+  currentPeriodEnd: string | null;
+  lastPaidAt: string | null;
+  cancelAtPeriodEnd: boolean;
+  paypalSubscriptionId: string | null;
+  paypalPlanId: string | null;
+  payerId: string | null;
+  founderEligible: boolean;
+  founderLockedUntil: string | null;
+  updatedAt: string;
+};
+
 async function readJson<T>(response: Response): Promise<ApiResponse<T>> {
   return (await response.json()) as ApiResponse<T>;
 }
@@ -60,5 +77,11 @@ export async function captureSubscriptionApproval(
   });
 
   const payload = await readJson<CaptureApprovalResult>(response);
+  return ensureSuccess(payload);
+}
+
+export async function getBillingSnapshot(): Promise<BillingSnapshotResult> {
+  const response = await fetch('/api/billing/subscription');
+  const payload = await readJson<BillingSnapshotResult>(response);
   return ensureSuccess(payload);
 }
