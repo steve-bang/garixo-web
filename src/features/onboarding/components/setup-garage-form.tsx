@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import { submitGarageSetup } from '@/features/onboarding/service';
 import { garageIndustryTypes } from '@/types/garage';
 
@@ -144,7 +145,7 @@ export function SetupGarageForm({
           <label className="text-small font-medium text-text-secondary">
             Industry Type
           </label>
-          <select
+          <Select
             className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
             {...form.register('industryType')}
           >
@@ -153,7 +154,7 @@ export function SetupGarageForm({
                 {industryType}
               </option>
             ))}
-          </select>
+          </Select>
           {form.formState.errors.industryType ? (
             <p className="text-caption text-state-error">
               {form.formState.errors.industryType.message}

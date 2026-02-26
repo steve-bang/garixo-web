@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { WorkOrderStatus, Worker } from '@/features/work-orders/types';
 
@@ -67,7 +68,7 @@ export function WorkOrdersFilters({
           />
         </div>
 
-        <select
+        <Select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={workerId ?? ''}
           onChange={(event) => onWorkerChange(event.target.value || undefined)}
@@ -78,9 +79,9 @@ export function WorkOrdersFilters({
               {worker.name} ({worker.activeJobs})
             </option>
           ))}
-        </select>
+        </Select>
 
-        <select
+        <Select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={status ?? ''}
           onChange={(event) =>
@@ -95,9 +96,9 @@ export function WorkOrdersFilters({
               {option.label}
             </option>
           ))}
-        </select>
+        </Select>
 
-        <select
+        <Select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={dateFilter}
           onChange={(event) =>
@@ -116,7 +117,7 @@ export function WorkOrdersFilters({
           <option value="this_week">This Week</option>
           <option value="this_month">This Month</option>
           <option value="custom">Custom</option>
-        </select>
+        </Select>
 
         <Button variant="secondary" className="h-11" onClick={onClear}>
           Clear All

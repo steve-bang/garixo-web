@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const settingsSectionKeySchema = z.enum([
   'garage-information',
-  'service-configuration'
+  'subscription'
 ]);
 
 export type SettingsSectionKeySchema = z.infer<typeof settingsSectionKeySchema>;

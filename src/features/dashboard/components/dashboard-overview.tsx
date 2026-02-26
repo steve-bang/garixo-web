@@ -14,6 +14,7 @@ import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/features/auth/hooks';
@@ -310,7 +311,7 @@ export function DashboardOverview(): JSX.Element {
         </div>
 
         <div className="flex flex-wrap items-center gap-s2">
-          <select
+          <Select
             className="h-10 rounded-md border border-input-border bg-input px-s3 text-small"
             value={range}
             onChange={(event) => {
@@ -325,7 +326,7 @@ export function DashboardOverview(): JSX.Element {
             <option value="week">This Week</option>
             <option value="month">This Month</option>
             <option value="custom">Custom</option>
-          </select>
+          </Select>
 
           <Button variant="secondary" size="sm" onClick={() => query.refetch()}>
             <RefreshCw className="size-4" />

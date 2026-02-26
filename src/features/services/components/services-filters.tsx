@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import type { ServiceCategory, ServiceStatus } from '@/features/services/types';
 
 type ServicesFiltersProps = {
@@ -50,10 +51,14 @@ export function ServicesFilters({
           />
         </div>
 
-        <select
+        <Select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={category ?? ''}
-          onChange={(event) => onCategoryChange((event.target.value || undefined) as ServiceCategory | undefined)}
+          onChange={(event) =>
+            onCategoryChange(
+              (event.target.value || undefined) as ServiceCategory | undefined
+            )
+          }
         >
           <option value="">All Categories</option>
           <option value="ENGINE">Engine</option>
@@ -62,17 +67,21 @@ export function ServicesFilters({
           <option value="TIRE">Tire</option>
           <option value="ELECTRICAL">Electrical</option>
           <option value="OTHER">Other</option>
-        </select>
+        </Select>
 
-        <select
+        <Select
           className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small text-input-foreground"
           value={status ?? ''}
-          onChange={(event) => onStatusChange((event.target.value || undefined) as ServiceStatus | undefined)}
+          onChange={(event) =>
+            onStatusChange(
+              (event.target.value || undefined) as ServiceStatus | undefined
+            )
+          }
         >
           <option value="">All Status</option>
           <option value="ACTIVE">Active</option>
           <option value="INACTIVE">Inactive</option>
-        </select>
+        </Select>
 
         <Button variant="secondary" className="h-11" onClick={onClear}>
           Clear All

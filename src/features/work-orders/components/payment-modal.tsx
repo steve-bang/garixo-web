@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/select';
 import type { PaymentMethod, WorkOrder } from '@/features/work-orders/types';
 import { formatCurrencyUsd } from '@/lib/utils/format';
 
@@ -14,14 +15,25 @@ type Props = {
   onConfirm: (id: string, method: PaymentMethod) => Promise<void>;
 };
 
-export function PaymentModal({ open, order, onClose, onConfirm }: Props): JSX.Element | null {
+export function PaymentModal({
+  open,
+  order,
+  onClose,
+  onConfirm
+}: Props): JSX.Element | null {
   const [method, setMethod] = useState<PaymentMethod>('CASH');
   const [error, setError] = useState('');
 
   if (!order) return null;
 
-  const servicesTotal = order.services.reduce((sum, item) => sum + item.price, 0);
-  const partsTotal = order.parts.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  const servicesTotal = order.services.reduce(
+    (sum, item) => sum + item.price,
+    0
+  );
+  const partsTotal = order.parts.reduce(
+    (sum, item) => sum + item.quantity * item.unitPrice,
+    0
+  );
 
   const submit = async () => {
     setError('');
@@ -68,15 +80,23 @@ export function PaymentModal({ open, order, onClose, onConfirm }: Props): JSX.El
       </div>
 
       <div className="mt-s4 space-y-s1">
-        <label className="text-small font-medium text-text-secondary">Payment Method</label>
-        <select className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
+        <label className="text-small font-medium text-text-secondary">
+          Payment Method
+        </label>
+        <Select
+          className="h-11 w-full rounded-md border border-input-border bg-input px-s3 text-small"
+          value={method}
+          onChange={(e) => setMethod(e.target.value as PaymentMethod)}
+        >
           <option value="CASH">Cash</option>
           <option value="BANK_TRANSFER">Bank Transfer</option>
           <option value="QR">QR</option>
-        </select>
+        </Select>
       </div>
 
-      {error ? <p className="mt-s2 text-caption text-state-error">{error}</p> : null}
+      {error ? (
+        <p className="mt-s2 text-caption text-state-error">{error}</p>
+      ) : null}
     </Modal>
   );
 }

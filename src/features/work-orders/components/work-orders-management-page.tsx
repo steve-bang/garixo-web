@@ -2,7 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { KanbanSquare, List, Plus } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -43,24 +44,78 @@ import {
 import type { Role } from '@/types/primitives';
 
 type ViewMode = 'board' | 'table';
+type DateFilter = 'all' | 'today' | 'this_week' | 'this_month' | 'custom';
+type QueryValue = string | null | undefined;
 
 const currentUserRole: Role = 'OWNER';
 const pageSize = 20;
+const dateFilterValues: DateFilter[] = [
+  'all',
+  'today',
+  'this_week',
+  'this_month',
+  'custom'
+];
+const validWorkOrderStatuses = new Set(Object.values(WorkOrderStatusEnum));
+
+function parseViewMode(value: string | null): ViewMode {
+  return value === 'table' ? 'table' : 'board';
+}
+
+function parseDateFilter(value: string | null): DateFilter {
+  if (
+    value &&
+    dateFilterValues.includes(
+      value as 'all' | 'today' | 'this_week' | 'this_month' | 'custom'
+    )
+  ) {
+    return value as DateFilter;
+  }
+
+  return 'all';
+}
+
+function parsePositiveInt(value: string | null, fallback = 1): number {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
+function parseWorkOrderStatus(
+  value: string | null
+): WorkOrderStatus | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return validWorkOrderStatuses.has(value as WorkOrderStatus)
+    ? (value as WorkOrderStatus)
+    : undefined;
+}
+
+function toQueryStringValue(value: QueryValue): string | undefined {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+  return normalized ? normalized : undefined;
+}
 
 export function WorkOrdersManagementPage(): JSX.Element {
   const toast = useToast();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [viewMode, setViewMode] = useState<ViewMode>('board');
   const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
-  const [workerId, setWorkerId] = useState<string | undefined>();
-  const [status, setStatus] = useState<WorkOrderStatus | undefined>();
-  const [dateFilter, setDateFilter] = useState<
-    'all' | 'today' | 'this_week' | 'this_month' | 'custom'
-  >('all');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [page, setPage] = useState(1);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -72,37 +127,112 @@ export function WorkOrdersManagementPage(): JSX.Element {
     null
   );
 
+  const viewMode = parseViewMode(searchParams.get('view'));
+  const search = toQueryStringValue(searchParams.get('search')) ?? '';
+  const workerId = toQueryStringValue(searchParams.get('workerId'));
+  const status = parseWorkOrderStatus(searchParams.get('status'));
+  const dateFilter = parseDateFilter(searchParams.get('dateFilter'));
+  const dateFrom =
+    dateFilter === 'custom'
+      ? (toQueryStringValue(searchParams.get('dateFrom')) ?? '')
+      : '';
+  const dateTo =
+    dateFilter === 'custom'
+      ? (toQueryStringValue(searchParams.get('dateTo')) ?? '')
+      : '';
+  const page = parsePositiveInt(searchParams.get('page'), 1);
+
+  const setQueryParams = useCallback(
+    (updates: Record<string, QueryValue>) => {
+      const nextParams = new URLSearchParams(searchParams.toString());
+
+      Object.entries(updates).forEach(([key, value]) => {
+        const normalized = toQueryStringValue(value);
+        if (!normalized) {
+          nextParams.delete(key);
+          return;
+        }
+
+        nextParams.set(key, normalized);
+      });
+
+      const nextQuery = nextParams.toString();
+      const currentQuery = searchParams.toString();
+      if (nextQuery === currentQuery) {
+        return;
+      }
+
+      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+        scroll: false
+      });
+    },
+    [pathname, router, searchParams]
+  );
+
+  const setQueryPage = useCallback(
+    (nextPage: number) => {
+      setQueryParams({ page: nextPage <= 1 ? undefined : String(nextPage) });
+    },
+    [setQueryParams]
+  );
+
+  const setQueryViewMode = useCallback(
+    (next: ViewMode) => {
+      setQueryParams({ view: next === 'board' ? undefined : next });
+    },
+    [setQueryParams]
+  );
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setSearch(searchInput.trim());
-      setPage(1);
+      if (searchInput.trim() === search) {
+        return;
+      }
+
+      setQueryParams({
+        search: searchInput,
+        page: '1'
+      });
     }, 300);
 
     return () => window.clearTimeout(timer);
-  }, [searchInput]);
+  }, [search, searchInput, setQueryParams]);
 
-  const params = {
-    search,
-    workerId,
-    status,
-    dateFilter,
-    dateFrom: dateFilter === 'custom' ? dateFrom : undefined,
-    dateTo: dateFilter === 'custom' ? dateTo : undefined,
-    page,
-    pageSize
-  } as const;
+  const params = useMemo(
+    () =>
+      ({
+        search: search || undefined,
+        workerId,
+        status,
+        dateFilter,
+        dateFrom: dateFilter === 'custom' ? dateFrom || undefined : undefined,
+        dateTo: dateFilter === 'custom' ? dateTo || undefined : undefined,
+        page,
+        pageSize
+      }) as const,
+    [dateFilter, dateFrom, dateTo, page, search, status, workerId]
+  );
+  const summaryParams = useMemo(
+    () =>
+      ({
+        search: search || undefined,
+        workerId,
+        status,
+        dateFilter,
+        dateFrom: dateFilter === 'custom' ? dateFrom || undefined : undefined,
+        dateTo: dateFilter === 'custom' ? dateTo || undefined : undefined,
+        page: 1,
+        pageSize: 100
+      }) as const,
+    [dateFilter, dateFrom, dateTo, search, status, workerId]
+  );
 
   const listQuery = useWorkOrders(params);
-  const summaryQuery = useWorkOrders({
-    search,
-    workerId,
-    status,
-    dateFilter,
-    dateFrom: dateFilter === 'custom' ? dateFrom : undefined,
-    dateTo: dateFilter === 'custom' ? dateTo : undefined,
-    page: 1,
-    pageSize: 100
-  });
+  const summaryQuery = useWorkOrders(summaryParams);
 
   const createMutation = useCreateWorkOrder();
   const updateMutation = useUpdateWorkOrder();
@@ -228,7 +358,7 @@ export function WorkOrdersManagementPage(): JSX.Element {
             <Button
               variant={viewMode === 'board' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode('board')}
+              onClick={() => setQueryViewMode('board')}
             >
               <KanbanSquare className="size-4" />
               Board
@@ -236,7 +366,7 @@ export function WorkOrdersManagementPage(): JSX.Element {
             <Button
               variant={viewMode === 'table' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode('table')}
+              onClick={() => setQueryViewMode('table')}
             >
               <List className="size-4" />
               Table
@@ -262,28 +392,48 @@ export function WorkOrdersManagementPage(): JSX.Element {
         workers={workers}
         onSearchInputChange={setSearchInput}
         onWorkerChange={(value) => {
-          setWorkerId(value);
-          setPage(1);
+          setQueryParams({
+            workerId: value,
+            page: '1'
+          });
         }}
         onStatusChange={(value) => {
-          setStatus(value);
-          setPage(1);
+          setQueryParams({
+            status: value,
+            page: '1'
+          });
         }}
         onDateFilterChange={(value) => {
-          setDateFilter(value);
-          setPage(1);
+          setQueryParams({
+            dateFilter: value === 'all' ? undefined : value,
+            dateFrom: value === 'custom' ? dateFrom : undefined,
+            dateTo: value === 'custom' ? dateTo : undefined,
+            page: '1'
+          });
         }}
-        onDateFromChange={setDateFrom}
-        onDateToChange={setDateTo}
+        onDateFromChange={(value) =>
+          setQueryParams({
+            dateFrom: value,
+            page: '1'
+          })
+        }
+        onDateToChange={(value) =>
+          setQueryParams({
+            dateTo: value,
+            page: '1'
+          })
+        }
         onClear={() => {
           setSearchInput('');
-          setSearch('');
-          setWorkerId(undefined);
-          setStatus(undefined);
-          setDateFilter('all');
-          setDateFrom('');
-          setDateTo('');
-          setPage(1);
+          setQueryParams({
+            search: undefined,
+            workerId: undefined,
+            status: undefined,
+            dateFilter: undefined,
+            dateFrom: undefined,
+            dateTo: undefined,
+            page: undefined
+          });
         }}
       />
 
@@ -323,7 +473,7 @@ export function WorkOrdersManagementPage(): JSX.Element {
               variant="secondary"
               size="sm"
               disabled={meta.page <= 1}
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              onClick={() => setQueryPage(Math.max(meta.page - 1, 1))}
             >
               Previous
             </Button>
@@ -333,7 +483,7 @@ export function WorkOrdersManagementPage(): JSX.Element {
               size="sm"
               disabled={meta.page >= meta.totalPages}
               onClick={() =>
-                setPage((prev) => Math.min(prev + 1, meta.totalPages))
+                setQueryPage(Math.min(meta.page + 1, meta.totalPages))
               }
             >
               Next

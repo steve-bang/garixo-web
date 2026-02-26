@@ -17,7 +17,15 @@ const envSchema = z.object({
   NEXT_PUBLIC_SMTP_PORT: z.string().optional(),
   NEXT_PUBLIC_SMTP_USERNAME: z.string().optional(),
   NEXT_PUBLIC_SMTP_PASSWORD: z.string().optional(),
-  NEXT_PUBLIC_SMTP_SENDER: z.string().optional()
+  NEXT_PUBLIC_SMTP_SENDER: z.string().optional(),
+  PAYPAL_CLIENT_ID: z.string().optional(),
+  PAYPAL_CLIENT_SECRET: z.string().optional(),
+  PAYPAL_ENV: z.enum(['sandbox', 'live']).default('sandbox'),
+  PAYPAL_WEBHOOK_ID: z.string().optional(),
+  PAYPAL_PLAN_ID_STARTER_MONTHLY: z.string().optional(),
+  PAYPAL_PLAN_ID_STARTER_ANNUAL: z.string().optional(),
+  PAYPAL_PLAN_ID_GROWTH_MONTHLY: z.string().optional(),
+  PAYPAL_PLAN_ID_GROWTH_ANNUAL: z.string().optional()
 });
 
 export const env = envSchema.parse({
@@ -39,5 +47,13 @@ export const env = envSchema.parse({
   NEXT_PUBLIC_SMTP_PORT: process.env.NEXT_PUBLIC_SMTP_PORT,
   NEXT_PUBLIC_SMTP_USERNAME: process.env.NEXT_PUBLIC_SMTP_USERNAME,
   NEXT_PUBLIC_SMTP_PASSWORD: process.env.NEXT_PUBLIC_SMTP_PASSWORD,
-  NEXT_PUBLIC_SMTP_SENDER: process.env.NEXT_PUBLIC_SMTP_SENDER
+  NEXT_PUBLIC_SMTP_SENDER: process.env.NEXT_PUBLIC_SMTP_SENDER,
+  PAYPAL_CLIENT_ID: process.env.PAYPAL_CLIENT_ID,
+  PAYPAL_CLIENT_SECRET: process.env.PAYPAL_CLIENT_SECRET,
+  PAYPAL_ENV: process.env.PAYPAL_ENV,
+  PAYPAL_WEBHOOK_ID: process.env.PAYPAL_WEBHOOK_ID,
+  PAYPAL_PLAN_ID_STARTER_MONTHLY: process.env.PAYPAL_PLAN_ID_STARTER_MONTHLY,
+  PAYPAL_PLAN_ID_STARTER_ANNUAL: process.env.PAYPAL_PLAN_ID_STARTER_ANNUAL,
+  PAYPAL_PLAN_ID_GROWTH_MONTHLY: process.env.PAYPAL_PLAN_ID_GROWTH_MONTHLY,
+  PAYPAL_PLAN_ID_GROWTH_ANNUAL: process.env.PAYPAL_PLAN_ID_GROWTH_ANNUAL
 });

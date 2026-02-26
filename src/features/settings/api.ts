@@ -1,5 +1,8 @@
 import { settingsSectionKeySchema } from '@/features/settings/schema';
-import type { SettingsSection, SettingsSectionKey } from '@/features/settings/types';
+import type {
+  SettingsSection,
+  SettingsSectionKey
+} from '@/features/settings/types';
 
 const settingsSections: Record<SettingsSectionKey, SettingsSection> = {
   'garage-information': {
@@ -9,7 +12,8 @@ const settingsSections: Record<SettingsSectionKey, SettingsSection> = {
     cards: [
       {
         title: 'Business Profile',
-        description: 'Basic profile shown on invoices and customer communication.',
+        description:
+          'Basic profile shown on invoices and customer communication.',
         fields: [
           { label: 'Garage Name', value: 'Garixo Auto Center' },
           { label: 'Business Registration ID', value: 'GXM-284-339' },
@@ -27,30 +31,11 @@ const settingsSections: Record<SettingsSectionKey, SettingsSection> = {
       }
     ]
   },
-  'service-configuration': {
-    key: 'service-configuration',
-    title: 'Service Configuration',
-    description: 'Set labor defaults, service categories, and pricing behavior.',
-    cards: [
-      {
-        title: 'Service Catalog Defaults',
-        description: 'Defaults for service creation and categorization.',
-        fields: [
-          { label: 'Default Labor Rate', value: '$95 / hour' },
-          { label: 'Tax Inclusion Mode', value: 'Exclusive' },
-          { label: 'Warranty Period', value: '90 Days' }
-        ]
-      },
-      {
-        title: 'Operational Rules',
-        description: 'Rules that reduce configuration errors during intake.',
-        fields: [
-          { label: 'Require Technician Assignment', value: 'Enabled' },
-          { label: 'Allow Zero-Cost Services', value: 'Disabled' },
-          { label: 'Require Customer Approval', value: 'Enabled' }
-        ]
-      }
-    ]
+  subscription: {
+    key: 'subscription',
+    title: 'Subscription',
+    description: 'Plans and billing options for your garage.',
+    cards: []
   }
 };
 
