@@ -278,6 +278,23 @@ function eventStatus(eventType: string): BillingStatus | null {
   return null;
 }
 
+function hasLocalTrialSignal(billing: GarageBillingDocument): boolean {
+  if (billing.status === 'trialing') {
+    return true;
+  }
+
+  if (billing.lastPaidAt == null) {
+    return true;
+  }
+
+  if (!billing.trialEndsAt) {
+    return false;
+  }
+
+  const trialEndTime = new Date(billing.trialEndsAt).getTime();
+  return !Number.isNaN(trialEndTime) && trialEndTime > Date.now();
+}
+
 export async function POST(request: Request): Promise<NextResponse> {
   if (WEBHOOK_DEBUG_ENABLED) {
     console.info('[billing][webhook] incoming request', {
@@ -418,10 +435,12 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
     const fallbackNow = new Date().toISOString();
     const now = subscriptionSnapshot?.updatedAt ?? fallbackNow;
-    const nextStatus: BillingStatus =
-      status === 'active' && subscriptionSnapshot?.isTrialing
-        ? 'trialing'
-        : status;
+    const shouldKeepTrialing =
+      status === 'active' &&
+      (subscriptionSnapshot?.isTrialing === true ||
+        hasLocalTrialSignal(billing));
+
+    const nextStatus: BillingStatus = shouldKeepTrialing ? 'trialing' : status;
 
     const updates: Partial<GarageBillingDocument> = {
       status: nextStatus,
