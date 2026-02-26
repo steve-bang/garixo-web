@@ -1,5 +1,26 @@
 import { NextResponse } from 'next/server';
 
+/**
+ * Capture Approval (PayPal Subscription)
+ *
+ * Endpoint intent:
+ * - Runs when the user returns from PayPal approval flow.
+ * - Reconciles local Firestore billing state with current PayPal subscription data.
+ *
+ * Why this exists:
+ * - Webhooks are asynchronous and may arrive later.
+ * - This route gives the UI immediate consistency after redirect.
+ *
+ * Key responsibilities:
+ * - Enforce owner-only authorization and garage ownership checks.
+ * - Fetch PayPal subscription by id and validate garage binding via `custom_id`.
+ * - Derive internal status (`trialing`, `active`, etc.) from provider state.
+ * - Persist canonical billing fields in `garages/{garageId}/billing/current`.
+ *
+ * Note:
+ * - Webhook processing remains the long-term source of truth for lifecycle events.
+ */
+
 import { getPayPalPlanMap } from '@/config/billing';
 import { captureApprovalInputSchema } from '@/features/billing/schema';
 import type {
@@ -11,7 +32,10 @@ import { auth } from '@/lib/auth';
 import { getRequestGarage } from '@/lib/auth/garage-context';
 import { errorResponse, successResponse } from '@/lib/api/handler';
 import { firebaseAdmin } from '@/lib/firebase-admin';
-import { getPayPalSubscription } from '@/services/paypal/paypal-client';
+import {
+  getPayPalSubscription,
+  type PayPalSubscription
+} from '@/services/paypal/paypal-client';
 import type { GarageBillingDocument } from '@/types/firebase-models';
 
 const BILLING_DOC_ID = 'current';
@@ -26,6 +50,7 @@ function mapPayPalStatus(
   paypalStatus: string | undefined,
   fallback: BillingStatus
 ): BillingStatus {
+  // Normalize provider-specific status values to the internal billing enum.
   const value = paypalStatus?.toUpperCase();
 
   if (
@@ -43,6 +68,69 @@ function mapPayPalStatus(
   }
 
   return fallback;
+}
+
+function isTrialingSubscription(subscription: PayPalSubscription): boolean {
+  // Trial state is inferred from PayPal cycle metadata, not only top-level status.
+  if (subscription.status !== 'ACTIVE') {
+    return false;
+  }
+
+  const billingInfo = subscription.billing_info;
+  if (!billingInfo) {
+    return false;
+  }
+
+  const cycles = billingInfo.cycle_executions ?? [];
+
+  const trialCycle = cycles.find(
+    (cycle) =>
+      cycle.tenure_type === 'TRIAL' &&
+      cycle.total_cycles &&
+      cycle.total_cycles > 0
+  );
+
+  if (!trialCycle) {
+    return false;
+  }
+
+  const regularCycle = cycles.find((cycle) => cycle.tenure_type === 'REGULAR');
+
+  if (
+    regularCycle &&
+    regularCycle.cycles_completed &&
+    regularCycle.cycles_completed > 0
+  ) {
+    return false;
+  }
+
+  const nextBillingTime = billingInfo.next_billing_time;
+  if (!nextBillingTime) {
+    return false;
+  }
+
+  const now = new Date();
+  const nextBillingDate = new Date(nextBillingTime);
+
+  return now < nextBillingDate;
+}
+
+function summarizeCycles(subscription: PayPalSubscription): Array<{
+  tenureType: string;
+  completed: number;
+  remaining: number | null;
+  total: number | null;
+}> {
+  const cycles = subscription.billing_info?.cycle_executions ?? [];
+  return cycles.map((cycle) => ({
+    tenureType: cycle.tenure_type ?? 'UNKNOWN',
+    completed: cycle.cycles_completed ?? 0,
+    remaining:
+      typeof cycle.cycles_remaining === 'number'
+        ? cycle.cycles_remaining
+        : null,
+    total: typeof cycle.total_cycles === 'number' ? cycle.total_cycles : null
+  }));
 }
 
 function resolvePlan(planId: string | null): {
@@ -106,8 +194,24 @@ export async function POST(request: Request): Promise<NextResponse> {
     const subscription = await getPayPalSubscription(
       parsed.data.subscriptionId
     );
+    console.info('[billing][capture-approval] fetched subscription', {
+      garageId: garage.id,
+      requestedSubscriptionId: parsed.data.subscriptionId,
+      paypalSubscriptionId: subscription.id,
+      paypalStatus: subscription.status ?? null,
+      planId: subscription.plan_id ?? null,
+      nextBillingTime: subscription.billing_info?.next_billing_time ?? null,
+      cycles: summarizeCycles(subscription)
+    });
+
     if (!subscription.id) {
       return errorResponse(new Error('Subscription not found.'), 404);
+    }
+    if (subscription.custom_id && subscription.custom_id !== garage.id) {
+      return errorResponse(
+        new Error('Subscription does not belong to this garage.'),
+        403
+      );
     }
 
     const billingRef = firebaseAdmin.db
@@ -131,25 +235,42 @@ export async function POST(request: Request): Promise<NextResponse> {
       return errorResponse(new Error('Unable to resolve billing plan.'), 409);
     }
 
-    const status = mapPayPalStatus(
+    const mappedStatus = mapPayPalStatus(
       subscription.status,
       current?.status ?? 'active'
     );
+
+    // Trial detection combines provider cycle info and local paid-history signal.
+    const hasTrialingTenureByCycle = isTrialingSubscription(subscription);
+    const hasTrialingTenureByBillingState =
+      current?.lastPaidAt == null &&
+      (mappedStatus === 'active' || mappedStatus === 'trialing');
+    const hasTrialingTenure =
+      hasTrialingTenureByCycle && hasTrialingTenureByBillingState;
+
+    // Use trialing while the subscription is still in trial tenure; otherwise keep mapped status.
+    const status: BillingStatus = hasTrialingTenure ? 'trialing' : mappedStatus;
+    const periodEnd =
+      subscription.billing_info?.next_billing_time ??
+      current?.currentPeriodEnd ??
+      null;
+    const lastPaymentAt = subscription.billing_info?.last_payment?.time ?? null;
 
     const payload: GarageBillingDocument = {
       provider: 'paypal',
       planCode,
       billingCycle,
       status,
-      trialEndsAt: current?.trialEndsAt ?? null,
-      currentPeriodEnd:
-        subscription.billing_info?.next_billing_time ??
-        current?.currentPeriodEnd ??
-        null,
+      trialEndsAt: hasTrialingTenure ? periodEnd : null,
+      currentPeriodEnd: periodEnd,
+      lastPaidAt: hasTrialingTenure
+        ? (current?.lastPaidAt ?? null)
+        : lastPaymentAt,
       cancelAtPeriodEnd: current?.cancelAtPeriodEnd ?? false,
       paypalSubscriptionId: subscription.id,
       paypalPlanId: subscription.plan_id ?? current?.paypalPlanId ?? null,
       paypalCustomerId:
+        subscription.subscriber?.payer_id ??
         subscription.subscriber?.email_address ??
         current?.paypalCustomerId ??
         null,
@@ -159,10 +280,27 @@ export async function POST(request: Request): Promise<NextResponse> {
       lastWebhookEventId: current?.lastWebhookEventId ?? null,
       webhookEventIdsRecent: current?.webhookEventIdsRecent ?? [],
       createdAt: current?.createdAt ?? now,
-      updatedAt: now
+      updatedAt:
+        subscription.status_update_time ?? subscription.update_time ?? now
     };
 
+    console.info('[billing][capture-approval] computed status', {
+      garageId: garage.id,
+      subscriptionId: subscription.id,
+      previousStatus: current?.status ?? null,
+      mappedStatus,
+      hasTrialingTenure,
+      finalStatus: status,
+      trialEndsAt: payload.trialEndsAt,
+      currentPeriodEnd: payload.currentPeriodEnd
+    });
+
     await billingRef.set(payload, { merge: true });
+    console.info('[billing][capture-approval] billing document updated', {
+      garageId: garage.id,
+      subscriptionId: subscription.id,
+      finalStatus: payload.status
+    });
 
     return successResponse<CaptureApprovalApiResult>({
       status,

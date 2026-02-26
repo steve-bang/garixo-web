@@ -11,6 +11,73 @@ type PayPalLink = {
   method?: string;
 };
 
+type PayPalMoney = {
+  currency_code: string;
+  value: string;
+};
+
+type PayPalName = {
+  given_name?: string;
+  surname?: string;
+};
+
+type PayPalSubscriberName = {
+  full_name?: string;
+};
+
+type PayPalSubscriberAddress = {
+  address_line_1?: string;
+  address_line_2?: string;
+  admin_area_2?: string;
+  admin_area_1?: string;
+  postal_code?: string;
+  country_code?: string;
+};
+
+type PayPalSubscriberShippingAddress = {
+  name?: PayPalSubscriberName;
+  address?: PayPalSubscriberAddress;
+};
+
+type PayPalSubscriber = {
+  email_address?: string;
+  payer_id?: string;
+  name?: PayPalName;
+  tenant?: string;
+  shipping_address?: PayPalSubscriberShippingAddress;
+};
+
+type PayPalCycleExecution = {
+  tenure_type?: 'TRIAL' | 'REGULAR' | string;
+  sequence?: number;
+  cycles_completed?: number;
+  cycles_remaining?: number;
+  total_cycles?: number;
+  current_pricing_scheme_version?: number;
+};
+
+type PayPalBillingInfo = {
+  outstanding_balance?: PayPalMoney;
+  cycle_executions?: PayPalCycleExecution[];
+  current_cycle_sequence?: number;
+  next_billing_time?: string;
+  final_payment_time?: string;
+  failed_payments_count?: number;
+  last_payment?: {
+    amount?: PayPalMoney;
+    time?: string;
+  };
+};
+
+export type PayPalSubscriptionStatus =
+  | 'APPROVAL_PENDING'
+  | 'APPROVED'
+  | 'ACTIVE'
+  | 'SUSPENDED'
+  | 'CANCELLED'
+  | 'EXPIRED'
+  | string;
+
 type PayPalErrorResponse = {
   name?: string;
   message?: string;
@@ -22,17 +89,20 @@ type PayPalAccessTokenResponse = {
 };
 
 export type PayPalSubscription = {
+  status?: PayPalSubscriptionStatus;
+  status_update_time?: string;
+  status_change_note?: string;
   id: string;
   plan_id?: string;
-  status?: string;
   start_time?: string;
-  billing_info?: {
-    next_billing_time?: string;
-  };
-  subscriber?: {
-    payer_id?: string;
-    email_address?: string;
-  };
+  quantity?: string;
+  shipping_amount?: PayPalMoney;
+  subscriber?: PayPalSubscriber;
+  billing_info?: PayPalBillingInfo;
+  create_time?: string;
+  update_time?: string;
+  custom_id?: string;
+  plan_overridden?: boolean;
   links?: PayPalLink[];
 };
 

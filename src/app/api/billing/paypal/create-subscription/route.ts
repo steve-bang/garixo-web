@@ -1,5 +1,30 @@
 import { NextResponse } from 'next/server';
 
+/**
+ * Create Subscription (PayPal)
+ *
+ * Endpoint intent:
+ * - Starts a PayPal subscription checkout flow for the authenticated garage context.
+ * - Returns PayPal approval URL for frontend redirect.
+ *
+ * Data-flow responsibilities:
+ * - Validate requested plan and billing cycle.
+ * - Resolve internal plan -> PayPal plan id mapping.
+ * - Create PayPal subscription with return/cancel callback URLs.
+ * - Persist local billing snapshot before redirect so callback/webhook handlers
+ *   always have a deterministic local reference document.
+ *
+ * Security model:
+ * - Requires authenticated session.
+ * - Uses garage context from session to scope write path:
+ *   `garages/{garageId}/billing/current`
+ *
+ * Notes:
+ * - This endpoint initializes/updates checkout context; it does not finalize
+ *   billing lifecycle state. Final status reconciliation happens in
+ *   capture-approval/webhook handlers.
+ */
+
 import { getPayPalPlanId } from '@/config/billing';
 import { env } from '@/config/env';
 import { createSubscriptionInputSchema } from '@/features/billing/schema';
@@ -37,7 +62,7 @@ function normalizeStatus(
 export async function POST(request: Request): Promise<NextResponse> {
   try {
     const session = await auth();
-    // Billing actions are always user-scoped and require an authenticated owner/staff session.
+    // Billing checkout creation is user-scoped and requires authentication.
     if (!session?.user?.id) {
       return errorResponse(new Error('Unauthorized'), 401);
     }
@@ -87,7 +112,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       : null;
     const now = new Date().toISOString();
 
-    // Persist checkout context before redirect so webhook handlers can reconcile state deterministically.
+    // Persist checkout context before redirect to avoid race conditions between
+    // callback/webhook arrivals and local billing document initialization.
     const payload: GarageBillingDocument = {
       provider: 'paypal',
       planCode: parsed.data.planCode,
@@ -95,6 +121,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       status: normalizeStatus(current),
       trialEndsAt: current?.trialEndsAt ?? null,
       currentPeriodEnd: current?.currentPeriodEnd ?? null,
+      lastPaidAt: current?.lastPaidAt ?? null,
       cancelAtPeriodEnd: current?.cancelAtPeriodEnd ?? false,
       paypalSubscriptionId: subscription.id,
       paypalPlanId: subscription.plan_id ?? planId,

@@ -11,6 +11,16 @@ export type CreateSubscriptionResult = {
   subscriptionId: string;
 };
 
+type CaptureApprovalInput = {
+  subscriptionId: string;
+};
+
+export type CaptureApprovalResult = {
+  status: 'trialing' | 'active' | 'past_due' | 'cancelled' | 'suspended';
+  paypalStatus: string | null;
+  subscriptionId: string;
+};
+
 async function readJson<T>(response: Response): Promise<ApiResponse<T>> {
   return (await response.json()) as ApiResponse<T>;
 }
@@ -35,5 +45,20 @@ export async function createSubscription(
   });
 
   const payload = await readJson<CreateSubscriptionResult>(response);
+  return ensureSuccess(payload);
+}
+
+export async function captureSubscriptionApproval(
+  input: CaptureApprovalInput
+): Promise<CaptureApprovalResult> {
+  const response = await fetch('/api/billing/paypal/capture-approval', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(input)
+  });
+
+  const payload = await readJson<CaptureApprovalResult>(response);
   return ensureSuccess(payload);
 }

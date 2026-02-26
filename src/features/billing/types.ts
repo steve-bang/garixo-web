@@ -18,6 +18,7 @@ export type BillingSnapshot = {
   status: BillingStatus;
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
+  lastPaidAt: string | null;
   cancelAtPeriodEnd: boolean;
   paypalSubscriptionId: string | null;
   paypalPlanId: string | null;

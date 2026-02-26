@@ -1,13 +1,17 @@
 'use client';
 
 import { Check } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { PlanCode } from '@/features/billing/types';
-import { createSubscription } from '@/features/settings/subscription.service';
+import {
+  captureSubscriptionApproval,
+  createSubscription
+} from '@/features/settings/subscription.service';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils/cn';
 
@@ -73,8 +77,66 @@ function formatUsd(value: number): string {
 
 export function SubscriptionSettings(): JSX.Element {
   const toast = useToast();
+  const router = useRouter();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
+  const [isHandlingCallback, setIsHandlingCallback] = useState(false);
+  const callbackHandledRef = useRef(false);
+
+  useEffect(() => {
+    if (callbackHandledRef.current) {
+      return;
+    }
+
+    const search = new URLSearchParams(window.location.search);
+    const paypalState = search.get('paypal');
+    if (paypalState !== 'success' && paypalState !== 'cancelled') {
+      return;
+    }
+
+    callbackHandledRef.current = true;
+    const callbackSubscriptionId =
+      search.get('subscription_id') ??
+      search.get('ba_token') ??
+      search.get('token');
+
+    const finishCallback = () => {
+      router.replace('/dashboard/settings/subscription');
+    };
+
+    if (paypalState === 'cancelled') {
+      toast.info('Payment was cancelled. You can try again anytime.');
+      finishCallback();
+      return;
+    }
+
+    if (!callbackSubscriptionId) {
+      toast.error('Could not confirm payment. Please try again.');
+      finishCallback();
+      return;
+    }
+
+    // Defer state update to avoid sync setState in effect body lint violation.
+    queueMicrotask(() => setIsHandlingCallback(true));
+
+    void captureSubscriptionApproval({
+      subscriptionId: callbackSubscriptionId
+    })
+      .then(() => {
+        toast.success('Your subscription has been confirmed.');
+      })
+      .catch((error) => {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : 'Could not confirm payment. Please try again.'
+        );
+      })
+      .finally(() => {
+        setIsHandlingCallback(false);
+        finishCallback();
+      });
+  }, [router, toast]);
 
   const onUpgrade = async (planCode: PlanCode) => {
     const pendingKey = `${planCode}-${billingCycle}`;
@@ -98,6 +160,17 @@ export function SubscriptionSettings(): JSX.Element {
 
   return (
     <div className="mx-auto max-w-[920px] space-y-s4">
+      {isHandlingCallback ? (
+        <Card className="p-s3">
+          <div className="flex items-center gap-s2">
+            <span className="size-4 animate-spin rounded-full border-2 border-border-strong border-t-transparent" />
+            <p className="text-small text-text-secondary">
+              Confirming your PayPal payment...
+            </p>
+          </div>
+        </Card>
+      ) : null}
+
       <header className="space-y-s2 text-center">
         <h2 className="text-h2">Simple pricing. Built for garage owners.</h2>
         <p className="text-small text-text-muted">
@@ -186,7 +259,7 @@ export function SubscriptionSettings(): JSX.Element {
                   type="button"
                   className="w-full"
                   variant={plan.isRecommended ? 'default' : 'secondary'}
-                  disabled={pendingPlan !== null}
+                  disabled={pendingPlan !== null || isHandlingCallback}
                   onClick={() => void onUpgrade(plan.id)}
                 >
                   {isPending ? 'Redirecting to PayPal...' : plan.ctaLabel}

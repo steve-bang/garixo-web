@@ -18,6 +18,7 @@ export const billingSnapshotSchema = z.object({
   status: billingStatusSchema,
   trialEndsAt: z.string().datetime().nullable(),
   currentPeriodEnd: z.string().datetime().nullable(),
+  lastPaidAt: z.string().datetime().nullable(),
   cancelAtPeriodEnd: z.boolean(),
   paypalSubscriptionId: z.string().nullable(),
   paypalPlanId: z.string().nullable(),
