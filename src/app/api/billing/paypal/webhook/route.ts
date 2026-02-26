@@ -220,11 +220,19 @@ function eventStatus(eventType: string): BillingStatus | null {
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
+  console.info('[billing][webhook] incoming request', {
+    method: request.method,
+    url: request.url,
+    headers: Object.fromEntries(request.headers.entries())
+  });
+
   let event: PayPalWebhookEvent;
 
   try {
     event = (await request.json()) as PayPalWebhookEvent;
+    console.info('[billing][webhook] parsed payload', event);
   } catch {
+    console.error('[billing][webhook] failed to parse JSON payload');
     return NextResponse.json({ success: true });
   }
 
@@ -241,6 +249,16 @@ export async function POST(request: Request): Promise<NextResponse> {
     !certUrl ||
     !authAlgo
   ) {
+    console.warn(
+      '[billing][webhook] missing required PayPal signature headers',
+      {
+        transmissionId,
+        transmissionTime,
+        transmissionSigPresent: Boolean(transmissionSig),
+        certUrl,
+        authAlgo
+      }
+    );
     return NextResponse.json(
       { success: false, error: 'Invalid webhook.' },
       { status: 400 }
@@ -258,6 +276,11 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   if (!signatureValid) {
     // Reject unsigned/untrusted events before touching persistence.
+    console.warn('[billing][webhook] signature verification failed', {
+      transmissionId,
+      eventId: event.id ?? null,
+      eventType: event.event_type ?? null
+    });
     return NextResponse.json(
       { success: false, error: 'Invalid webhook.' },
       { status: 400 }
@@ -268,17 +291,33 @@ export async function POST(request: Request): Promise<NextResponse> {
   const eventType = event.event_type?.trim();
   const subscriptionId = resolveSubscriptionId(event);
   if (!eventId || !eventType || !subscriptionId) {
+    console.warn('[billing][webhook] missing required event fields', {
+      eventId,
+      eventType,
+      subscriptionId
+    });
     return NextResponse.json({ success: true });
   }
 
   const status = eventStatus(eventType);
   if (!status) {
     // Acknowledge unknown/non-target events to avoid unnecessary retries.
+    console.info('[billing][webhook] ignored unsupported event type', {
+      eventId,
+      eventType,
+      subscriptionId
+    });
     return NextResponse.json({ success: true });
   }
 
   const billingRef = await resolveBillingRef(event, subscriptionId);
   if (!billingRef) {
+    console.warn('[billing][webhook] billing document not resolved', {
+      eventId,
+      eventType,
+      subscriptionId,
+      customId: event.resource?.custom_id ?? null
+    });
     return NextResponse.json({ success: true });
   }
 
@@ -291,6 +330,11 @@ export async function POST(request: Request): Promise<NextResponse> {
     const billing = snap.data() as GarageBillingDocument;
     if (isProcessed(eventId, billing)) {
       // Safe no-op on duplicate event.
+      console.info('[billing][webhook] duplicate event skipped', {
+        eventId,
+        eventType,
+        subscriptionId
+      });
       return;
     }
 
@@ -356,7 +400,21 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     transaction.set(billingRef, updates, { merge: true });
+
+    console.info('[billing][webhook] billing updated', {
+      eventId,
+      eventType,
+      subscriptionId,
+      nextStatus,
+      nextPeriodEnd: updates.currentPeriodEnd ?? null,
+      lastPaidAt: updates.lastPaidAt ?? null
+    });
   });
 
+  console.info('[billing][webhook] processed successfully', {
+    eventId,
+    eventType,
+    subscriptionId
+  });
   return NextResponse.json({ success: true });
 }
