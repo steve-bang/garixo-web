@@ -8,6 +8,12 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 ### Added
 
+- No entries yet.
+
+## [0.1.7] - 2026-02-26
+
+### Added
+
 - Billing and PayPal backend foundation:
 - Billing config map for plan/cycle -> PayPal plan id in `/src/config/billing.ts`.
 - Billing domain schemas and types in `/src/features/billing/*`.
