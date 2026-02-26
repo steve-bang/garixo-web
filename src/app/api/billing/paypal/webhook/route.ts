@@ -25,6 +25,7 @@ import { NextResponse } from 'next/server';
  */
 
 import type { BillingStatus } from '@/features/billing/types';
+import { env } from '@/config/env';
 import { firebaseAdmin } from '@/lib/firebase-admin';
 import {
   getPayPalSubscription,
@@ -35,6 +36,7 @@ import type { GarageBillingDocument } from '@/types/firebase-models';
 
 const BILLING_DOC_ID = 'current';
 const MAX_RECENT_WEBHOOK_IDS = 50;
+const WEBHOOK_DEBUG_ENABLED = env.DEBUG_PAYPAL_WEBHOOK === 'true';
 
 type PayPalWebhookEvent = {
   id?: string;
@@ -43,6 +45,7 @@ type PayPalWebhookEvent = {
     id?: string;
     custom_id?: string;
     billing_agreement_id?: string;
+    status?: string;
   };
 };
 
@@ -59,6 +62,39 @@ type PayPalSubscriptionSnapshot = {
 
 function parseHeader(request: Request, name: string): string {
   return request.headers.get(name) ?? '';
+}
+
+function redactHeaders(headers: Headers): Record<string, string> {
+  const output: Record<string, string> = {};
+  for (const [key, value] of headers.entries()) {
+    const lower = key.toLowerCase();
+    const isSensitive =
+      lower === 'authorization' ||
+      lower === 'paypal-transmission-sig' ||
+      lower === 'cookie' ||
+      lower === 'set-cookie' ||
+      lower.includes('token') ||
+      lower.includes('secret') ||
+      lower.includes('signature');
+    output[key] = isSensitive ? '[REDACTED]' : value;
+  }
+
+  return output;
+}
+
+function toWebhookLogPayload(event: PayPalWebhookEvent): {
+  id: string | null;
+  eventType: string | null;
+  subscriptionId: string | null;
+  status: string | null;
+} {
+  return {
+    id: event.id ?? null,
+    eventType: event.event_type ?? null,
+    subscriptionId:
+      event.resource?.billing_agreement_id ?? event.resource?.id ?? null,
+    status: event.resource?.status ?? null
+  };
 }
 
 function resolveSubscriptionId(event: PayPalWebhookEvent): string | null {
@@ -116,25 +152,48 @@ function fallbackPeriodEnd(billing: GarageBillingDocument, now: Date): string {
 }
 
 function isTrialingSubscription(subscription: PayPalSubscription): boolean {
-  const cycles = subscription.billing_info?.cycle_executions ?? [];
-  const trialCycle = cycles.find((cycle) => cycle.tenure_type === 'TRIAL');
+  // Trial state is inferred from PayPal cycle metadata, not only top-level status.
+  if (subscription.status !== 'ACTIVE') {
+    return false;
+  }
+
+  const billingInfo = subscription.billing_info;
+  if (!billingInfo) {
+    return false;
+  }
+
+  const cycles = billingInfo.cycle_executions ?? [];
+
+  const trialCycle = cycles.find(
+    (cycle) =>
+      cycle.tenure_type === 'TRIAL' &&
+      cycle.total_cycles &&
+      cycle.total_cycles > 0
+  );
+
   if (!trialCycle) {
     return false;
   }
 
-  const completed = trialCycle.cycles_completed ?? 0;
-  const remaining = trialCycle.cycles_remaining;
-  const total = trialCycle.total_cycles;
+  const regularCycle = cycles.find((cycle) => cycle.tenure_type === 'REGULAR');
 
-  if (typeof remaining === 'number') {
-    return remaining > 0;
+  if (
+    regularCycle &&
+    regularCycle.cycles_completed &&
+    regularCycle.cycles_completed > 0
+  ) {
+    return false;
   }
 
-  if (typeof total === 'number') {
-    return total > completed;
+  const nextBillingTime = billingInfo.next_billing_time;
+  if (!nextBillingTime) {
+    return false;
   }
 
-  return false;
+  const now = new Date();
+  const nextBillingDate = new Date(nextBillingTime);
+
+  return now < nextBillingDate;
 }
 
 async function resolveBillingRef(
@@ -220,19 +279,28 @@ function eventStatus(eventType: string): BillingStatus | null {
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
-  console.info('[billing][webhook] incoming request', {
-    method: request.method,
-    url: request.url,
-    headers: Object.fromEntries(request.headers.entries())
-  });
+  if (WEBHOOK_DEBUG_ENABLED) {
+    console.info('[billing][webhook] incoming request', {
+      method: request.method,
+      url: request.url,
+      headers: redactHeaders(request.headers)
+    });
+  }
 
   let event: PayPalWebhookEvent;
 
   try {
     event = (await request.json()) as PayPalWebhookEvent;
-    console.info('[billing][webhook] parsed payload', event);
+    if (WEBHOOK_DEBUG_ENABLED) {
+      console.info(
+        '[billing][webhook] parsed payload',
+        toWebhookLogPayload(event)
+      );
+    }
   } catch {
-    console.error('[billing][webhook] failed to parse JSON payload');
+    if (WEBHOOK_DEBUG_ENABLED) {
+      console.error('[billing][webhook] failed to parse JSON payload');
+    }
     return NextResponse.json({ success: true });
   }
 
@@ -324,7 +392,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   await firebaseAdmin.db.runTransaction(async (transaction: any) => {
     const snap = await transaction.get(billingRef);
     if (!snap.exists) {
-      return;
+      return NextResponse.json({ success: true });
     }
 
     const billing = snap.data() as GarageBillingDocument;
@@ -335,7 +403,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         eventType,
         subscriptionId
       });
-      return;
+      return NextResponse.json({ success: true });
     }
 
     const subscriptionSnapshot = await fetchSubscriptionSnapshot(
