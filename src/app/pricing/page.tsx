@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card';
 import { formatCurrencyUsd } from '@/lib/utils/format';
 
 type PricingPlan = {
-  id: 'starter' | 'growth';
+  id: 'free' | 'starter' | 'growth';
   name: string;
   monthlyPrice: number;
   annualPrice: number;
@@ -25,6 +25,27 @@ type PricingPlan = {
 
 const plans: PricingPlan[] = [
   {
+    id: 'free',
+    name: 'Free',
+    monthlyPrice: 0,
+    annualPrice: 0,
+    annualDiscountPercent: 0,
+    trialDays: 0,
+    users: 'Up to 1 user',
+    subtitle: 'Perfect for small shops getting organized',
+    ctaLabel: 'Start Free',
+    recommended: true,
+    features: [
+      '1 user',
+      '1 location',
+      'Up to 25 work orders per month',
+      'Customer & vehicle history',
+      'Service management',
+      'Basic invoices',
+      'Community/email support'
+    ]
+  },
+  {
     id: 'starter',
     name: 'Starter',
     monthlyPrice: 79,
@@ -36,11 +57,11 @@ const plans: PricingPlan[] = [
     ctaLabel: 'Start Free for 14 Days',
     recommended: true,
     features: [
-      'Work order management',
-      'Customer and vehicle history',
-      'Service and parts list',
-      'Basic invoice generation',
-      'Email support'
+      'Unlimited work orders',
+      'Staff job assignment',
+      'Monthly revenue reports',
+      'Remove Garixo branding',
+      'Priority email support'
     ]
   },
   {
@@ -55,10 +76,11 @@ const plans: PricingPlan[] = [
     ctaLabel: 'Scale My Shop',
     features: [
       'Everything in Starter',
-      'Staff workflow management',
-      'Deeper business reports',
-      'Priority support',
-      'Faster team collaboration'
+      'Mechanic performance tracking',
+      'Advanced reports',
+      'Workflow management per staff',
+      'Early access to new features',
+      'Priority support'
     ]
   }
 ];
@@ -213,62 +235,69 @@ export default function PricingPage(): JSX.Element {
 
         <section className="bg-background-primary py-s10">
           <div className="mx-auto grid w-full max-w-[980px] gap-s4 px-s4 md:grid-cols-2">
-            {plans.map((plan) => (
-              <Card
-                key={plan.id}
-                className={`relative flex h-full flex-col p-s4 ${
-                  plan.recommended ? 'border-primary-300 shadow-sm' : ''
-                }`}
-              >
-                {plan.recommended ? (
-                  <Badge className="absolute right-s3 top-s3" variant="success">
-                    Most Popular
-                  </Badge>
-                ) : null}
-
-                <div className="space-y-s1">
-                  <h2 className="text-h2">{plan.name}</h2>
-                  <p className="text-small text-text-muted">{plan.subtitle}</p>
-                </div>
-
-                <div className="mt-s3 rounded-md border border-border bg-surface-default p-s3">
-                  <p className="text-h2 font-bold text-text-primary">
-                    {formatCurrencyUsd(plan.monthlyPrice)}
-                    <span className="ml-1 text-small font-medium text-text-muted">
-                      /month
-                    </span>
-                  </p>
-                  <p className="text-small text-text-muted">
-                    {formatCurrencyUsd(plan.annualPrice)}/year • save{' '}
-                    {plan.annualDiscountPercent}%
-                  </p>
-                  <p className="mt-s1 text-caption text-text-secondary">
-                    {plan.users}
-                  </p>
-                </div>
-
-                <ul className="mt-s4 space-y-s2">
-                  {plan.features.map((feature) => (
-                    <li
-                      key={`${plan.id}-${feature}`}
-                      className="flex items-start gap-s2 text-small text-text-secondary"
+            {plans
+              .filter((plan) => plan.id !== 'free')
+              .map((plan) => (
+                <Card
+                  key={plan.id}
+                  className={`relative flex h-full flex-col p-s4 ${
+                    plan.recommended ? 'border-primary-300 shadow-sm' : ''
+                  }`}
+                >
+                  {plan.recommended ? (
+                    <Badge
+                      className="absolute right-s3 top-s3"
+                      variant="success"
                     >
-                      <Check className="mt-[2px] size-4 text-success-700" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                      Most Popular
+                    </Badge>
+                  ) : null}
 
-                <div className="mt-auto space-y-s2 pt-s4">
-                  <p className="text-caption text-text-muted">
-                    {plan.trialDays}-day free trial included
-                  </p>
-                  <Button asChild className="h-11 w-full">
-                    <Link href="/auth/sign-up">{plan.ctaLabel}</Link>
-                  </Button>
-                </div>
-              </Card>
-            ))}
+                  <div className="space-y-s1">
+                    <h2 className="text-h2">{plan.name}</h2>
+                    <p className="text-small text-text-muted">
+                      {plan.subtitle}
+                    </p>
+                  </div>
+
+                  <div className="mt-s3 rounded-md border border-border bg-surface-default p-s3">
+                    <p className="text-h2 font-bold text-text-primary">
+                      {formatCurrencyUsd(plan.monthlyPrice)}
+                      <span className="ml-1 text-small font-medium text-text-muted">
+                        /month
+                      </span>
+                    </p>
+                    <p className="text-small text-text-muted">
+                      {formatCurrencyUsd(plan.annualPrice)}/year • save{' '}
+                      {plan.annualDiscountPercent}%
+                    </p>
+                    <p className="mt-s1 text-caption text-text-secondary">
+                      {plan.users}
+                    </p>
+                  </div>
+
+                  <ul className="mt-s4 space-y-s2">
+                    {plan.features.map((feature) => (
+                      <li
+                        key={`${plan.id}-${feature}`}
+                        className="flex items-start gap-s2 text-small text-text-secondary"
+                      >
+                        <Check className="mt-[2px] size-4 text-success-700" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-auto space-y-s2 pt-s4">
+                    <p className="text-caption text-text-muted">
+                      {plan.trialDays}-day free trial included
+                    </p>
+                    <Button asChild className="h-11 w-full">
+                      <Link href="/auth/sign-up">{plan.ctaLabel}</Link>
+                    </Button>
+                  </div>
+                </Card>
+              ))}
           </div>
         </section>
 
