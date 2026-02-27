@@ -8,7 +8,22 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 ### Added
 
-- No entries yet.
+- Subscription lifecycle notification templates:
+- `/src/lib/email/templates/subscription-payment-failed-template.ts`
+- `/src/lib/email/templates/subscription-payment-succeeded-template.ts`
+- `/src/lib/email/templates/subscription-cancelled-template.ts`
+- `/src/lib/email/templates/subscription-suspended-template.ts`
+
+### Changed
+
+- PayPal webhook notification flow now sends owner-facing lifecycle emails for:
+- `BILLING.SUBSCRIPTION.ACTIVATED`
+- `BILLING.SUBSCRIPTION.PAYMENT.FAILED`
+- `PAYMENT.SALE.COMPLETED`
+- `BILLING.SUBSCRIPTION.CANCELLED`
+- `BILLING.SUBSCRIPTION.SUSPENDED`
+- Webhook post-processing now exits early for duplicate/no-op events to avoid side effects after idempotency checks.
+- Centralized subscription notification senders in `/src/services/email.service.ts`.
 
 ## [0.1.9] - 2026-02-27
 
