@@ -34,6 +34,10 @@ export const billingConfig = {
     webhookId: (): string => requiredPayPalValue('PAYPAL_WEBHOOK_ID')
   },
   plans: {
+    free: {
+      monthly: () => '',
+      annual: () => ''
+    },
     starter: {
       monthly: () => requiredPayPalValue('PAYPAL_PLAN_ID_STARTER_MONTHLY'),
       annual: () => requiredPayPalValue('PAYPAL_PLAN_ID_STARTER_ANNUAL')
@@ -54,6 +58,10 @@ export function getPayPalPlanId(
 
 export function getPayPalPlanMap(): BillingPlanMap {
   return {
+    free: {
+      monthly: '',
+      annual: ''
+    },
     starter: {
       monthly: billingConfig.plans.starter.monthly(),
       annual: billingConfig.plans.starter.annual()
