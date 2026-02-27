@@ -1,5 +1,6 @@
 import { sendSmtpEmail } from '@/lib/email/smtp-client';
 import { buildSubscriptionActivatedEmailTemplate } from '@/lib/email/templates/subscription-activated-template';
+import { buildSubscriptionPaymentFailedEmailTemplate } from '@/lib/email/templates/subscription-payment-failed-template';
 import { buildVerifyEmailTemplate } from '@/lib/email/templates/verify-email-template';
 
 type SendVerificationEmailInput = {
@@ -16,6 +17,18 @@ type SendSubscriptionActivatedEmailInput = {
   price: number;
   nextBillingDate: Date;
   dashboardLink: string;
+  supportEmail: string;
+  websiteUrl: string;
+};
+
+type SendSubscriptionPaymentFailedEmailInput = {
+  recipientEmail: string;
+  firstName?: string;
+  planName: string;
+  amount: number;
+  billingDate: Date;
+  gracePeriodDate: Date;
+  updateBillingLink: string;
   supportEmail: string;
   websiteUrl: string;
 };
@@ -48,6 +61,28 @@ export async function sendSubscriptionActivatedEmail(
     price: input.price,
     nextBillingDate: input.nextBillingDate,
     dashboardLink: input.dashboardLink,
+    supportEmail: input.supportEmail,
+    websiteUrl: input.websiteUrl
+  });
+
+  return sendSmtpEmail({
+    to: input.recipientEmail,
+    subject: template.subject,
+    text: template.text,
+    html: template.html
+  });
+}
+
+export async function sendSubscriptionPaymentFailedEmail(
+  input: SendSubscriptionPaymentFailedEmailInput
+): Promise<boolean> {
+  const template = buildSubscriptionPaymentFailedEmailTemplate({
+    firstName: input.firstName,
+    planName: input.planName,
+    amount: input.amount,
+    billingDate: input.billingDate,
+    gracePeriodDate: input.gracePeriodDate,
+    updateBillingLink: input.updateBillingLink,
     supportEmail: input.supportEmail,
     websiteUrl: input.websiteUrl
   });

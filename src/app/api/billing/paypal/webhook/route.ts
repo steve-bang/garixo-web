@@ -37,7 +37,10 @@ import {
   type PayPalSubscription,
   verifyPayPalWebhookSignature
 } from '@/services/paypal/paypal-client';
-import { sendSubscriptionActivatedEmail } from '@/services/email.service';
+import {
+  sendSubscriptionActivatedEmail,
+  sendSubscriptionPaymentFailedEmail
+} from '@/services/email.service';
 import { getGarageById } from '@/services/firebase/garage-service';
 import { getUserDocument } from '@/services/firebase/user-sync-service';
 import { syncUsageCurrentByPlan } from '@/services/firebase/usage-plan-sync-service';
@@ -339,6 +342,10 @@ function shouldSendActivatedEmail(eventType: string): boolean {
   );
 }
 
+function shouldSendPaymentFailedEmail(eventType: string): boolean {
+  return eventType === 'BILLING.SUBSCRIPTION.PAYMENT.FAILED';
+}
+
 function toFirstName(fullName?: string): string | undefined {
   if (!fullName) return undefined;
   const first = fullName.trim().split(/\s+/)[0];
@@ -632,6 +639,62 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     } catch (error) {
       console.error('[billing][webhook] activation email send failed', {
+        eventId,
+        eventType,
+        subscriptionId,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  if (shouldSendPaymentFailedEmail(eventType)) {
+    try {
+      const [garage, billingSnap] = await Promise.all([
+        getGarageById(garageId),
+        billingRef.get()
+      ]);
+
+      const billing = billingSnap.exists
+        ? (billingSnap.data() as GarageBillingDocument)
+        : null;
+
+      if (garage?.ownerUserId && billing) {
+        const owner = await getUserDocument(garage.ownerUserId);
+        if (owner?.email) {
+          const plan =
+            subscriptionPlanConfig.find(
+              (item) => item.id === billing.planCode
+            ) ?? null;
+          const updateBillingLink = new URL(
+            '/dashboard/settings/subscription',
+            env.NEXTAUTH_URL
+          ).toString();
+          const websiteUrl = new URL('/', env.NEXTAUTH_URL).toString();
+          const billingDate = billing.updatedAt
+            ? new Date(billing.updatedAt)
+            : new Date();
+          const gracePeriodDate = new Date(
+            Date.now() + 7 * 24 * 60 * 60 * 1000
+          );
+
+          await sendSubscriptionPaymentFailedEmail({
+            recipientEmail: owner.email,
+            firstName: toFirstName(owner.name),
+            planName: plan?.name ?? billing.planCode,
+            amount: plan ? getPriceByCycle(plan, billing.billingCycle) : 0,
+            billingDate: Number.isNaN(billingDate.getTime())
+              ? new Date()
+              : billingDate,
+            gracePeriodDate,
+            updateBillingLink,
+            supportEmail:
+              env.NEXT_PUBLIC_APP_SUPPORT_EMAIL ?? 'support@garixo.com',
+            websiteUrl
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[billing][webhook] payment failed email send failed', {
         eventId,
         eventType,
         subscriptionId,

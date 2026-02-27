@@ -86,7 +86,6 @@ export function buildSubscriptionActivatedEmailTemplate(
         <p style="margin: 0 0 6px;"><strong>Billing cycle:</strong> ${input.billingCycle}</p>
         <p style="margin: 0 0 6px;"><strong>Amount:</strong> ${formattedPrice}</p>
         <p style="margin: 0 0 6px;"><strong>Next billing date:</strong> ${formattedNextBillingDate}</p>
-        <p style="margin: 0;"><strong>Payment method:</strong> PayPal</p>
       </div>
       <p style="margin: 0 0 12px;">
         Your account now has full access to all features included in your plan.
