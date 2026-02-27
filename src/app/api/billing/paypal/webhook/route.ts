@@ -27,12 +27,19 @@ import { NextResponse } from 'next/server';
 import type { BillingStatus } from '@/features/billing/types';
 import { getPayPalPlanMap } from '@/config/billing';
 import { env } from '@/config/env';
+import {
+  getPriceByCycle,
+  subscriptionPlanConfig
+} from '@/features/billing/plan-feature-config';
 import { firebaseAdmin } from '@/lib/firebase-admin';
 import {
   getPayPalSubscription,
   type PayPalSubscription,
   verifyPayPalWebhookSignature
 } from '@/services/paypal/paypal-client';
+import { sendSubscriptionActivatedEmail } from '@/services/email.service';
+import { getGarageById } from '@/services/firebase/garage-service';
+import { getUserDocument } from '@/services/firebase/user-sync-service';
 import { syncUsageCurrentByPlan } from '@/services/firebase/usage-plan-sync-service';
 import type { GarageBillingDocument } from '@/types/firebase-models';
 import type { BillingCycle, PlanCode } from '@/features/billing/types';
@@ -325,6 +332,19 @@ function shouldSyncUsageForEvent(eventType: string): boolean {
   );
 }
 
+function shouldSendActivatedEmail(eventType: string): boolean {
+  return (
+    eventType === 'BILLING.SUBSCRIPTION.ACTIVATED' ||
+    eventType === 'BILLING.SUBSCRIPTION.RE-ACTIVATED'
+  );
+}
+
+function toFirstName(fullName?: string): string | undefined {
+  if (!fullName) return undefined;
+  const first = fullName.trim().split(/\s+/)[0];
+  return first || undefined;
+}
+
 function hasLocalTrialSignal(billing: GarageBillingDocument): boolean {
   if (billing.status === 'trialing') {
     return true;
@@ -565,6 +585,58 @@ export async function POST(request: Request): Promise<NextResponse> {
   // for key subscription lifecycle transitions.
   if (shouldSyncUsageForEvent(eventType) && syncedPlanCode) {
     await syncUsageCurrentByPlan(garageId, syncedPlanCode);
+  }
+
+  if (shouldSendActivatedEmail(eventType)) {
+    try {
+      const [garage, billingSnap] = await Promise.all([
+        getGarageById(garageId),
+        billingRef.get()
+      ]);
+
+      const billing = billingSnap.exists
+        ? (billingSnap.data() as GarageBillingDocument)
+        : null;
+
+      if (garage?.ownerUserId && billing) {
+        const owner = await getUserDocument(garage.ownerUserId);
+        if (owner?.email) {
+          const plan =
+            subscriptionPlanConfig.find(
+              (item) => item.id === billing.planCode
+            ) ?? null;
+          const dashboardUrl = new URL(
+            '/dashboard',
+            env.NEXTAUTH_URL
+          ).toString();
+          const websiteUrl = new URL('/', env.NEXTAUTH_URL).toString();
+          const nextBillingDate = billing.currentPeriodEnd
+            ? new Date(billing.currentPeriodEnd)
+            : new Date();
+
+          await sendSubscriptionActivatedEmail({
+            recipientEmail: owner.email,
+            firstName: toFirstName(owner.name),
+            planName: plan?.name ?? billing.planCode,
+            billingCycle: billing.billingCycle,
+            price: plan ? getPriceByCycle(plan, billing.billingCycle) : 0,
+            nextBillingDate: Number.isNaN(nextBillingDate.getTime())
+              ? new Date()
+              : nextBillingDate,
+            dashboardLink: dashboardUrl,
+            supportEmail: 'support@garixo.com',
+            websiteUrl
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[billing][webhook] activation email send failed', {
+        eventId,
+        eventType,
+        subscriptionId,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   }
 
   if (WEBHOOK_DEBUG_ENABLED) {

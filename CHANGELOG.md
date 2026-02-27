@@ -10,6 +10,46 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 - No entries yet.
 
+## [0.1.9] - 2026-02-27
+
+### Added
+
+- Free-tier bootstrap for new garages during onboarding:
+- `garages/{garageId}/billing/current` initialized with free plan defaults.
+- `garages/{garageId}/usage/current` initialized with usage counters and period metadata.
+- New bootstrap service at `/src/services/firebase/garage-billing-usage-bootstrap-service.ts`.
+
+- Shared billing plan/feature config for centralized plan rules and UI config:
+- `/src/features/billing/plan-feature-config.ts`.
+
+- Usage plan sync service:
+- `/src/services/firebase/usage-plan-sync-service.ts`.
+- Synchronizes `usage/current` feature gates and limits with current subscription plan.
+
+### Changed
+
+- Work-order creation now enforces usage limits from `usage/current` key `workOrders`:
+- Transactional create + usage consume in `/src/app/api/work-orders/work-orders-db.ts`.
+- Friendly API responses for plan-limit and feature-disabled cases in `/src/app/api/work-orders/route.ts`.
+
+- Work-order create UX improvements for non-technical owners:
+- Added upgrade modals in:
+- `/src/features/work-orders/components/create-order-form.tsx`
+- `/src/features/work-orders/components/first-work-order-drawer.tsx`
+- CTA routes users to subscription settings when plan upgrade is required.
+
+- Subscription settings now consumes shared plan config instead of local inline plan definitions:
+- `/src/features/settings/components/subscription-settings.tsx`.
+
+- Billing lifecycle now syncs usage rules on plan transitions:
+- Capture approval integration in `/src/app/api/billing/paypal/capture-approval/route.ts`.
+- Webhook integration for `ACTIVATED`, `RE-ACTIVATED`, `CANCELLED`, `SUSPENDED` in `/src/app/api/billing/paypal/webhook/route.ts`.
+
+### Fixed
+
+- Staff usage baseline now uses `0` (owner not counted as staff seat) and release flow aligns with this baseline.
+- Staff service refactor centralizes usage seat logic and reduces duplicated quota/counter code.
+
 ## [0.1.8] - 2026-02-27
 
 ### Added
