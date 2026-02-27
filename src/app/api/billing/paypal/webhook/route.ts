@@ -624,7 +624,8 @@ export async function POST(request: Request): Promise<NextResponse> {
               ? new Date()
               : nextBillingDate,
             dashboardLink: dashboardUrl,
-            supportEmail: 'support@garixo.com',
+            supportEmail:
+              env.NEXT_PUBLIC_APP_SUPPORT_EMAIL ?? 'support@garixo.com',
             websiteUrl
           });
         }
