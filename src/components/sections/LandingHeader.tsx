@@ -42,6 +42,12 @@ export function LandingHeader(): JSX.Element {
           >
             Case Studies
           </Link>
+          <Link
+            href="/pricing"
+            className="text-small text-text-secondary hover:text-text-primary"
+          >
+            Pricing
+          </Link>
         </nav>
 
         <div className="flex items-center gap-s2">
