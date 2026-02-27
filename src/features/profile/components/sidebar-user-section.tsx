@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronUp, LogOut, Settings, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -8,6 +9,7 @@ import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import type { BillingStatus, PlanCode } from '@/features/billing/types';
 import { User } from '@/types/user';
 
 function initials(nameOrEmail: string): string {
@@ -18,7 +20,28 @@ function initials(nameOrEmail: string): string {
   return (tokens[0]?.slice(0, 2) ?? 'US').toUpperCase();
 }
 
-export function SidebarUserSection(): JSX.Element {
+type SidebarUserSectionProps = {
+  currentPlan: PlanCode;
+  billingStatus: BillingStatus;
+};
+
+function formatPlanLabel(planCode: PlanCode): string {
+  if (planCode === 'starter') return 'Starter';
+  if (planCode === 'growth') return 'Growth';
+  return 'Free';
+}
+
+function formatBillingStatus(status: BillingStatus): string | null {
+  if (status === 'suspended') return 'Suspended';
+  if (status === 'past_due') return 'Payment issue';
+  if (status === 'cancelled') return 'Cancelled';
+  return null;
+}
+
+export function SidebarUserSection({
+  currentPlan,
+  billingStatus
+}: SidebarUserSectionProps): JSX.Element {
   const toast = useToast();
   const router = useRouter();
 
@@ -108,6 +131,7 @@ export function SidebarUserSection(): JSX.Element {
     () => initials(user?.name || user?.email || 'User'),
     [user]
   );
+  const billingStatusLabel = formatBillingStatus(billingStatus);
 
   const resetPasswordState = () => {
     setCurrentPassword('');
@@ -294,6 +318,10 @@ export function SidebarUserSection(): JSX.Element {
           <span className="block truncate text-small text-text-secondary">
             {loading ? 'Loading…' : user?.email || '-'}
           </span>
+          <span className="mt-0.5 block truncate text-caption text-text-muted">
+            Plan: {formatPlanLabel(currentPlan)}
+            {billingStatusLabel ? ` • ${billingStatusLabel}` : ''}
+          </span>
         </span>
 
         <ChevronUp className="size-4 text-text-muted" />
@@ -301,6 +329,15 @@ export function SidebarUserSection(): JSX.Element {
 
       {menuOpen ? (
         <div className="absolute bottom-[88px] left-s4 w-[240px] rounded-xl border border-border bg-surface-default p-s2 shadow-md">
+          <Link
+            href="/dashboard/settings/subscription"
+            className="mb-s1 flex w-full items-center gap-s2 rounded-md px-s3 py-s2 text-small text-text-primary hover:bg-surface-hover"
+            onClick={() => setMenuOpen(false)}
+          >
+            <ShieldCheck className="size-4" />
+            Manage Subscription
+          </Link>
+
           <button
             type="button"
             className="flex w-full items-center gap-s2 rounded-md px-s3 py-s2 text-small text-text-primary hover:bg-surface-hover"

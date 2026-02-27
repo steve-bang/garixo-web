@@ -30,6 +30,7 @@ import {
   useCreateWorkOrder,
   useWorkOrders
 } from '@/features/work-orders/hooks';
+import type { BillingStatus, PlanCode } from '@/features/billing/types';
 import type { CreateWorkOrderInput } from '@/features/work-orders/schema';
 import type { OrderService } from '@/features/work-orders/types';
 import { cn } from '@/lib/utils/cn';
@@ -108,9 +109,13 @@ export function buildBreadcrumb(pathname: string): BreadcrumbItem[] {
 }
 
 export function DashboardLayoutShell({
-  children
+  children,
+  currentPlan,
+  billingStatus
 }: {
   children: ReactNode;
+  currentPlan: PlanCode;
+  billingStatus: BillingStatus;
 }): JSX.Element {
   const pathname = usePathname();
   const router = useRouter();
@@ -242,7 +247,10 @@ export function DashboardLayoutShell({
         })}
       </nav>
 
-      <SidebarUserSection />
+      <SidebarUserSection
+        currentPlan={currentPlan}
+        billingStatus={billingStatus}
+      />
     </div>
   );
 
