@@ -43,7 +43,7 @@ const PLAN_USER_LIMITS: Record<PlanCode, number> = {
   starter: 5,
   growth: 12
 };
-const OWNER_BASELINE_USERS = 1;
+const OWNER_BASELINE_USERS = 0;
 
 export class StaffQuotaExceededError extends Error {
   constructor(message = 'Your current plan does not have enough user slots.') {
@@ -253,7 +253,10 @@ export async function consumeGarageUserUsageQuantity(
   const billingRef = billingDocRef(garageId);
   const now = new Date().toISOString();
 
-  let result = { currentUsers: 1, limit: PLAN_USER_LIMITS.free };
+  let result = {
+    currentUsers: OWNER_BASELINE_USERS,
+    limit: PLAN_USER_LIMITS.free
+  };
 
   await firebaseAdmin.db.runTransaction(async (transaction: any) => {
     const [usageSnap, billingSnap] = await Promise.all([
@@ -293,38 +296,53 @@ export async function consumeGarageUserUsageQuantity(
 
 /**
  * Decrements `usage/current.counters['users']` by `quantity`.
- * Floors at 1 to keep owner seat as the minimum baseline.
+ * Floors at 0 because owner is not counted as a staff seat.
  */
 export async function releaseGarageUserUsageQuantity(
   garageId: string,
   quantity: number
 ): Promise<{ currentUsers: number; limit: number }> {
+  // Normalize incoming quantity to a safe positive integer (minimum 1).
   const safeQuantity = sanitizeQuantity(quantity);
+  // Resolve Firestore references for usage and billing in this garage scope.
   const usageRef = usageDocRef(garageId);
   const billingRef = billingDocRef(garageId);
+  // Single timestamp reused for all writes in this operation.
   const now = new Date().toISOString();
 
-  let result = { currentUsers: 1, limit: PLAN_USER_LIMITS.free };
+  // Default return shape used if transaction reads minimal/no data.
+  let result = {
+    currentUsers: OWNER_BASELINE_USERS,
+    limit: PLAN_USER_LIMITS.free
+  };
 
+  // Use transaction to guarantee read/modify/write consistency under concurrency.
   await firebaseAdmin.db.runTransaction(async (transaction: any) => {
+    // Read usage and billing together to compute current seats + plan limit.
     const [usageSnap, billingSnap] = await Promise.all([
       transaction.get(usageRef),
       transaction.get(billingRef)
     ]);
 
+    // Map usage document to typed object when present, otherwise null fallback.
     const usage = usageSnap.exists
       ? (usageSnap.data() as Partial<GarageUsageCurrentDocument>)
       : null;
+    // Map billing document to typed object when present, otherwise null fallback.
     const billing = billingSnap.exists
       ? (billingSnap.data() as Partial<GarageBillingDocument>)
       : null;
+    // Build normalized seat state (current users + effective plan limit).
     const state = resolveSeatUsageState(usage, billing);
+    // Decrement seats but never below the configured baseline (0).
     const nextUsers = Math.max(
       OWNER_BASELINE_USERS,
       state.currentUsers - safeQuantity
     );
+    // Produce next counters array with updated `users` value and timestamp.
     const nextCounters = withUsersCounterUpdated(state, nextUsers, now);
 
+    // Persist updated usage counters atomically.
     transaction.set(
       usageRef,
       {
@@ -334,9 +352,11 @@ export async function releaseGarageUserUsageQuantity(
       { merge: true }
     );
 
+    // Capture computed values for function return after transaction commit.
     result = { currentUsers: nextUsers, limit: state.limit };
   });
 
+  // Return final users count and effective limit for caller-side decisions/UI.
   return result;
 }
 
@@ -533,6 +553,12 @@ export async function deleteGarageStaff(
   }
 
   const staff = mapDoc(existing.id, existing.data() as StaffFirestoreDoc);
+
+  // Prevent deletion if staff still has active jobs.
   await ref.delete();
+
+  // Optional: release seat usage quantity when staff is deleted.
+  await releaseGarageUserUsageQuantity(garageId, 1);
+
   return staff;
 }
