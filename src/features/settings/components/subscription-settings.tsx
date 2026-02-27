@@ -29,7 +29,16 @@ type Plan = {
   ctaLabel: string;
   isRecommended?: boolean;
   features: string[];
+  featureConfig: Record<string, FeatureRule>;
   tier: number;
+};
+
+type FeatureResetPolicy = 'monthly' | 'yearly' | 'forever';
+
+type FeatureRule = {
+  enabled: boolean;
+  limit: number;
+  resetPolicy: FeatureResetPolicy;
 };
 type BillingCycle = 'monthly' | 'annual';
 
@@ -53,7 +62,24 @@ const plans: Plan[] = [
       'Service management',
       'Basic invoices',
       'Community/email support'
-    ]
+    ],
+    featureConfig: {
+      users: { enabled: true, limit: 1, resetPolicy: 'forever' },
+      locations: { enabled: true, limit: 1, resetPolicy: 'forever' },
+      workOrders: { enabled: true, limit: 25, resetPolicy: 'monthly' },
+      customerVehicleHistory: {
+        enabled: true,
+        limit: -1,
+        resetPolicy: 'forever'
+      },
+      serviceManagement: { enabled: true, limit: -1, resetPolicy: 'forever' },
+      basicInvoices: { enabled: true, limit: -1, resetPolicy: 'forever' },
+      communityEmailSupport: {
+        enabled: true,
+        limit: -1,
+        resetPolicy: 'forever'
+      }
+    }
   },
   {
     id: 'starter',
@@ -74,7 +100,28 @@ const plans: Plan[] = [
       'Services and parts listing',
       'Basic invoice generation',
       'Email support'
-    ]
+    ],
+    featureConfig: {
+      users: { enabled: true, limit: 5, resetPolicy: 'forever' },
+      locations: { enabled: true, limit: 1, resetPolicy: 'forever' },
+      workOrderManagement: { enabled: true, limit: -1, resetPolicy: 'forever' },
+      customerVehicleHistory: {
+        enabled: true,
+        limit: -1,
+        resetPolicy: 'forever'
+      },
+      servicesPartsListing: {
+        enabled: true,
+        limit: -1,
+        resetPolicy: 'forever'
+      },
+      basicInvoiceGeneration: {
+        enabled: true,
+        limit: -1,
+        resetPolicy: 'forever'
+      },
+      emailSupport: { enabled: true, limit: -1, resetPolicy: 'forever' }
+    }
   },
   {
     id: 'growth',
@@ -93,7 +140,19 @@ const plans: Plan[] = [
       'Staff workflow management',
       'Deeper reports',
       'Priority email support'
-    ]
+    ],
+    featureConfig: {
+      users: { enabled: true, limit: 12, resetPolicy: 'forever' },
+      locations: { enabled: true, limit: 1, resetPolicy: 'forever' },
+      everythingInStarter: { enabled: true, limit: -1, resetPolicy: 'forever' },
+      staffWorkflowManagement: {
+        enabled: true,
+        limit: -1,
+        resetPolicy: 'forever'
+      },
+      deeperReports: { enabled: true, limit: -1, resetPolicy: 'forever' },
+      priorityEmailSupport: { enabled: true, limit: -1, resetPolicy: 'forever' }
+    }
   }
 ];
 
@@ -102,13 +161,18 @@ function isNoSubscriptionYet(snapshot: BillingSnapshotResult): boolean {
     snapshot.paypalSubscriptionId == null &&
     snapshot.trialEndsAt == null &&
     snapshot.currentPeriodEnd == null &&
-    snapshot.lastPaidAt == null
+    snapshot.lastPaidAt == null &&
+    snapshot.planCode == null
   );
 }
 
 function getStatusMessage(snapshot: BillingSnapshotResult): string {
   if (isNoSubscriptionYet(snapshot)) {
     return 'You are almost ready. Pick a plan to start running your shop with Garixo.';
+  }
+
+  if (snapshot.planCode === 'free') {
+    return 'You are on the Free plan. Upgrade anytime when your shop is ready for more users and advanced workflows.';
   }
 
   if (snapshot.status === 'trialing') {

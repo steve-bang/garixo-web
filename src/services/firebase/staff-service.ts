@@ -1,5 +1,10 @@
 import type { Staff, StaffStatus } from '@/features/staff/types';
+import type { PlanCode } from '@/features/billing/types';
 import { firebaseAdmin } from '@/lib/firebase-admin';
+import type {
+  GarageBillingDocument,
+  GarageUsageCurrentDocument
+} from '@/types/firebase-models';
 
 type StaffFirestoreDoc = {
   id?: string;
@@ -17,11 +22,44 @@ type StaffFirestoreDoc = {
   updatedAt?: string;
 };
 
+const BILLING_DOC_ID = 'current';
+const USAGE_DOC_ID = 'current';
+const USERS_COUNTER_KEY = 'users';
+
+const PLAN_USER_LIMITS: Record<PlanCode, number> = {
+  free: 1,
+  starter: 5,
+  growth: 12
+};
+
+export class StaffQuotaExceededError extends Error {
+  constructor(message = 'Your current plan does not have enough user slots.') {
+    super(message);
+    this.name = 'StaffQuotaExceededError';
+  }
+}
+
 function staffCollection(garageId: string) {
   return firebaseAdmin.db
     .collection('garages')
     .doc(garageId)
     .collection('staff');
+}
+
+function billingDocRef(garageId: string) {
+  return firebaseAdmin.db
+    .collection('garages')
+    .doc(garageId)
+    .collection('billing')
+    .doc(BILLING_DOC_ID);
+}
+
+function usageDocRef(garageId: string) {
+  return firebaseAdmin.db
+    .collection('garages')
+    .doc(garageId)
+    .collection('usage')
+    .doc(USAGE_DOC_ID);
 }
 
 function normalizePhone(phone: string): string {
@@ -106,6 +144,158 @@ export async function createGarageStaff(
 
   await ref.set(payload);
   return mapDoc(ref.id, payload);
+}
+
+function resolvePlanUserLimit(planCode: PlanCode | null | undefined): number {
+  if (!planCode) {
+    return PLAN_USER_LIMITS.free;
+  }
+
+  return PLAN_USER_LIMITS[planCode] ?? PLAN_USER_LIMITS.free;
+}
+
+/**
+ * Checks whether a garage can add `quantity` new staff users under current plan usage.
+ * Source of truth:
+ * - Plan from `garages/{garageId}/billing/current`
+ * - Current usage from `garages/{garageId}/usage/current` counter key `users`
+ */
+export async function canCreateGarageStaff(
+  garageId: string,
+  quantity: number
+): Promise<{
+  allowed: boolean;
+  currentUsers: number;
+  limit: number;
+  remaining: number;
+}> {
+  const safeQuantity = Number.isFinite(quantity)
+    ? Math.max(1, Math.floor(quantity))
+    : 1;
+  const [billingSnap, usageSnap] = await Promise.all([
+    billingDocRef(garageId).get(),
+    usageDocRef(garageId).get()
+  ]);
+
+  const billing = billingSnap.exists
+    ? (billingSnap.data() as Partial<GarageBillingDocument>)
+    : null;
+  const usage = usageSnap.exists
+    ? (usageSnap.data() as Partial<GarageUsageCurrentDocument>)
+    : null;
+
+  const usersCounter = usage?.counters?.find(
+    (counter) => counter.key === USERS_COUNTER_KEY
+  );
+  const currentUsers = Math.max(0, usersCounter?.value ?? 1);
+  const limit = Math.max(
+    -1,
+    usersCounter?.limit ?? resolvePlanUserLimit(billing?.planCode)
+  );
+  const remaining = limit < 0 ? Number.MAX_SAFE_INTEGER : limit - currentUsers;
+  const allowed = limit < 0 || currentUsers + safeQuantity <= limit;
+
+  return {
+    allowed,
+    currentUsers,
+    limit,
+    remaining: Math.max(0, remaining)
+  };
+}
+
+/**
+ * Atomically creates a staff record and increments users usage in `usage/current`.
+ * Throws `StaffQuotaExceededError` if requested quantity exceeds plan/usage capacity.
+ */
+export async function createGarageStaffWithUsageCheck(
+  garageId: string,
+  input: Omit<Staff, 'id' | 'createdAt' | 'updatedAt'>,
+  quantity = 1
+): Promise<Staff> {
+  const safeQuantity = Number.isFinite(quantity)
+    ? Math.max(1, Math.floor(quantity))
+    : 1;
+  const now = new Date().toISOString();
+  const newStaffRef = staffCollection(garageId).doc();
+  const newStaffPayload: StaffFirestoreDoc = {
+    fullName: input.fullName,
+    phone: input.phone,
+    phoneNormalized: normalizePhone(input.phone),
+    email: input.email ?? '',
+    avatar: input.avatar ?? '',
+    role: input.role,
+    status: input.status,
+    currentJobs: input.currentJobs,
+    completedJobs: input.completedJobs ?? 0,
+    branchId: input.branchId ?? '',
+    createdAt: now,
+    updatedAt: now
+  };
+
+  await firebaseAdmin.db.runTransaction(async (transaction: any) => {
+    const billingRef = billingDocRef(garageId);
+    const usageRef = usageDocRef(garageId);
+    const [billingSnap, usageSnap] = await Promise.all([
+      transaction.get(billingRef),
+      transaction.get(usageRef)
+    ]);
+
+    const billing = billingSnap.exists
+      ? (billingSnap.data() as Partial<GarageBillingDocument>)
+      : null;
+    const usage = usageSnap.exists
+      ? (usageSnap.data() as Partial<GarageUsageCurrentDocument>)
+      : null;
+
+    const counters = usage?.counters ?? [];
+    const usersIndex = counters.findIndex(
+      (counter) => counter.key === USERS_COUNTER_KEY
+    );
+    const usersCounter = usersIndex >= 0 ? counters[usersIndex] : undefined;
+    const currentUsers = Math.max(0, usersCounter?.value ?? 1);
+    const limit = Math.max(
+      -1,
+      usersCounter?.limit ?? resolvePlanUserLimit(billing?.planCode)
+    );
+    const isAllowed = limit < 0 || currentUsers + safeQuantity <= limit;
+
+    if (!isAllowed) {
+      throw new StaffQuotaExceededError();
+    }
+
+    transaction.set(newStaffRef, newStaffPayload);
+
+    if (usageSnap.exists) {
+      const nextCounters = [...counters];
+      if (usersIndex >= 0) {
+        nextCounters[usersIndex] = {
+          ...nextCounters[usersIndex],
+          value: currentUsers + safeQuantity,
+          updatedAt: now
+        };
+      } else {
+        nextCounters.push({
+          key: USERS_COUNTER_KEY,
+          value: currentUsers + safeQuantity,
+          limit: resolvePlanUserLimit(billing?.planCode),
+          resetPolicy: 'forever',
+          enabled: true,
+          updatedAt: now
+        });
+      }
+
+      transaction.set(
+        usageRef,
+        {
+          counters: nextCounters,
+          updatedAt: now
+        },
+        { merge: true }
+      );
+    }
+  });
+
+  return mapDoc(newStaffRef.id, newStaffPayload);
 }
 
 export async function updateGarageStaff(
