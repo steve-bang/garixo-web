@@ -64,6 +64,11 @@ export function LandingFooter(): JSX.Element {
                   Case Studies
                 </Link>
               </p>
+              <p>
+                <Link href="/pricing" className="hover:text-white">
+                  Pricing
+                </Link>
+              </p>
             </div>
           </div>
 
