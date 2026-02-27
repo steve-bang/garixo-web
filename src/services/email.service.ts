@@ -1,5 +1,6 @@
 import { sendSmtpEmail } from '@/lib/email/smtp-client';
 import { buildSubscriptionActivatedEmailTemplate } from '@/lib/email/templates/subscription-activated-template';
+import { buildSubscriptionCancelledEmailTemplate } from '@/lib/email/templates/subscription-cancelled-template';
 import { buildSubscriptionPaymentFailedEmailTemplate } from '@/lib/email/templates/subscription-payment-failed-template';
 import { buildSubscriptionPaymentSucceededEmailTemplate } from '@/lib/email/templates/subscription-payment-succeeded-template';
 import { buildVerifyEmailTemplate } from '@/lib/email/templates/verify-email-template';
@@ -47,15 +48,14 @@ type SendSubscriptionPaymentSucceededEmailInput = {
   websiteUrl: string;
 };
 
-type SendSubscriptionTrialConvertedEmailInput = {
+type SendSubscriptionCancelledEmailInput = {
   recipientEmail: string;
   firstName?: string;
   planName: string;
   billingCycle: 'monthly' | 'annual';
-  amount: number;
-  billedAt: Date;
-  nextBillingDate: Date;
+  accessEndsAt: Date;
   dashboardLink: string;
+  resubscribeLink: string;
   supportEmail: string;
   websiteUrl: string;
 };
@@ -133,6 +133,28 @@ export async function sendSubscriptionPaymentSucceededEmail(
     billedAt: input.billedAt,
     nextBillingDate: input.nextBillingDate,
     dashboardLink: input.dashboardLink,
+    supportEmail: input.supportEmail,
+    websiteUrl: input.websiteUrl
+  });
+
+  return sendSmtpEmail({
+    to: input.recipientEmail,
+    subject: template.subject,
+    text: template.text,
+    html: template.html
+  });
+}
+
+export async function sendSubscriptionCancelledEmail(
+  input: SendSubscriptionCancelledEmailInput
+): Promise<boolean> {
+  const template = buildSubscriptionCancelledEmailTemplate({
+    firstName: input.firstName,
+    planName: input.planName,
+    billingCycle: input.billingCycle === 'annual' ? 'Annual' : 'Monthly',
+    accessEndsAt: input.accessEndsAt,
+    dashboardLink: input.dashboardLink,
+    resubscribeLink: input.resubscribeLink,
     supportEmail: input.supportEmail,
     websiteUrl: input.websiteUrl
   });

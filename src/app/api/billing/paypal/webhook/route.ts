@@ -39,6 +39,7 @@ import {
 } from '@/services/paypal/paypal-client';
 import {
   sendSubscriptionActivatedEmail,
+  sendSubscriptionCancelledEmail,
   sendSubscriptionPaymentFailedEmail,
   sendSubscriptionPaymentSucceededEmail
 } from '@/services/email.service';
@@ -349,6 +350,10 @@ function shouldSendPaymentFailedEmail(eventType: string): boolean {
 
 function shouldSendPaymentSucceededEmail(eventType: string): boolean {
   return eventType === 'PAYMENT.SALE.COMPLETED';
+}
+
+function shouldSendCancelledEmail(eventType: string): boolean {
+  return eventType === 'BILLING.SUBSCRIPTION.CANCELLED';
 }
 
 function toFirstName(fullName?: string): string | undefined {
@@ -768,6 +773,63 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     } catch (error) {
       console.error('[billing][webhook] payment succeeded email send failed', {
+        eventId,
+        eventType,
+        subscriptionId,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  if (shouldSendCancelledEmail(eventType)) {
+    try {
+      const [garage, billingSnap] = await Promise.all([
+        getGarageById(garageId),
+        billingRef.get()
+      ]);
+
+      const billing = billingSnap.exists
+        ? (billingSnap.data() as GarageBillingDocument)
+        : null;
+
+      if (garage?.ownerUserId && billing) {
+        const owner = await getUserDocument(garage.ownerUserId);
+        if (owner?.email) {
+          const plan =
+            subscriptionPlanConfig.find(
+              (item) => item.id === billing.planCode
+            ) ?? null;
+          const dashboardUrl = new URL(
+            '/dashboard',
+            env.NEXTAUTH_URL
+          ).toString();
+          const resubscribeLink = new URL(
+            '/dashboard/settings/subscription',
+            env.NEXTAUTH_URL
+          ).toString();
+          const websiteUrl = new URL('/', env.NEXTAUTH_URL).toString();
+          const accessEndsAt = billing.currentPeriodEnd
+            ? new Date(billing.currentPeriodEnd)
+            : new Date();
+
+          await sendSubscriptionCancelledEmail({
+            recipientEmail: owner.email,
+            firstName: toFirstName(owner.name),
+            planName: plan?.name ?? billing.planCode,
+            billingCycle: billing.billingCycle,
+            accessEndsAt: Number.isNaN(accessEndsAt.getTime())
+              ? new Date()
+              : accessEndsAt,
+            dashboardLink: dashboardUrl,
+            resubscribeLink,
+            supportEmail:
+              env.NEXT_PUBLIC_APP_SUPPORT_EMAIL ?? 'support@garixo.com',
+            websiteUrl
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[billing][webhook] cancelled email send failed', {
         eventId,
         eventType,
         subscriptionId,
