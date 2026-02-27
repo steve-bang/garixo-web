@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils/cn';
 import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
 
 type Plan = {
-  id: 'starter' | 'growth';
+  id: 'free' | 'starter' | 'growth';
   name: string;
   priceMonthly: number;
   priceAnnual: number;
@@ -29,13 +29,62 @@ type Plan = {
   ctaLabel: string;
   isRecommended?: boolean;
   features: string[];
+  featureConfig: Record<string, FeatureRule>;
+  tier: number;
+};
+
+type FeatureResetPolicy = 'monthly' | 'yearly' | 'forever';
+
+type FeatureRule = {
+  enabled: boolean;
+  limit: number;
+  resetPolicy: FeatureResetPolicy;
 };
 type BillingCycle = 'monthly' | 'annual';
 
 const plans: Plan[] = [
   {
+    id: 'free',
+    name: 'Free',
+    tier: 1,
+    priceMonthly: 0,
+    priceAnnual: 0,
+    annualDiscountPercent: 0,
+    trialDays: 0,
+    subtitle: 'Perfect for small shops getting organized',
+    ctaLabel: 'Start Free',
+    isRecommended: false,
+    features: [
+      '1 user',
+      '1 location',
+      'Up to 25 work orders per month',
+      'Customer & vehicle history',
+      'Service management',
+      'Basic invoices',
+      'Community/email support'
+    ],
+    featureConfig: {
+      users: { enabled: true, limit: 1, resetPolicy: 'forever' },
+      locations: { enabled: true, limit: 1, resetPolicy: 'forever' },
+      workOrders: { enabled: true, limit: 25, resetPolicy: 'monthly' },
+      customerVehicleHistory: {
+        enabled: true,
+        limit: -1,
+        resetPolicy: 'forever'
+      },
+      serviceManagement: { enabled: true, limit: -1, resetPolicy: 'forever' },
+      basicInvoices: { enabled: true, limit: -1, resetPolicy: 'forever' },
+      communityEmailSupport: {
+        enabled: true,
+        limit: -1,
+        resetPolicy: 'forever'
+      }
+    }
+  },
+  {
     id: 'starter',
     name: 'Starter',
+    tier: 2,
     priceMonthly: 79,
     priceAnnual: 790,
     annualDiscountPercent: 17,
@@ -51,11 +100,33 @@ const plans: Plan[] = [
       'Services and parts listing',
       'Basic invoice generation',
       'Email support'
-    ]
+    ],
+    featureConfig: {
+      users: { enabled: true, limit: 5, resetPolicy: 'forever' },
+      locations: { enabled: true, limit: 1, resetPolicy: 'forever' },
+      workOrderManagement: { enabled: true, limit: -1, resetPolicy: 'forever' },
+      customerVehicleHistory: {
+        enabled: true,
+        limit: -1,
+        resetPolicy: 'forever'
+      },
+      servicesPartsListing: {
+        enabled: true,
+        limit: -1,
+        resetPolicy: 'forever'
+      },
+      basicInvoiceGeneration: {
+        enabled: true,
+        limit: -1,
+        resetPolicy: 'forever'
+      },
+      emailSupport: { enabled: true, limit: -1, resetPolicy: 'forever' }
+    }
   },
   {
     id: 'growth',
     name: 'Growth',
+    tier: 3,
     priceMonthly: 129,
     priceAnnual: 1290,
     annualDiscountPercent: 17,
@@ -69,7 +140,19 @@ const plans: Plan[] = [
       'Staff workflow management',
       'Deeper reports',
       'Priority email support'
-    ]
+    ],
+    featureConfig: {
+      users: { enabled: true, limit: 12, resetPolicy: 'forever' },
+      locations: { enabled: true, limit: 1, resetPolicy: 'forever' },
+      everythingInStarter: { enabled: true, limit: -1, resetPolicy: 'forever' },
+      staffWorkflowManagement: {
+        enabled: true,
+        limit: -1,
+        resetPolicy: 'forever'
+      },
+      deeperReports: { enabled: true, limit: -1, resetPolicy: 'forever' },
+      priorityEmailSupport: { enabled: true, limit: -1, resetPolicy: 'forever' }
+    }
   }
 ];
 
@@ -78,13 +161,18 @@ function isNoSubscriptionYet(snapshot: BillingSnapshotResult): boolean {
     snapshot.paypalSubscriptionId == null &&
     snapshot.trialEndsAt == null &&
     snapshot.currentPeriodEnd == null &&
-    snapshot.lastPaidAt == null
+    snapshot.lastPaidAt == null &&
+    snapshot.planCode == null
   );
 }
 
 function getStatusMessage(snapshot: BillingSnapshotResult): string {
   if (isNoSubscriptionYet(snapshot)) {
     return 'You are almost ready. Pick a plan to start running your shop with Garixo.';
+  }
+
+  if (snapshot.planCode === 'free') {
+    return 'You are on the Free plan. Upgrade anytime when your shop is ready for more users and advanced workflows.';
   }
 
   if (snapshot.status === 'trialing') {
@@ -310,77 +398,79 @@ export function SubscriptionSettings(): JSX.Element {
       </div>
 
       <div className="grid gap-s3 md:grid-cols-2">
-        {plans.map((plan) => {
-          const currentPrice =
-            billingCycle === 'monthly' ? plan.priceMonthly : plan.priceAnnual;
-          const pendingKey = `${plan.id}-${billingCycle}`;
-          const isPending = pendingPlan === pendingKey;
+        {plans
+          .filter((plan) => plan.id !== 'free')
+          .map((plan) => {
+            const currentPrice =
+              billingCycle === 'monthly' ? plan.priceMonthly : plan.priceAnnual;
+            const pendingKey = `${plan.id}-${billingCycle}`;
+            const isPending = pendingPlan === pendingKey;
 
-          return (
-            <Card
-              key={plan.id}
-              className={cn(
-                'relative flex h-full flex-col p-s4',
-                plan.isRecommended ? 'border-primary-300 shadow-sm' : ''
-              )}
-            >
-              {plan.isRecommended ? (
-                <Badge
-                  variant="success"
-                  className="absolute right-s3 top-s3 px-s2 py-1"
-                >
-                  Most popular
-                </Badge>
-              ) : null}
-
-              <div className="space-y-s1">
-                <h3 className="text-h3">{plan.name}</h3>
-                <p className="text-small text-text-muted">{plan.subtitle}</p>
-              </div>
-
-              <div className="mt-s3 rounded-md border border-border bg-surface-default p-s3">
-                <p className="text-h2 font-bold text-text-primary">
-                  {formatCurrencyUsd(currentPrice)}
-                  <span className="ml-1 text-small font-medium text-text-muted">
-                    /{billingCycle === 'monthly' ? 'month' : 'year'}
-                  </span>
-                </p>
-                <p className="text-caption text-text-muted">
-                  {billingCycle === 'monthly'
-                    ? `${formatCurrencyUsd(plan.priceAnnual)}/year • save ${plan.annualDiscountPercent}%`
-                    : `${formatCurrencyUsd(plan.priceMonthly)}/month equivalent`}
-                </p>
-              </div>
-
-              <ul className="mt-s4 space-y-s2">
-                {plan.features.map((feature) => (
-                  <li
-                    key={`${plan.id}-${feature}`}
-                    className="flex items-start gap-s2 text-small text-text-secondary"
+            return (
+              <Card
+                key={plan.id}
+                className={cn(
+                  'relative flex h-full flex-col p-s4',
+                  plan.isRecommended ? 'border-primary-300 shadow-sm' : ''
+                )}
+              >
+                {plan.isRecommended ? (
+                  <Badge
+                    variant="success"
+                    className="absolute right-s3 top-s3 px-s2 py-1"
                   >
-                    <Check className="mt-[2px] size-4 text-success-700" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+                    Most popular
+                  </Badge>
+                ) : null}
 
-              <div className="mt-auto space-y-s2 pt-s4">
-                <p className="text-caption text-text-muted">
-                  {plan.trialDays}-day free trial included
-                </p>
-                <Button
-                  type="button"
-                  className="w-full"
-                  variant={plan.isRecommended ? 'default' : 'secondary'}
-                  disabled={pendingPlan !== null || isHandlingCallback}
-                  onClick={() => void onUpgrade(plan.id)}
-                >
-                  {isPending ? 'Opening secure checkout...' : plan.ctaLabel}
-                </Button>
-              </div>
-            </Card>
-          );
-        })}
+                <div className="space-y-s1">
+                  <h3 className="text-h3">{plan.name}</h3>
+                  <p className="text-small text-text-muted">{plan.subtitle}</p>
+                </div>
+
+                <div className="mt-s3 rounded-md border border-border bg-surface-default p-s3">
+                  <p className="text-h2 font-bold text-text-primary">
+                    {formatCurrencyUsd(currentPrice)}
+                    <span className="ml-1 text-small font-medium text-text-muted">
+                      /{billingCycle === 'monthly' ? 'month' : 'year'}
+                    </span>
+                  </p>
+                  <p className="text-caption text-text-muted">
+                    {billingCycle === 'monthly'
+                      ? `${formatCurrencyUsd(plan.priceAnnual)}/year • save ${plan.annualDiscountPercent}%`
+                      : `${formatCurrencyUsd(plan.priceMonthly)}/month equivalent`}
+                  </p>
+                </div>
+
+                <ul className="mt-s4 space-y-s2">
+                  {plan.features.map((feature) => (
+                    <li
+                      key={`${plan.id}-${feature}`}
+                      className="flex items-start gap-s2 text-small text-text-secondary"
+                    >
+                      <Check className="mt-[2px] size-4 text-success-700" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-auto space-y-s2 pt-s4">
+                  <p className="text-caption text-text-muted">
+                    {plan.trialDays}-day free trial included
+                  </p>
+                  <Button
+                    type="button"
+                    className="w-full"
+                    variant={plan.isRecommended ? 'default' : 'secondary'}
+                    disabled={pendingPlan !== null || isHandlingCallback}
+                    onClick={() => void onUpgrade(plan.id)}
+                  >
+                    {isPending ? 'Opening secure checkout...' : plan.ctaLabel}
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
       </div>
     </div>
   );

@@ -10,6 +10,23 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 - No entries yet.
 
+## [0.1.8] - 2026-02-27
+
+### Added
+
+- New public pricing page at `/src/app/pricing/page.tsx` with:
+- SEO metadata and canonical URL for `/pricing`.
+- Structured data: `SoftwareApplication`, `BreadcrumbList`, and `FAQPage`.
+- Clear two-plan pricing content for independent garage owners.
+
+### Changed
+
+- Improved internal-link conversion and crawl flow to pricing:
+- Home hero CTA now links to `/pricing`.
+- Home CTA section includes a direct `/pricing` link.
+- Features page top and bottom CTA sections now link to `/pricing`.
+- Landing header and footer now include `/pricing` navigation links.
+
 ## [0.1.7] - 2026-02-26
 
 ### Added

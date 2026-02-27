@@ -1,3 +1,13 @@
+/**
+ * Firestore persistence models for Garixo domain documents.
+ *
+ * Notes:
+ * - These types represent storage shape (not UI view models).
+ * - Date/time fields use ISO-8601 UTC strings for cross-platform consistency.
+ * - Subcollection path conventions are documented near each related interface.
+ * - Keep these models stable and append fields carefully to avoid data migration churn.
+ */
+
 import type { UserRole } from '@/types/user';
 import type { WorkOrderStatus as UnifiedWorkOrderStatus } from '@/features/work-orders/types';
 import type { GarageIndustryType } from '@/types/garage';
@@ -86,6 +96,48 @@ export interface GarageWorkOrderDocument {
   vehicleId?: string;
   vehicleModel?: string;
   isOverdue?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type UsageResetPolicy = 'monthly' | 'yearly' | 'forever';
+
+/**
+ * Single usage counter item for one feature in the current billing period.
+ * Stored as an array item to keep the model flexible as new tracked features are added.
+ */
+export interface GarageUsageCounterItem {
+  key: string;
+  value: number;
+  limit: number;
+  resetPolicy: UsageResetPolicy;
+  enabled: boolean;
+  updatedAt: string;
+}
+
+/**
+ * Live usage snapshot for a garage.
+ * Path: garages/{garageId}/usage/current
+ */
+export interface GarageUsageCurrentDocument {
+  periodKey: string;
+  periodStartAt: string;
+  periodEndAt: string;
+  counters: GarageUsageCounterItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Historical usage snapshot archived by period.
+ * Path: garages/{garageId}/usage/history/{periodKey}
+ */
+export interface GarageUsageHistoryDocument {
+  periodKey: string;
+  periodStartAt: string;
+  periodEndAt: string;
+  counters: GarageUsageCounterItem[];
+  snapshotAt: string;
   createdAt: string;
   updatedAt: string;
 }
