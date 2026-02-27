@@ -25,6 +25,14 @@ export function CTA(): JSX.Element {
             >
               <Link href="/auth/sign-up">Book Your Free Demo</Link>
             </Button>
+            <div className="mt-s2 text-center">
+              <Link
+                href="/pricing"
+                className="text-small font-medium text-primary-100 underline-offset-2 hover:underline"
+              >
+                See Pricing Plans
+              </Link>
+            </div>
           </div>
         </Card>
 
