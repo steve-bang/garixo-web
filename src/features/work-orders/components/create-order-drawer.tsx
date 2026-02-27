@@ -33,6 +33,7 @@ export function CreateOrderDrawer({
         availableServices={availableServices}
         onSubmit={onSubmit}
         onCancel={onClose}
+        upgradePath="/dashboard/settings/subscription"
       />
     </Drawer>
   );
