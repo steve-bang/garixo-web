@@ -37,6 +37,7 @@ import {
   getPayPalSubscription,
   type PayPalSubscription
 } from '@/services/paypal/paypal-client';
+import { syncUsageCurrentByPlan } from '@/services/firebase/usage-plan-sync-service';
 import type { GarageBillingDocument } from '@/types/firebase-models';
 
 const BILLING_DOC_ID = 'current';
@@ -301,6 +302,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     await billingRef.set(payload, { merge: true });
+    await syncUsageCurrentByPlan(garage.id, planCode);
     if (WEBHOOK_DEBUG_ENABLED) {
       console.info('[billing][capture-approval] billing document updated', {
         subscriptionId: subscription.id,

@@ -25,6 +25,7 @@ import { NextResponse } from 'next/server';
  */
 
 import type { BillingStatus } from '@/features/billing/types';
+import { getPayPalPlanMap } from '@/config/billing';
 import { env } from '@/config/env';
 import { firebaseAdmin } from '@/lib/firebase-admin';
 import {
@@ -32,7 +33,9 @@ import {
   type PayPalSubscription,
   verifyPayPalWebhookSignature
 } from '@/services/paypal/paypal-client';
+import { syncUsageCurrentByPlan } from '@/services/firebase/usage-plan-sync-service';
 import type { GarageBillingDocument } from '@/types/firebase-models';
+import type { BillingCycle, PlanCode } from '@/features/billing/types';
 
 const BILLING_DOC_ID = 'current';
 const MAX_RECENT_WEBHOOK_IDS = 50;
@@ -199,7 +202,10 @@ function isTrialingSubscription(subscription: PayPalSubscription): boolean {
 async function resolveBillingRef(
   event: PayPalWebhookEvent,
   subscriptionId: string
-) {
+): Promise<{
+  garageId: string;
+  billingRef: any;
+} | null> {
   let garageId = event.resource?.custom_id?.trim();
   if (!garageId) {
     try {
@@ -212,11 +218,12 @@ async function resolveBillingRef(
 
   if (garageId) {
     // `custom_id` is written at checkout creation and binds event -> garage scope.
-    return firebaseAdmin.db
+    const billingRef = firebaseAdmin.db
       .collection('garages')
       .doc(garageId)
       .collection('billing')
       .doc(BILLING_DOC_ID);
+    return { garageId, billingRef };
   }
 
   return null;
@@ -276,6 +283,46 @@ function eventStatus(eventType: string): BillingStatus | null {
   }
 
   return null;
+}
+
+function resolvePlan(planId: string | null): {
+  planCode: PlanCode;
+  billingCycle: BillingCycle;
+} | null {
+  if (!planId) return null;
+
+  const planMap = getPayPalPlanMap();
+  const entries: Array<{
+    planCode: PlanCode;
+    billingCycle: BillingCycle;
+    id: string;
+  }> = [
+    {
+      planCode: 'starter',
+      billingCycle: 'monthly',
+      id: planMap.starter.monthly
+    },
+    { planCode: 'starter', billingCycle: 'annual', id: planMap.starter.annual },
+    { planCode: 'growth', billingCycle: 'monthly', id: planMap.growth.monthly },
+    { planCode: 'growth', billingCycle: 'annual', id: planMap.growth.annual }
+  ];
+
+  const matched = entries.find((item) => item.id === planId);
+  if (!matched) return null;
+
+  return {
+    planCode: matched.planCode,
+    billingCycle: matched.billingCycle
+  };
+}
+
+function shouldSyncUsageForEvent(eventType: string): boolean {
+  return (
+    eventType === 'BILLING.SUBSCRIPTION.ACTIVATED' ||
+    eventType === 'BILLING.SUBSCRIPTION.RE-ACTIVATED' ||
+    eventType === 'BILLING.SUBSCRIPTION.CANCELLED' ||
+    eventType === 'BILLING.SUBSCRIPTION.SUSPENDED'
+  );
 }
 
 function hasLocalTrialSignal(billing: GarageBillingDocument): boolean {
@@ -401,8 +448,8 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ success: true });
   }
 
-  const billingRef = await resolveBillingRef(event, subscriptionId);
-  if (!billingRef) {
+  const billingScope = await resolveBillingRef(event, subscriptionId);
+  if (!billingScope) {
     console.warn('[billing][webhook] billing document not resolved', {
       eventId,
       eventType,
@@ -411,6 +458,9 @@ export async function POST(request: Request): Promise<NextResponse> {
     });
     return NextResponse.json({ success: true });
   }
+  const { garageId, billingRef } = billingScope;
+
+  let syncedPlanCode: PlanCode | null = null;
 
   await firebaseAdmin.db.runTransaction(async (transaction: any) => {
     const snap = await transaction.get(billingRef);
@@ -435,6 +485,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
     const fallbackNow = new Date().toISOString();
     const now = subscriptionSnapshot?.updatedAt ?? fallbackNow;
+    const resolvedPlan = resolvePlan(subscriptionSnapshot?.planId ?? null);
     const shouldKeepTrialing =
       status === 'active' &&
       (subscriptionSnapshot?.isTrialing === true ||
@@ -447,6 +498,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       paypalSubscriptionId: subscriptionId,
       paypalPlanId:
         subscriptionSnapshot?.planId ?? billing.paypalPlanId ?? null,
+      planCode: resolvedPlan?.planCode ?? billing.planCode,
+      billingCycle: resolvedPlan?.billingCycle ?? billing.billingCycle,
       payerId: subscriptionSnapshot?.payerId ?? billing.payerId ?? null,
       paypalCustomerId:
         subscriptionSnapshot?.paypalCustomerId ??
@@ -504,7 +557,15 @@ export async function POST(request: Request): Promise<NextResponse> {
         lastPaidAt: updates.lastPaidAt ?? null
       });
     }
+
+    syncedPlanCode = updates.planCode ?? billing.planCode;
   });
+
+  // Keep usage feature gates and limits aligned with the current effective plan
+  // for key subscription lifecycle transitions.
+  if (shouldSyncUsageForEvent(eventType) && syncedPlanCode) {
+    await syncUsageCurrentByPlan(garageId, syncedPlanCode);
+  }
 
   if (WEBHOOK_DEBUG_ENABLED) {
     console.info('[billing][webhook] processed successfully', {
