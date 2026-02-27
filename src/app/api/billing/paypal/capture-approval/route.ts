@@ -22,6 +22,7 @@ import { NextResponse } from 'next/server';
  */
 
 import { getPayPalPlanMap } from '@/config/billing';
+import { env } from '@/config/env';
 import { captureApprovalInputSchema } from '@/features/billing/schema';
 import type {
   BillingCycle,
@@ -39,6 +40,7 @@ import {
 import type { GarageBillingDocument } from '@/types/firebase-models';
 
 const BILLING_DOC_ID = 'current';
+const WEBHOOK_DEBUG_ENABLED = env.DEBUG_PAYPAL_WEBHOOK === 'true';
 
 type CaptureApprovalApiResult = {
   status: BillingStatus;
@@ -194,15 +196,16 @@ export async function POST(request: Request): Promise<NextResponse> {
     const subscription = await getPayPalSubscription(
       parsed.data.subscriptionId
     );
-    console.info('[billing][capture-approval] fetched subscription', {
-      garageId: garage.id,
-      requestedSubscriptionId: parsed.data.subscriptionId,
-      paypalSubscriptionId: subscription.id,
-      paypalStatus: subscription.status ?? null,
-      planId: subscription.plan_id ?? null,
-      nextBillingTime: subscription.billing_info?.next_billing_time ?? null,
-      cycles: summarizeCycles(subscription)
-    });
+    if (WEBHOOK_DEBUG_ENABLED) {
+      console.info('[billing][capture-approval] fetched subscription', {
+        requestedSubscriptionId: parsed.data.subscriptionId,
+        paypalSubscriptionId: subscription.id,
+        paypalStatus: subscription.status ?? null,
+        planId: subscription.plan_id ?? null,
+        nextBillingTime: subscription.billing_info?.next_billing_time ?? null,
+        cycles: summarizeCycles(subscription)
+      });
+    }
 
     if (!subscription.id) {
       return errorResponse(new Error('Subscription not found.'), 404);
@@ -240,13 +243,14 @@ export async function POST(request: Request): Promise<NextResponse> {
       current?.status ?? 'active'
     );
 
-    // Trial detection combines provider cycle info and local paid-history signal.
+    // Product rule: if no successful payment has been recorded yet, treat as trialing.
+    // Keep a safety guard to avoid overriding terminal statuses.
     const hasTrialingTenureByCycle = isTrialingSubscription(subscription);
-    const hasTrialingTenureByBillingState =
-      current?.lastPaidAt == null &&
-      (mappedStatus === 'active' || mappedStatus === 'trialing');
+    const hasTrialingTenureByBillingState = current?.lastPaidAt == null;
     const hasTrialingTenure =
-      hasTrialingTenureByCycle && hasTrialingTenureByBillingState;
+      (hasTrialingTenureByBillingState || hasTrialingTenureByCycle) &&
+      mappedStatus !== 'cancelled' &&
+      mappedStatus !== 'suspended';
 
     // Use trialing while the subscription is still in trial tenure; otherwise keep mapped status.
     const status: BillingStatus = hasTrialingTenure ? 'trialing' : mappedStatus;
@@ -284,23 +288,25 @@ export async function POST(request: Request): Promise<NextResponse> {
         subscription.status_update_time ?? subscription.update_time ?? now
     };
 
-    console.info('[billing][capture-approval] computed status', {
-      garageId: garage.id,
-      subscriptionId: subscription.id,
-      previousStatus: current?.status ?? null,
-      mappedStatus,
-      hasTrialingTenure,
-      finalStatus: status,
-      trialEndsAt: payload.trialEndsAt,
-      currentPeriodEnd: payload.currentPeriodEnd
-    });
+    if (WEBHOOK_DEBUG_ENABLED) {
+      console.info('[billing][capture-approval] computed status', {
+        subscriptionId: subscription.id,
+        previousStatus: current?.status ?? null,
+        mappedStatus,
+        hasTrialingTenure,
+        finalStatus: status,
+        trialEndsAt: payload.trialEndsAt,
+        currentPeriodEnd: payload.currentPeriodEnd
+      });
+    }
 
     await billingRef.set(payload, { merge: true });
-    console.info('[billing][capture-approval] billing document updated', {
-      garageId: garage.id,
-      subscriptionId: subscription.id,
-      finalStatus: payload.status
-    });
+    if (WEBHOOK_DEBUG_ENABLED) {
+      console.info('[billing][capture-approval] billing document updated', {
+        subscriptionId: subscription.id,
+        finalStatus: payload.status
+      });
+    }
 
     return successResponse<CaptureApprovalApiResult>({
       status,

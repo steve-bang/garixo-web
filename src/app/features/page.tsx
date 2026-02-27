@@ -72,7 +72,7 @@ export default function FeaturesPage(): JSX.Element {
                 <Link href="/auth/sign-up">Book Free Demo</Link>
               </Button>
               <Button asChild variant="secondary" className="h-12">
-                <Link href="#vehicle">Explore Features</Link>
+                <Link href="/pricing">View Pricing</Link>
               </Button>
             </div>
           </div>
@@ -106,7 +106,7 @@ export default function FeaturesPage(): JSX.Element {
                 variant="secondary"
                 className="h-12 bg-slate-800 text-white hover:bg-slate-700"
               >
-                <Link href="/blog">Read the Blog</Link>
+                <Link href="/pricing">Compare Plans</Link>
               </Button>
             </div>
           </div>
