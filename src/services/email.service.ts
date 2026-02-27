@@ -3,6 +3,7 @@ import { buildSubscriptionActivatedEmailTemplate } from '@/lib/email/templates/s
 import { buildSubscriptionCancelledEmailTemplate } from '@/lib/email/templates/subscription-cancelled-template';
 import { buildSubscriptionPaymentFailedEmailTemplate } from '@/lib/email/templates/subscription-payment-failed-template';
 import { buildSubscriptionPaymentSucceededEmailTemplate } from '@/lib/email/templates/subscription-payment-succeeded-template';
+import { buildSubscriptionSuspendedEmailTemplate } from '@/lib/email/templates/subscription-suspended-template';
 import { buildVerifyEmailTemplate } from '@/lib/email/templates/verify-email-template';
 
 type SendVerificationEmailInput = {
@@ -56,6 +57,17 @@ type SendSubscriptionCancelledEmailInput = {
   accessEndsAt: Date;
   dashboardLink: string;
   resubscribeLink: string;
+  supportEmail: string;
+  websiteUrl: string;
+};
+
+type SendSubscriptionSuspendedEmailInput = {
+  recipientEmail: string;
+  firstName?: string;
+  planName: string;
+  billingCycle: 'monthly' | 'annual';
+  restoreAccessLink: string;
+  dashboardLink: string;
   supportEmail: string;
   websiteUrl: string;
 };
@@ -155,6 +167,27 @@ export async function sendSubscriptionCancelledEmail(
     accessEndsAt: input.accessEndsAt,
     dashboardLink: input.dashboardLink,
     resubscribeLink: input.resubscribeLink,
+    supportEmail: input.supportEmail,
+    websiteUrl: input.websiteUrl
+  });
+
+  return sendSmtpEmail({
+    to: input.recipientEmail,
+    subject: template.subject,
+    text: template.text,
+    html: template.html
+  });
+}
+
+export async function sendSubscriptionSuspendedEmail(
+  input: SendSubscriptionSuspendedEmailInput
+): Promise<boolean> {
+  const template = buildSubscriptionSuspendedEmailTemplate({
+    firstName: input.firstName,
+    planName: input.planName,
+    billingCycle: input.billingCycle === 'annual' ? 'Annual' : 'Monthly',
+    restoreAccessLink: input.restoreAccessLink,
+    dashboardLink: input.dashboardLink,
     supportEmail: input.supportEmail,
     websiteUrl: input.websiteUrl
   });

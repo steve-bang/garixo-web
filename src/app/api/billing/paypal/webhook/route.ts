@@ -41,7 +41,8 @@ import {
   sendSubscriptionActivatedEmail,
   sendSubscriptionCancelledEmail,
   sendSubscriptionPaymentFailedEmail,
-  sendSubscriptionPaymentSucceededEmail
+  sendSubscriptionPaymentSucceededEmail,
+  sendSubscriptionSuspendedEmail
 } from '@/services/email.service';
 import { getGarageById } from '@/services/firebase/garage-service';
 import { getUserDocument } from '@/services/firebase/user-sync-service';
@@ -354,6 +355,10 @@ function shouldSendPaymentSucceededEmail(eventType: string): boolean {
 
 function shouldSendCancelledEmail(eventType: string): boolean {
   return eventType === 'BILLING.SUBSCRIPTION.CANCELLED';
+}
+
+function shouldSendSuspendedEmail(eventType: string): boolean {
+  return eventType === 'BILLING.SUBSCRIPTION.SUSPENDED';
 }
 
 function toFirstName(fullName?: string): string | undefined {
@@ -830,6 +835,57 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     } catch (error) {
       console.error('[billing][webhook] cancelled email send failed', {
+        eventId,
+        eventType,
+        subscriptionId,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  if (shouldSendSuspendedEmail(eventType)) {
+    try {
+      const [garage, billingSnap] = await Promise.all([
+        getGarageById(garageId),
+        billingRef.get()
+      ]);
+
+      const billing = billingSnap.exists
+        ? (billingSnap.data() as GarageBillingDocument)
+        : null;
+
+      if (garage?.ownerUserId && billing) {
+        const owner = await getUserDocument(garage.ownerUserId);
+        if (owner?.email) {
+          const plan =
+            subscriptionPlanConfig.find(
+              (item) => item.id === billing.planCode
+            ) ?? null;
+          const dashboardUrl = new URL(
+            '/dashboard',
+            env.NEXTAUTH_URL
+          ).toString();
+          const restoreAccessLink = new URL(
+            '/dashboard/settings/subscription',
+            env.NEXTAUTH_URL
+          ).toString();
+          const websiteUrl = new URL('/', env.NEXTAUTH_URL).toString();
+
+          await sendSubscriptionSuspendedEmail({
+            recipientEmail: owner.email,
+            firstName: toFirstName(owner.name),
+            planName: plan?.name ?? billing.planCode,
+            billingCycle: billing.billingCycle,
+            restoreAccessLink,
+            dashboardLink: dashboardUrl,
+            supportEmail:
+              env.NEXT_PUBLIC_APP_SUPPORT_EMAIL ?? 'support@garixo.com',
+            websiteUrl
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[billing][webhook] suspended email send failed', {
         eventId,
         eventType,
         subscriptionId,
