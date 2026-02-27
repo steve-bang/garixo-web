@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 
 import {
-  createGarageWorkOrder,
+  createGarageWorkOrderWithUsageConsume,
   listGarageWorkers,
   listGarageWorkOrders,
-  nextOrderCode
+  nextOrderCode,
+  WorkOrderFeatureDisabledError,
+  WorkOrderUsageLimitExceededError
 } from '@/app/api/work-orders/work-orders-db';
 import {
   createWorkOrderSchema,
@@ -292,7 +294,39 @@ export async function POST(
     updatedAt: now
   };
 
-  const created = await createGarageWorkOrder(garageId, createdPayload);
+  let created: WorkOrder;
+  try {
+    created = await createGarageWorkOrderWithUsageConsume(
+      garageId,
+      createdPayload,
+      1
+    );
+  } catch (error) {
+    if (error instanceof WorkOrderFeatureDisabledError) {
+      return response(
+        {
+          success: false,
+          error:
+            'Your current plan does not include work order creation. Please upgrade to continue.'
+        },
+        403
+      );
+    }
+
+    if (error instanceof WorkOrderUsageLimitExceededError) {
+      return response(
+        {
+          success: false,
+          error:
+            'You have reached your work order limit for this period. Upgrade your plan to create more work orders.'
+        },
+        403
+      );
+    }
+
+    throw error;
+  }
+
   await ensureDashboardSummaryDocs(garageId);
   if (created.workerId) {
     await incrementGarageStaffCurrentJobs(garageId, created.workerId, 1);
