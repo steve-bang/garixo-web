@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { getPublicInvoiceByToken } from '@/features/invoices/service';
 import type { PublicInvoiceView } from '@/features/invoices/types';
+import { trackEvent } from '@/lib/analytics/ga';
 import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
 
 function paymentTermLabel(
@@ -38,6 +39,9 @@ export function PublicInvoicePage({
         const data = await getPublicInvoiceByToken(token);
         if (!mounted) return;
         setInvoice(data);
+        trackEvent('public_invoice_viewed', {
+          has_tax: data.tax.enabled
+        });
       } catch (e) {
         if (!mounted) return;
         setError(

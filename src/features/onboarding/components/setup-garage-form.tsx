@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { submitGarageSetup } from '@/features/onboarding/service';
+import { trackEvent } from '@/lib/analytics/ga';
 import { garageIndustryTypes } from '@/types/garage';
 
 const setupSchema = z.object({
@@ -84,6 +85,9 @@ export function SetupGarageForm({
 
   const onSubmit = form.handleSubmit(async (values) => {
     await submitGarageSetup(values);
+    trackEvent('onboarding_setup_garage_completed', {
+      industry_type: values.industryType
+    });
     setSuccessGarageName(values.garageName.trim());
     setSuccess(true);
     window.setTimeout(() => {

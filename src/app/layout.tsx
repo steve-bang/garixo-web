@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
+import { GoogleAnalytics } from '@/components/analytics/google-analytics';
+import { GoogleAnalyticsPageview } from '@/components/analytics/google-analytics-pageview';
 import { appConfig } from '@/config/app';
 import { AppProviders } from '@/components/providers/app-providers';
 
@@ -11,10 +13,16 @@ export const metadata: Metadata = {
   description: appConfig.appDescription
 };
 
-export default function RootLayout({ children }: { children: ReactNode }): JSX.Element {
+export default function RootLayout({
+  children
+}: {
+  children: ReactNode;
+}): JSX.Element {
   return (
     <html lang="en">
       <body>
+        <GoogleAnalytics />
+        <GoogleAnalyticsPageview />
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

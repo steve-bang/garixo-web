@@ -29,6 +29,7 @@ import type {
 import { useWorkOrder } from '@/features/work-orders/hooks';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import { useToast } from '@/hooks/use-toast';
+import { trackEvent } from '@/lib/analytics/ga';
 import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
 
 const paymentTermOptions: Array<{ value: InvoicePaymentTerm; label: string }> =
@@ -253,6 +254,9 @@ export function InvoiceDetailPage({
         payload: {
           recipientEmail: recipientEmail.trim() || undefined
         }
+      });
+      trackEvent('invoice_email_sent', {
+        from_detail_page: true
       });
       toast.success('Invoice sent successfully.');
       void invoiceQuery.refetch();

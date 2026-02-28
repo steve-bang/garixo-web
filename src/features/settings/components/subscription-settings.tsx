@@ -19,6 +19,7 @@ import {
   type BillingSnapshotResult
 } from '@/features/settings/subscription.service';
 import { useToast } from '@/hooks/use-toast';
+import { trackEvent } from '@/lib/analytics/ga';
 import { cn } from '@/lib/utils/cn';
 import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
 
@@ -183,6 +184,10 @@ export function SubscriptionSettings(): JSX.Element {
     setPendingPlan(pendingKey);
 
     try {
+      trackEvent('begin_checkout', {
+        plan_code: planCode,
+        billing_cycle: billingCycle
+      });
       const result = await createSubscription({
         planCode,
         billingCycle

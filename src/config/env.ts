@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 const envSchema = z.object({
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
   NEXT_PUBLIC_APP_SUPPORT_EMAIL: z.string().email().optional(),
   NEXTAUTH_URL: z.string().url(),
   NEXTAUTH_SECRET: z.string().min(16),
@@ -31,6 +32,7 @@ const envSchema = z.object({
 });
 
 export const env = envSchema.parse({
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
   NEXT_PUBLIC_APP_SUPPORT_EMAIL: process.env.NEXT_PUBLIC_APP_SUPPORT_EMAIL,
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
