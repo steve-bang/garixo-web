@@ -2,10 +2,10 @@
 
 This document describes the current Firestore data design used by Garixo, based on:
 
-- `/Users/mrsteve.bang/Documents/New project/src/types/firebase-models.ts`
+- `/src/types/firebase-models.ts`
 - Firestore usage in:
-  - `/Users/mrsteve.bang/Documents/New project/src/services/firebase/*`
-  - `/Users/mrsteve.bang/Documents/New project/src/app/api/*`
+  - `/src/services/firebase/*`
+  - `/src/app/api/*`
 
 ## 1) Purpose and Scope
 
