@@ -6,6 +6,45 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 ## [Unreleased]
 
+## [0.1.13] - 2026-02-28
+
+### Added
+
+- Blog management module for admin:
+- New routes:
+- `/dashboard/administrator/blogs`
+- `/dashboard/administrator/blogs/new`
+- `/dashboard/administrator/blogs/[id]/edit`
+- New admin/public blog APIs:
+- `/api/blogs/*`
+- `/api/public/blogs/*`
+- New public blog pages:
+- `/blog`
+- `/blog/[slug]`
+- CKEditor 5 rich text editor with Firebase Storage image upload in:
+- `/src/features/blogs/components/rich-text-editor.tsx`
+
+- Dynamic sitemap architecture for SEO:
+- `/sitemap.xml` as sitemap index
+- `/sitemap-static.xml` for static/marketing pages
+- `/sitemap-blog.xml` for published/indexable blog URLs
+
+- Search engine sitemap notification service (best-effort on publish/update):
+- `/src/services/seo/search-engine-notifier.ts`
+
+### Changed
+
+- Blog schema/form behavior simplified to require only core content fields.
+- Blog editor UI now marks required fields with red `*` and includes clearer content section labeling.
+- Blog list public page now includes a friendly empty state.
+- Sitemap blog route now logs real errors in non-production and returns explicit `500` during local debugging.
+
+### Fixed
+
+- Firestore index precondition failure for blog sitemap:
+- Added safe fallback query path when composite index is missing (query by `status=published`, then filter `isIndexed` in memory).
+- Keeps `/sitemap-blog.xml` functional in local/dev while production can use optimized indexed query.
+
 ## [0.1.12] - 2026-02-28
 
 ### Added
