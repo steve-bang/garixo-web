@@ -37,7 +37,7 @@ export function SignUpForm(): JSX.Element {
         className="relative hidden md:flex md:min-h-screen md:flex-col md:justify-between md:p-s12 lg:p-s12"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=1400&q=80')",
+            "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/images/bg-image-signup-form.png')",
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}

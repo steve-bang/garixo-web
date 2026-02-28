@@ -1,8 +1,15 @@
+import type { Metadata } from 'next';
 import { JSX } from 'react';
 import { redirect } from 'next/navigation';
 
 import { LoginForm } from '@/features/auth/components/login-form';
 import { auth } from '@/lib/auth';
+
+export const metadata: Metadata = {
+  title: 'Login | Garixo',
+  description:
+    'Sign in to Garixo to manage work orders, customers, inventory, and staff in one simple garage dashboard.'
+};
 
 export default async function AuthLoginPage(): Promise<JSX.Element> {
   const session = await auth();
