@@ -70,7 +70,7 @@ const menuItems: SidebarItem[] = [
       },
       {
         href: '/dashboard/settings/invoice-settings',
-        label: 'Invoice Settings'
+        label: 'Invoice'
       }
     ]
   }
