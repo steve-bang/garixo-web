@@ -72,7 +72,7 @@ function parseDateFilter(value: string | null): DateFilter {
     return value as DateFilter;
   }
 
-  return 'all';
+  return 'today';
 }
 
 function parsePositiveInt(value: string | null, fallback = 1): number {
@@ -405,7 +405,7 @@ export function WorkOrdersManagementPage(): JSX.Element {
         }}
         onDateFilterChange={(value) => {
           setQueryParams({
-            dateFilter: value === 'all' ? undefined : value,
+            dateFilter: value === 'today' ? undefined : value,
             dateFrom: value === 'custom' ? dateFrom : undefined,
             dateTo: value === 'custom' ? dateTo : undefined,
             page: '1'

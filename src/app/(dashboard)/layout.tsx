@@ -56,6 +56,7 @@ export default async function DashboardLayout({
     <DashboardLayoutShell
       currentPlan={billingSummary.planCode}
       billingStatus={billingSummary.status}
+      currentUserRole={session.user.role}
     >
       {children}
     </DashboardLayoutShell>

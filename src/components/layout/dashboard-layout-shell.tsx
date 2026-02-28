@@ -35,6 +35,7 @@ import type { BillingStatus, PlanCode } from '@/features/billing/types';
 import type { CreateWorkOrderInput } from '@/features/work-orders/schema';
 import type { OrderService } from '@/features/work-orders/types';
 import { cn } from '@/lib/utils/cn';
+import type { UserRole } from '@/types/user';
 
 type SidebarSubItem = {
   href: string;
@@ -48,7 +49,13 @@ type SidebarItem = {
   children?: SidebarSubItem[];
 };
 
-const menuItems: SidebarItem[] = [
+type SidebarSection = {
+  key: string;
+  title?: string;
+  items: SidebarItem[];
+};
+
+const operationsMenuItems: SidebarItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/work-orders', label: 'Work Orders', icon: ClipboardList },
   { href: '/dashboard/invoices', label: 'Invoices', icon: FileText },
@@ -75,6 +82,15 @@ const menuItems: SidebarItem[] = [
         label: 'Invoice'
       }
     ]
+  }
+];
+
+const administratorMenuItems: SidebarItem[] = [
+  {
+    href: '/dashboard/administrator/users',
+    label: 'Administrator',
+    icon: UserCog,
+    children: [{ href: '/dashboard/administrator/users', label: 'Users' }]
   }
 ];
 
@@ -117,11 +133,13 @@ export function buildBreadcrumb(pathname: string): BreadcrumbItem[] {
 export function DashboardLayoutShell({
   children,
   currentPlan,
-  billingStatus
+  billingStatus,
+  currentUserRole
 }: {
   children: ReactNode;
   currentPlan: PlanCode;
   billingStatus: BillingStatus;
+  currentUserRole: UserRole;
 }): JSX.Element {
   const pathname = usePathname();
   const router = useRouter();
@@ -188,6 +206,22 @@ export function DashboardLayoutShell({
     };
   }, [isSidebarOpen]);
 
+  const menuSections = useMemo<SidebarSection[]>(() => {
+    const sections: SidebarSection[] = [
+      { key: 'operations', items: operationsMenuItems }
+    ];
+
+    if (currentUserRole === 'admin') {
+      sections.push({
+        key: 'administrator',
+        title: 'Administrator',
+        items: administratorMenuItems
+      });
+    }
+
+    return sections;
+  }, [currentUserRole]);
+
   const sidebarContent = (
     <div className="flex h-full flex-col">
       <div className="border-b border-sidebar-border px-s4 py-s4">
@@ -200,57 +234,67 @@ export function DashboardLayoutShell({
         </p>
       </div>
 
-      <nav className="flex-1 space-y-s1 overflow-y-auto px-s3 py-s3">
-        {menuItems.map((item) => {
-          const isActive =
-            pathname === item.href || pathname.startsWith(`${item.href}/`);
-          const Icon = item.icon;
+      <nav className="flex-1 space-y-s3 overflow-y-auto px-s3 py-s3">
+        {menuSections.map((section) => (
+          <div key={section.key} className="space-y-s1">
+            {section.title ? (
+              <p className="px-s3 py-s1 text-caption font-medium uppercase tracking-wide text-text-muted">
+                {section.title}
+              </p>
+            ) : null}
 
-          return (
-            <div key={item.href} className="space-y-s1">
-              <Link
-                href={item.href}
-                prefetch={false}
-                onClick={() => setIsSidebarOpen(false)}
-                className={cn(
-                  'flex items-center gap-s2 rounded-md px-s3 py-s2 text-small text-sidebar-foreground transition-colors',
-                  isActive
-                    ? 'bg-sidebar-active text-sidebar-active-text'
-                    : 'hover:bg-surface-hover'
-                )}
-              >
-                <Icon className="size-4" />
-                <span>{item.label}</span>
-              </Link>
+            {section.items.map((item) => {
+              const isActive =
+                pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const Icon = item.icon;
 
-              {item.children?.length ? (
-                <div className="ml-s6 space-y-s1">
-                  {item.children.map((child) => {
-                    const isChildActive =
-                      pathname === child.href ||
-                      pathname.startsWith(`${child.href}/`);
-                    return (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        prefetch={false}
-                        onClick={() => setIsSidebarOpen(false)}
-                        className={cn(
-                          'block rounded-md px-s3 py-s2 text-small transition-colors',
-                          isChildActive
-                            ? 'bg-sidebar-active text-sidebar-active-text'
-                            : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
-                        )}
-                      >
-                        {child.label}
-                      </Link>
-                    );
-                  })}
+              return (
+                <div key={item.href} className="space-y-s1">
+                  <Link
+                    href={item.href}
+                    prefetch={false}
+                    onClick={() => setIsSidebarOpen(false)}
+                    className={cn(
+                      'flex items-center gap-s2 rounded-md px-s3 py-s2 text-small text-sidebar-foreground transition-colors',
+                      isActive
+                        ? 'bg-sidebar-active text-sidebar-active-text'
+                        : 'hover:bg-surface-hover'
+                    )}
+                  >
+                    <Icon className="size-4" />
+                    <span>{item.label}</span>
+                  </Link>
+
+                  {item.children?.length ? (
+                    <div className="ml-s6 space-y-s1">
+                      {item.children.map((child) => {
+                        const isChildActive =
+                          pathname === child.href ||
+                          pathname.startsWith(`${child.href}/`);
+                        return (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            prefetch={false}
+                            onClick={() => setIsSidebarOpen(false)}
+                            className={cn(
+                              'block rounded-md px-s3 py-s2 text-small transition-colors',
+                              isChildActive
+                                ? 'bg-sidebar-active text-sidebar-active-text'
+                                : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
+                            )}
+                          >
+                            {child.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
-            </div>
-          );
-        })}
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <SidebarUserSection
