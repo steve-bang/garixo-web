@@ -1,8 +1,8 @@
-import { BarChart3, Boxes, CarFront, Users } from 'lucide-react';
+import { Boxes, ClipboardList, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type CoreFeature = {
-  id: 'vehicle' | 'technician' | 'inventory' | 'financial';
+  id: 'work-order' | 'customers' | 'inventory' | 'staff';
   title: string;
   badge: string;
   description: string;
@@ -19,35 +19,35 @@ export type FeatureFaq = {
 
 export const coreFeatures: CoreFeature[] = [
   {
-    id: 'vehicle',
-    title: 'Vehicle Workflow Management from Check-In to Delivery',
-    badge: 'Feature 01 · Vehicle Workflow',
+    id: 'work-order',
+    title: 'Work Order Management from Check-In to Delivery',
+    badge: 'Feature 01 · Work Order Management',
     description:
-      'Track every vehicle in your garage management system with real-time status updates from check-in to delivery.',
-    impact: 'Know exactly where every vehicle is at any moment.',
-    href: '/features',
-    icon: CarFront,
+      'Create, assign, and track every repair job with real-time status updates from draft to paid.',
+    impact: 'Know exactly what every job needs and what to do next.',
+    href: '/features/work-orders-management',
+    icon: ClipboardList,
     bullets: [
-      'Digital check-in and complete service history',
-      'Live status tracking: Waiting, In Progress, QC, Delivered',
-      'Clear job board without floor-walk delays',
-      'Faster turnaround with priority assignment'
+      'Create work orders with customer and vehicle context in minutes',
+      'Live status flow: Draft, In Progress, Waiting Parts, Completed, Paid',
+      'Board and table views for faster daily dispatch',
+      'Assign workers clearly and reduce missed handoffs'
     ]
   },
   {
-    id: 'technician',
-    title: 'Technician Management and Labor Tracking',
-    badge: 'Feature 02 · Technician Management',
+    id: 'customers',
+    title: 'Customers Management and Service History Tracking',
+    badge: 'Feature 02 · Customers Management',
     description:
-      'Assign jobs quickly and track labor time automatically with auto repair shop management software built for workshop teams.',
-    impact: 'Turn your team into a performance-driven workforce.',
-    href: '/features/technician-tracking',
+      'Keep customer profiles, linked vehicles, and service history in one simple system built for independent auto shops.',
+    impact: 'Increase repeat visits by making every customer feel remembered.',
+    href: '/features/customers-management',
     icon: Users,
     bullets: [
-      'Assign tasks in seconds with clear priorities',
-      'Capture labor time automatically per job',
-      'Monitor technician performance daily',
-      'Balance workloads in real time'
+      'Search customers quickly by name, phone, or plate',
+      'Link customers to vehicles for cleaner service context',
+      'Review work-order history before creating new jobs',
+      'Track repeat visits and spending behavior over time'
     ]
   },
   {
@@ -67,19 +67,19 @@ export const coreFeatures: CoreFeature[] = [
     ]
   },
   {
-    id: 'financial',
-    title: 'Real-Time Financial Dashboard for Auto Repair Businesses',
-    badge: 'Feature 04 · Financial Dashboard',
+    id: 'staff',
+    title: 'Staff Management and Workload Visibility for Small Garages',
+    badge: 'Feature 04 · Staff Management',
     description:
-      'Get daily revenue, cost, and net profit visibility from one automotive repair management software dashboard.',
-    impact: 'Make decisions based on data, not guesswork.',
-    href: '/features',
-    icon: BarChart3,
+      'Manage team profiles, track workload, and keep assignments organized with a simple staff management workflow.',
+    impact: 'Keep your team balanced and productive every day.',
+    href: '/features/staff-management',
+    icon: Users,
     bullets: [
-      'Revenue and cost breakdown by service',
-      'Daily net profit visibility',
-      'Weekly and monthly performance trends',
-      'Cash flow insight without spreadsheets'
+      'Add and manage staff profiles in minutes',
+      'Track active, free, and overloaded team members',
+      'Keep role and status data clear for daily planning',
+      'Enforce user-seat limits with upgrade guidance when needed'
     ]
   }
 ];
@@ -88,7 +88,7 @@ export const featureFaqs: FeatureFaq[] = [
   {
     question: 'What features should a garage management system have?',
     answer:
-      'A complete garage management system should include vehicle workflow tracking, technician management, inventory control, and a real-time financial dashboard. Garixo combines all four in one platform.'
+      'A complete garage management system should include work order management, customer management, inventory control, and staff management. Garixo combines all four in one platform.'
   },
   {
     question:
@@ -104,6 +104,6 @@ export const featureFaqs: FeatureFaq[] = [
   {
     question: 'Can garage management software track inventory and profit?',
     answer:
-      'Yes. Garixo updates inventory when jobs complete and shows live financial performance, including revenue, parts cost, labor cost, and net profit in one dashboard.'
+      'Yes. Garixo helps track inventory usage and gives clear operational context to support better revenue and profit decisions.'
   }
 ];

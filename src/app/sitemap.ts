@@ -31,6 +31,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9
     },
     {
+      url: toAbsoluteUrl(baseUrl, '/features/customers-management'),
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8
+    },
+    {
+      url: toAbsoluteUrl(baseUrl, '/features/staff-management'),
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8
+    },
+    {
+      url: toAbsoluteUrl(baseUrl, '/features/inventory-management'),
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8
+    },
+    {
+      url: toAbsoluteUrl(baseUrl, '/features/work-orders-management'),
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8
+    },
+    {
       url: toAbsoluteUrl(baseUrl, '/pricing'),
       lastModified: now,
       changeFrequency: 'weekly',

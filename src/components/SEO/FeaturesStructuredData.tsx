@@ -10,12 +10,12 @@ export function FeaturesStructuredData(): JSX.Element {
     operatingSystem: 'Web',
     url: 'https://www.garixo.com/features',
     description:
-      'A complete garage management system for auto repair shops with vehicle workflow, technician management, inventory control and real-time financial reporting.',
+      'A complete garage management system for auto repair shops with work order management, customer management, inventory control and staff management.',
     featureList: [
-      'Vehicle Workflow Management',
-      'Technician Labor Tracking',
+      'Work Order Management',
+      'Customer Management',
       'Inventory Control',
-      'Real-Time Financial Dashboard'
+      'Staff Management'
     ]
   };
 
