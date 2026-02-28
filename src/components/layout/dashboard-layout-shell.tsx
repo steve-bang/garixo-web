@@ -3,6 +3,7 @@
 import {
   Car,
   ClipboardList,
+  FileText,
   HelpCircle,
   Home,
   LayoutDashboard,
@@ -50,6 +51,7 @@ type SidebarItem = {
 const menuItems: SidebarItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/work-orders', label: 'Work Orders', icon: ClipboardList },
+  { href: '/dashboard/invoices', label: 'Invoices', icon: FileText },
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/vehicles', label: 'Vehicles', icon: Car },
   { href: '/dashboard/services', label: 'Services', icon: Wrench },

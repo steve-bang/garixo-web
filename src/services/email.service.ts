@@ -4,6 +4,7 @@ import { buildSubscriptionCancelledEmailTemplate } from '@/lib/email/templates/s
 import { buildSubscriptionPaymentFailedEmailTemplate } from '@/lib/email/templates/subscription-payment-failed-template';
 import { buildSubscriptionPaymentSucceededEmailTemplate } from '@/lib/email/templates/subscription-payment-succeeded-template';
 import { buildSubscriptionSuspendedEmailTemplate } from '@/lib/email/templates/subscription-suspended-template';
+import { buildInvoiceEmailTemplate } from '@/lib/email/templates/invoice-template';
 import { buildVerifyEmailTemplate } from '@/lib/email/templates/verify-email-template';
 
 type SendVerificationEmailInput = {
@@ -70,6 +71,30 @@ type SendSubscriptionSuspendedEmailInput = {
   dashboardLink: string;
   supportEmail: string;
   websiteUrl: string;
+};
+
+type SendInvoiceEmailInput = {
+  recipientEmail: string;
+  garageName: string;
+  customerName: string;
+  invoiceNumber: string;
+  orderCode: string;
+  paymentTerm: 'DUE_ON_RECEIPT' | 'NET_7' | 'NET_15' | 'NET_30';
+  issuedAt: Date;
+  total: number;
+  subtotal: number;
+  taxLabel: string;
+  taxRate: number;
+  taxAmount: number;
+  dueDate: Date;
+  lineItems: Array<{
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    amount: number;
+  }>;
+  invoiceLink: string;
+  supportEmail?: string;
 };
 
 export async function sendVerificationEmail(
@@ -190,6 +215,35 @@ export async function sendSubscriptionSuspendedEmail(
     dashboardLink: input.dashboardLink,
     supportEmail: input.supportEmail,
     websiteUrl: input.websiteUrl
+  });
+
+  return sendSmtpEmail({
+    to: input.recipientEmail,
+    subject: template.subject,
+    text: template.text,
+    html: template.html
+  });
+}
+
+export async function sendInvoiceEmail(
+  input: SendInvoiceEmailInput
+): Promise<boolean> {
+  const template = buildInvoiceEmailTemplate({
+    garageName: input.garageName,
+    customerName: input.customerName,
+    invoiceNumber: input.invoiceNumber,
+    orderCode: input.orderCode,
+    paymentTerm: input.paymentTerm,
+    issuedAt: input.issuedAt,
+    total: input.total,
+    subtotal: input.subtotal,
+    taxLabel: input.taxLabel,
+    taxRate: input.taxRate,
+    taxAmount: input.taxAmount,
+    dueDate: input.dueDate,
+    lineItems: input.lineItems,
+    invoiceLink: input.invoiceLink,
+    supportEmail: input.supportEmail
   });
 
   return sendSmtpEmail({

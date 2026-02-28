@@ -162,3 +162,63 @@ export interface GarageInvoiceSettingsDocument {
   createdAt: string;
   updatedAt: string;
 }
+
+export type GarageInvoiceLineItemType = 'service' | 'part' | 'custom';
+
+export interface GarageInvoiceLineItemDocument {
+  key: string;
+  type: GarageInvoiceLineItemType;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  amount: number;
+}
+
+export interface GarageInvoiceDocument {
+  invoiceNumber: string;
+  workOrderId: string;
+  orderCode: string;
+  customerId: string | null;
+  customerName: string;
+  customerEmail: string | null;
+  customerPhone: string | null;
+  vehicleId: string | null;
+  vehicleLabel: string;
+  issuedAt: string;
+  dueDate: string;
+  paymentTerm: GarageInvoicePaymentTerm;
+  lineItems: GarageInvoiceLineItemDocument[];
+  subtotal: number;
+  tax: {
+    enabled: boolean;
+    rate: number;
+    label: string;
+    amount: number;
+  };
+  total: number;
+  notes: string | null;
+  sentAt: string | null;
+  lastSentAt: string | null;
+  sentCount: number;
+  createdAt: string;
+  updatedAt: string;
+  createdByUserId: string;
+  updatedByUserId: string;
+}
+
+/**
+ * Public invoice share token record.
+ * Path: invoicePublicShares/{shareId}
+ */
+export interface InvoicePublicShareDocument {
+  garageId: string;
+  invoiceId: string;
+  tokenHash: string;
+  publicToken: string;
+  isActive: boolean;
+  expiresAt: string | null;
+  createdByUserId: string;
+  lastViewedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

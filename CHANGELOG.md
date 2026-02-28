@@ -8,6 +8,36 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 ### Added
 
+- Basic Invoice MVP module integrated with Work Orders:
+- Invoice domain types/schemas/services/hooks under `/src/features/invoices/*`.
+- New dashboard invoices routes:
+- `/src/app/(dashboard)/dashboard/invoices/page.tsx`
+- `/src/app/(dashboard)/dashboard/invoices/[id]/page.tsx`
+- Work order detail invoice quick actions card in `/src/features/invoices/components/invoice-summary-card.tsx`.
+- Invoice Firestore service and model extensions:
+- `/src/services/firebase/invoices-service.ts`
+- `/src/types/firebase-models.ts`
+- New invoice APIs:
+- `GET /api/invoices`
+- `POST /api/invoices/from-work-order`
+- `GET /api/invoices/[id]`
+- `PUT /api/invoices/[id]`
+- `POST /api/invoices/[id]/send`
+
+- Public invoice sharing flow:
+- Public invoice page at `/src/app/(public)/invoice/[token]/page.tsx`.
+- Public invoice UI component at `/src/features/invoices/components/public-invoice-page.tsx`.
+- Public invoice API:
+- `GET /api/public/invoices/[token]`.
+- Share management APIs:
+- `POST /api/invoices/[id]/share`
+- `GET /api/invoices/[id]/share/current`
+- `POST /api/invoices/[id]/share/revoke`
+- Revocable/expirable share storage via `invoicePublicShares` with tokenized links.
+
+- Invoice email template:
+- `/src/lib/email/templates/invoice-template.ts` with detailed line items/totals breakdown.
+
 - Subscription lifecycle notification templates:
 - `/src/lib/email/templates/subscription-payment-failed-template.ts`
 - `/src/lib/email/templates/subscription-payment-succeeded-template.ts`
@@ -15,6 +45,19 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 - `/src/lib/email/templates/subscription-suspended-template.ts`
 
 ### Changed
+
+- Invoice detail UX improvements:
+- Added clearer field labels for Tax and Line Items on desktop/mobile in `/src/features/invoices/components/invoice-detail-page.tsx`.
+- Added public-link card actions (generate/copy/revoke) in invoice detail page.
+- Improved invoices list empty state messaging with owner-friendly guidance and direct CTAs in `/src/features/invoices/components/invoices-management-page.tsx`.
+
+- Public invoice copy and metadata:
+- Friendly unavailable/expired messages for customers in `/src/features/invoices/components/public-invoice-page.tsx`.
+- Updated metadata and noindex settings for public invoice token route in `/src/app/(public)/invoice/[token]/page.tsx`.
+
+- Invoice email send flow:
+- Send endpoint now generates a public share link and sends that URL to customers.
+- Send flow now syncs recipient email back to invoice snapshot and customer profile when applicable.
 
 - PayPal webhook notification flow now sends owner-facing lifecycle emails for:
 - `BILLING.SUBSCRIPTION.ACTIVATED`
@@ -24,6 +67,18 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 - `BILLING.SUBSCRIPTION.SUSPENDED`
 - Webhook post-processing now exits early for duplicate/no-op events to avoid side effects after idempotency checks.
 - Centralized subscription notification senders in `/src/services/email.service.ts`.
+
+### Fixed
+
+- Public share link persistence on invoice detail refresh:
+- Added active-link retrieval API (`/api/invoices/[id]/share/current`) so owners can reload and still see the current public link.
+- Legacy non-retrievable share rows are handled safely as `no active link`.
+
+- Invoice email send rate limiting:
+- Added per-garage limiter at `garages/{garageId}/rate-limits/invoice-email`.
+- Enforced cap: `20` invoice emails per hour in `/src/app/api/invoices/[id]/send/route.ts`.
+- Added friendly rate-limit modal in invoice detail UI for HTTP `429`:
+- “To prevent accidental duplicate emails and protect your account, invoice emails can only be sent a few times within a short period.”
 
 ## [0.1.9] - 2026-02-27
 
