@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { fetchUsers } from '@/features/user/api';
+import { fetchUsers, usersQueryKey } from '@/features/user/api';
 import type { UserListItem } from '@/features/user/types';
 
 export type UserKpis = {
@@ -13,7 +13,7 @@ export type UserKpis = {
 
 export function useUsers() {
   return useQuery({
-    queryKey: ['users'],
+    queryKey: usersQueryKey,
     queryFn: fetchUsers
   });
 }
