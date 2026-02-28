@@ -5,15 +5,15 @@ import Link from 'next/link';
 import type { MouseEvent } from 'react';
 
 const navItems = [
-  { label: 'Vehicle Workflow', href: '#vehicle' },
-  { label: 'Technician', href: '#technician' },
+  { label: 'Work Orders', href: '#work-order' },
+  { label: 'Customers', href: '#customers' },
   { label: 'Inventory', href: '#inventory' },
-  { label: 'Financials', href: '#financial' },
+  { label: 'Staff', href: '#staff' },
   { label: 'FAQ', href: '#faq' }
 ] as const;
 
 export function FeaturesSubnav(): JSX.Element {
-  const [activeSection, setActiveSection] = useState<string>('vehicle');
+  const [activeSection, setActiveSection] = useState<string>('work-order');
 
   const handleNavClick = (
     event: MouseEvent<HTMLAnchorElement>,

@@ -195,7 +195,7 @@ export default async function CaseStudyDetailPage({
             <p className="mt-s2 text-body text-slate-300">
               Simple setup. Clear workflow. Better daily operations.
             </p>
-            <div className="mt-s5 flex flex-col justify-center gap-s2 sm:flex-row">
+            <div className="mt-s4 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button
                 asChild
                 className="h-12 bg-surface-default text-primary-800 hover:bg-primary-50"
