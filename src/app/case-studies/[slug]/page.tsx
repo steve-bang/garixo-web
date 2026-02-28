@@ -29,7 +29,7 @@ export async function generateMetadata({
   }
 
   return {
-    metadataBase: new URL('https://garixo.com'),
+    metadataBase: new URL('https://www.garixo.com'),
     title: `${study.garageName} Case Study | GARIXO`,
     description: `See how ${study.garageName} in ${study.city}, ${study.state} improved revenue and shop efficiency using GARIXO garage management software.`,
     alternates: {
@@ -39,7 +39,7 @@ export async function generateMetadata({
       title: `${study.garageName} Case Study | GARIXO`,
       description: `See how ${study.garageName} in ${study.city}, ${study.state} improved revenue and shop efficiency using GARIXO garage management software.`,
       type: 'article',
-      url: `https://garixo.com/case-studies/${study.slug}`
+      url: `https://www.garixo.com/case-studies/${study.slug}`
     }
   };
 }
@@ -76,7 +76,7 @@ export default async function CaseStudyDetailPage({
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'GARIXO',
-    url: 'https://garixo.com'
+    url: 'https://www.garixo.com'
   };
 
   return (

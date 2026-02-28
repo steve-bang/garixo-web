@@ -4,11 +4,11 @@ export function FeaturesStructuredData(): JSX.Element {
   const softwareSchema = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    '@id': 'https://garixo.com/#app',
+    '@id': 'https://www.garixo.com/#app',
     name: 'Garixo',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
-    url: 'https://garixo.com/features',
+    url: 'https://www.garixo.com/features',
     description:
       'A complete garage management system for auto repair shops with vehicle workflow, technician management, inventory control and real-time financial reporting.',
     featureList: [
@@ -27,13 +27,13 @@ export function FeaturesStructuredData(): JSX.Element {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://garixo.com/'
+        item: 'https://www.garixo.com/'
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Features',
-        item: 'https://garixo.com/features'
+        item: 'https://www.garixo.com/features'
       }
     ]
   };

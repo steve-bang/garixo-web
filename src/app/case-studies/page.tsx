@@ -12,7 +12,7 @@ export const revalidate = false;
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    metadataBase: new URL('https://garixo.com'),
+    metadataBase: new URL('https://www.garixo.com'),
     title: 'Garage Management Software Case Studies | GARIXO',
     description:
       'Real success stories from independent auto repair shops using GARIXO to increase revenue and simplify daily operations.',
@@ -34,7 +34,13 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         'Real success stories from independent auto repair shops using GARIXO to increase revenue and simplify daily operations.',
       type: 'website',
-      url: 'https://garixo.com/case-studies'
+      url: 'https://www.garixo.com/case-studies'
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Garage Management Software Case Studies | GARIXO',
+      description:
+        'Real success stories from independent auto repair shops using GARIXO to increase revenue and simplify daily operations.'
     }
   };
 }
@@ -44,7 +50,7 @@ export default function CaseStudiesPage(): JSX.Element {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'GARIXO',
-    url: 'https://garixo.com',
+    url: 'https://www.garixo.com',
     description:
       'Garage management software for independent auto repair shop owners in the United States.'
   };
