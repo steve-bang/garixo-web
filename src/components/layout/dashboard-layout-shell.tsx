@@ -90,7 +90,10 @@ const administratorMenuItems: SidebarItem[] = [
     href: '/dashboard/administrator/users',
     label: 'Administrator',
     icon: UserCog,
-    children: [{ href: '/dashboard/administrator/users', label: 'Users' }]
+    children: [
+      { href: '/dashboard/administrator/users', label: 'Users' },
+      { href: '/dashboard/administrator/blogs', label: 'Blogs' }
+    ]
   }
 ];
 
