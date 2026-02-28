@@ -3,6 +3,10 @@ import { FieldValue } from 'firebase-admin/firestore';
 import type { WorkOrder, WorkOrderStatus } from '@/features/work-orders/types';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import { firebaseAdmin } from '@/lib/firebase-admin';
+import {
+  toVehicleWorkOrderHistoryPayload,
+  vehicleWorkOrderHistoryRef
+} from '@/services/firebase/vehicle-work-order-history-service';
 
 type OverviewDoc = {
   carsInShop: number;
@@ -442,6 +446,23 @@ export async function applyWorkOrderStatusTransition(
         },
         { merge: true }
       );
+
+      const primaryServiceName =
+        currentOrder.services.length > 0
+          ? currentOrder.services.map((service) => service.name).join(', ')
+          : 'General service';
+      transaction.set(
+        customerRef(input.garageId, currentOrder.customerId)
+          .collection('serviceHistory')
+          .doc(currentOrder.id),
+        {
+          date: nowIso,
+          vehiclePlate: currentOrder.plateNumber,
+          serviceName: primaryServiceName,
+          amount: currentOrder.totalAmount
+        },
+        { merge: true }
+      );
     }
 
     if (becomesCompleted && currentOrder.vehicleId) {
@@ -522,12 +543,26 @@ export async function applyWorkOrderStatusTransition(
         : {})
     };
 
-    transaction.set(orderReference, nextOrder, { merge: true });
-
-    return mapWorkOrderDoc(currentOrder.id, {
+    const nextOrderState = mapWorkOrderDoc(currentOrder.id, {
       ...currentOrder,
       ...nextOrder
     });
+
+    if (nextOrderState.vehicleId) {
+      transaction.set(
+        vehicleWorkOrderHistoryRef(
+          input.garageId,
+          nextOrderState.vehicleId,
+          nextOrderState.id
+        ),
+        toVehicleWorkOrderHistoryPayload(nextOrderState),
+        { merge: true }
+      );
+    }
+
+    transaction.set(orderReference, nextOrder, { merge: true });
+
+    return nextOrderState;
   });
 }
 

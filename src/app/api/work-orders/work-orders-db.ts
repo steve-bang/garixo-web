@@ -8,6 +8,12 @@ import type {
   GarageUsageCurrentDocument
 } from '@/types/firebase-models';
 import { listGarageStaff } from '@/services/firebase/staff-service';
+import {
+  deleteVehicleWorkOrderHistory,
+  toVehicleWorkOrderHistoryPayload,
+  vehicleWorkOrderHistoryRef,
+  upsertVehicleWorkOrderHistory
+} from '@/services/firebase/vehicle-work-order-history-service';
 
 type WorkOrderFirestoreDoc = Partial<Omit<WorkOrder, 'id'>>;
 type WorkOrderUsageState = {
@@ -247,6 +253,14 @@ export async function createGarageWorkOrderWithUsageConsume(
     const nextCounters = withWorkOrdersCounterUpdated(state, nextCount, now);
 
     transaction.set(ref, safePayload);
+    if (payload.vehicleId) {
+      const orderForHistory = mapDoc(ref.id, safePayload);
+      transaction.set(
+        vehicleWorkOrderHistoryRef(garageId, payload.vehicleId, ref.id),
+        toVehicleWorkOrderHistoryPayload(orderForHistory),
+        { merge: true }
+      );
+    }
     transaction.set(
       usageRef,
       {
@@ -271,6 +285,7 @@ export async function updateGarageWorkOrder(
     return null;
   }
 
+  const currentOrder = mapDoc(id, current.data() as WorkOrderFirestoreDoc);
   const next = {
     ...(current.data() as WorkOrderFirestoreDoc),
     ...patch,
@@ -279,6 +294,14 @@ export async function updateGarageWorkOrder(
 
   const safeNext = withoutUndefined(next);
   await ref.set(safeNext, { merge: true });
+  const nextOrder = mapDoc(id, safeNext);
+  if (
+    currentOrder.vehicleId &&
+    currentOrder.vehicleId !== nextOrder.vehicleId
+  ) {
+    await deleteVehicleWorkOrderHistory(garageId, currentOrder.vehicleId, id);
+  }
+  await upsertVehicleWorkOrderHistory(garageId, nextOrder);
   return mapDoc(id, safeNext);
 }
 

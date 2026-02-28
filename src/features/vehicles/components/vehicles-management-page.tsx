@@ -21,7 +21,7 @@ import {
   useVehicleDetail,
   useVehicleKpis,
   useVehicles,
-  useVehicleServices
+  useVehicleWorkOrderHistory
 } from '@/features/vehicles/hooks';
 import type { CreateVehicleInput } from '@/features/vehicles/schema';
 import type { Vehicle, VehicleStatus } from '@/features/vehicles/types';
@@ -197,7 +197,7 @@ export function VehiclesManagementPage(): JSX.Element {
   const listQuery = useVehicles(listParams);
 
   const detailQuery = useVehicleDetail(drawerState.vehicle?.id);
-  const servicesQuery = useVehicleServices(drawerState.vehicle?.id);
+  const historyQuery = useVehicleWorkOrderHistory(drawerState.vehicle?.id);
   const customersQuery = useCustomers(
     { page: 1, pageSize: 100 },
     {
@@ -379,8 +379,8 @@ export function VehiclesManagementPage(): JSX.Element {
         mode={drawerState.mode}
         vehicle={drawerState.vehicle}
         detail={detailQuery.data}
-        services={servicesQuery.data}
-        loadingDetail={detailQuery.isLoading || servicesQuery.isLoading}
+        history={historyQuery.data}
+        loadingDetail={detailQuery.isLoading || historyQuery.isLoading}
         customers={customersQuery.data?.items ?? []}
         onClose={closeDrawer}
         onSubmit={handleSave}

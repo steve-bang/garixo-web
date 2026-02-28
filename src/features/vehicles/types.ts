@@ -3,6 +3,12 @@ import type {
   PaginatedResponse,
   PaginationMeta
 } from '@/types/primitives';
+import type {
+  OrderPart,
+  OrderService,
+  PaymentMethod,
+  WorkOrderStatus
+} from '@/features/work-orders/types';
 
 export type VehicleStatus =
   | 'ACTIVE'
@@ -38,6 +44,29 @@ export interface VehicleServiceRecord {
   serviceName: string;
   amount: number;
   status: 'OPEN' | 'DONE';
+}
+
+export interface VehicleWorkOrderHistoryRecord {
+  id: string;
+  workOrderId: string;
+  vehicleId: string;
+  orderCode: string;
+  plateNumber: string;
+  customerId?: string;
+  customerName: string;
+  customerPhone: string;
+  workerId?: string;
+  workerName?: string;
+  services: OrderService[];
+  parts: OrderPart[];
+  totalAmount: number;
+  status: WorkOrderStatus;
+  notes?: string;
+  paymentMethod?: PaymentMethod;
+  completedAt?: ISODateString | null;
+  paidAt?: ISODateString | null;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
 }
 
 export type VehicleListMeta = PaginationMeta;

@@ -4,6 +4,7 @@ import type {
 } from '@/features/vehicles/schema';
 import type {
   VehicleServiceRecord,
+  VehicleWorkOrderHistoryRecord,
   Vehicle,
   VehicleListResponse,
   VehicleStatus
@@ -63,6 +64,17 @@ export async function getVehicleServices(
 ): Promise<VehicleServiceRecord[]> {
   const response = await fetch(`/api/vehicles/${id}/services`);
   const payload = await readJson<VehicleServiceRecord[]>(response);
+  return ensureSuccess(payload);
+}
+
+export async function getVehicleWorkOrderHistory(
+  id: string,
+  limit = 50
+): Promise<VehicleWorkOrderHistoryRecord[]> {
+  const response = await fetch(
+    `/api/vehicles/${id}/work-order-history?limit=${limit}`
+  );
+  const payload = await readJson<VehicleWorkOrderHistoryRecord[]>(response);
   return ensureSuccess(payload);
 }
 
