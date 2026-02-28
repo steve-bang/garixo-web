@@ -1,9 +1,9 @@
 import { apiClient } from '@/lib/api/client';
 import type { ApiResponse } from '@/types/api';
-import { User } from '@/types/user';
+import type { UserListItem } from '@/features/user/types';
 
-export async function fetchUsers(): Promise<User[]> {
-  const response = await apiClient.get<ApiResponse<User[]>>('/users');
+export async function fetchUsers(): Promise<UserListItem[]> {
+  const response = await apiClient.get<ApiResponse<UserListItem[]>>('/users');
 
   if (!response.data.success || !response.data.data) {
     throw new Error(response.data.error ?? 'Failed to fetch users');

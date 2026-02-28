@@ -3,11 +3,12 @@
 import axios, { AxiosError } from 'axios';
 import { getSession, signOut } from 'next-auth/react';
 
-import { appConfig } from '@/config/app';
 import { normalizeError } from '@/lib/errors/app-error';
 
 export const apiClient = axios.create({
-  baseURL: appConfig.apiBaseUrl,
+  // Use public runtime env directly to avoid importing server-only env schema
+  // into client bundles (which validates NEXTAUTH_* and can throw in browser).
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json'
   }
