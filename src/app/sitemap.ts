@@ -3,7 +3,8 @@ import type { MetadataRoute } from 'next';
 import { caseStudies } from '@/lib/caseStudies';
 
 function getBaseUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://garixo.com';
+  const raw =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://www.garixo.com';
   return raw.endsWith('/') ? raw.slice(0, -1) : raw;
 }
 

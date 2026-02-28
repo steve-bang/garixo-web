@@ -21,7 +21,7 @@ export function Hero(): JSX.Element {
             id="hero-title"
             className="text-[38px] font-bold leading-[1.05] text-text-primary md:text-[56px]"
           >
-            The all-in-one shop management software.
+            The All-in-One Garage Management Software for Auto Repair Shops
           </h1>
 
           <p className="max-w-[620px] text-small text-text-secondary">

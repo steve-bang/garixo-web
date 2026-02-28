@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 export const revalidate = false;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://garixo.com'),
+  metadataBase: new URL('https://www.garixo.com'),
   title: 'Garage Management System Features for Auto Repair Shops | Garixo',
   description:
     'Discover Garixo garage management software features: vehicle workflow tracking, technician management, inventory control, and real-time financial reporting.',
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     description:
       'Everything you need to manage vehicles, technicians, inventory and profit in one simple platform.',
     type: 'website',
-    url: 'https://garixo.com/features'
+    url: 'https://www.garixo.com/features'
   }
 };
 

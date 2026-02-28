@@ -4,7 +4,7 @@ import { LandingFooter } from '@/components/sections/LandingFooter';
 import { LandingHeader } from '@/components/sections/LandingHeader';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://garixo.com'),
+  metadataBase: new URL('https://www.garixo.com'),
   title: 'Terms of Services | GARIXO',
   description:
     'Read GARIXO Terms of Services for global users, including key terms relevant for the United States market.',

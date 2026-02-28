@@ -111,7 +111,7 @@ const pricingFaqs = [
 export const revalidate = false;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://garixo.com'),
+  metadataBase: new URL('https://www.garixo.com'),
   title: 'Simple Garage Software Pricing for Auto Repair Shops | Garixo',
   description:
     'Clear pricing for independent auto repair shops. Start a free trial, manage work orders faster, and run your garage with less stress.',
@@ -134,7 +134,7 @@ export const metadata: Metadata = {
     description:
       'Choose a simple plan built for independent garage owners. Free trial available. No complex setup.',
     type: 'website',
-    url: 'https://garixo.com/pricing'
+    url: 'https://www.garixo.com/pricing'
   },
   twitter: {
     card: 'summary_large_image',
@@ -148,11 +148,11 @@ export default function PricingPage(): JSX.Element {
   const softwareSchema = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    '@id': 'https://garixo.com/#app',
+    '@id': 'https://www.garixo.com/#app',
     name: 'Garixo',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
-    url: 'https://garixo.com/pricing',
+    url: 'https://www.garixo.com/pricing',
     description:
       'Garage management software pricing for independent auto repair shops.',
     offers: plans.map((plan) => ({
@@ -160,7 +160,7 @@ export default function PricingPage(): JSX.Element {
       name: `${plan.name} Monthly`,
       price: String(plan.monthlyPrice),
       priceCurrency: 'USD',
-      url: 'https://garixo.com/auth/sign-up',
+      url: 'https://www.garixo.com/auth/sign-up',
       availability: 'https://schema.org/InStock'
     }))
   };
@@ -173,13 +173,13 @@ export default function PricingPage(): JSX.Element {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://garixo.com/'
+        item: 'https://www.garixo.com/'
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Pricing',
-        item: 'https://garixo.com/pricing'
+        item: 'https://www.garixo.com/pricing'
       }
     ]
   };

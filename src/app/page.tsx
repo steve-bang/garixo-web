@@ -12,36 +12,65 @@ import { Trust } from '@/components/sections/Trust';
 export const revalidate = false;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://garixo.com'),
+  metadataBase: new URL('https://www.garixo.com'),
   title: 'Garage Management Software for Auto Repair Shops | Garixo',
   description:
-    'Garixo is a powerful garage management software helping auto repair shop owners manage vehicles, technicians, inventory and profit in one simple system.',
+    'Garixo is all-in-one garage management software for auto repair shops. Track vehicles, technicians & inventory. See daily profit clearly. Setup in minutes.',
   keywords: [
     'garage management software',
     'auto repair shop management software',
     'auto shop management system',
     'workshop management software',
-    'automotive repair management software'
+    'garage management system for small shops',
+    'auto repair shop management system',
+    'vehicle repair tracking software',
+    'technician job management software',
+    'car workshop software',
+    'best garage management software',
+    'auto repair shop profit tracking',
+    'garage software with inventory management',
+    'workshop management system',
+    'auto repair business software',
+    'garage job management software'
   ],
   alternates: {
     canonical: '/'
   },
   robots: {
     index: true,
-    follow: true
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-snippet': -1,
+      'max-image-preview': 'large',
+      'max-video-preview': -1
+    }
   },
   openGraph: {
     title: 'Garage Management Software for Auto Repair Shops | Garixo',
     description:
-      'Garixo is a powerful garage management software helping auto repair shop owners manage vehicles, technicians, inventory and profit in one simple system.',
+      'Garixo is all-in-one garage management software for auto repair shops. Track vehicles, technicians & inventory. See daily profit clearly. Setup in minutes.',
     type: 'website',
-    url: 'https://garixo.com/'
+    url: 'https://www.garixo.com/',
+    siteName: 'Garixo',
+    locale: 'en_US',
+    images: [
+      {
+        url: 'https://www.garixo.com/images/og-image.png',
+        alt: 'Global auto repair shop management software overview by Garixo',
+        width: 1200,
+        height: 630
+      }
+    ]
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Garage Management Software for Auto Repair Shops | Garixo',
     description:
-      'Garixo is a powerful garage management software helping auto repair shop owners manage vehicles, technicians, inventory and profit in one simple system.'
+      'Garixo is all-in-one garage management software for auto repair shops. Track vehicles, technicians & inventory. See daily profit clearly. Setup in minutes.',
+    site: '@garixo',
+    images: ['https://www.garixo.com/images/og-image.png']
   }
 };
 
