@@ -141,3 +141,24 @@ export interface GarageUsageHistoryDocument {
   createdAt: string;
   updatedAt: string;
 }
+
+export type GarageInvoicePaymentTerm =
+  | 'DUE_ON_RECEIPT'
+  | 'NET_7'
+  | 'NET_15'
+  | 'NET_30';
+
+/**
+ * Invoice settings configured at garage scope.
+ * Path: garages/{garageId}/settings/invoice
+ */
+export interface GarageInvoiceSettingsDocument {
+  tax: {
+    enabled: boolean;
+    rate: number;
+    label: string;
+  };
+  paymentTerm: GarageInvoicePaymentTerm;
+  createdAt: string;
+  updatedAt: string;
+}

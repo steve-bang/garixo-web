@@ -30,6 +30,14 @@ export async function generateMetadata({
     };
   }
 
+  if (sectionData.key === 'invoice-settings') {
+    return {
+      title: 'Invoice Settings | Garixo',
+      description:
+        'Manage default tax and payment terms to send clean and consistent invoices.'
+    };
+  }
+
   return {
     title: `${sectionData.title} | Garixo`,
     description: sectionData.description

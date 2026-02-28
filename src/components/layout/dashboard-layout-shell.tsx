@@ -67,6 +67,10 @@ const menuItems: SidebarItem[] = [
       {
         href: '/dashboard/settings/subscription',
         label: 'Subscription'
+      },
+      {
+        href: '/dashboard/settings/invoice-settings',
+        label: 'Invoice Settings'
       }
     ]
   }
