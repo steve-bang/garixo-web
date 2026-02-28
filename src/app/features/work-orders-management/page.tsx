@@ -392,19 +392,19 @@ export default function WorkOrdersManagementFeaturePage(): JSX.Element {
                 </span>
               </Link>
               <Link
-                href="/features/customer-management"
+                href="/features/customers-management"
                 className="group flex items-center justify-between rounded-md border border-border bg-surface-default px-s3 py-s3 text-small text-text-primary transition-colors hover:border-primary-300 hover:bg-primary-50"
               >
-                <span className="font-medium">Customer Management System</span>
+                <span className="font-medium">Customers Management System</span>
                 <span className="text-primary transition-transform group-hover:translate-x-0.5">
                   →
                 </span>
               </Link>
               <Link
-                href="/features/vehicle-management"
+                href="/features/staff-management"
                 className="group flex items-center justify-between rounded-md border border-border bg-surface-default px-s3 py-s3 text-small text-text-primary transition-colors hover:border-primary-300 hover:bg-primary-50"
               >
-                <span className="font-medium">Vehicle History Tracking</span>
+                <span className="font-medium">Staff Management</span>
                 <span className="text-primary transition-transform group-hover:translate-x-0.5">
                   →
                 </span>
