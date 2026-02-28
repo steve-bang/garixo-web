@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 
 import { GoogleAnalytics } from '@/components/analytics/google-analytics';
 import { GoogleAnalyticsPageview } from '@/components/analytics/google-analytics-pageview';
@@ -22,7 +22,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <GoogleAnalytics />
-        <GoogleAnalyticsPageview />
+        <Suspense fallback={null}>
+          <GoogleAnalyticsPageview />
+        </Suspense>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

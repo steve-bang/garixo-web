@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { JSX } from 'react';
+import { JSX, Suspense } from 'react';
 
 import { InventoryManagementPage } from '@/features/inventory/components/inventory-management-page';
 
@@ -9,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function InventoryPage(): JSX.Element {
-  return <InventoryManagementPage />;
+  return (
+    <Suspense fallback={<div className="h-32 w-full" />}>
+      <InventoryManagementPage />
+    </Suspense>
+  );
 }

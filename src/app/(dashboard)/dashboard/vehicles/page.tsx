@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { JSX } from 'react';
+import { JSX, Suspense } from 'react';
 
 import { VehiclesManagementPage } from '@/features/vehicles/components/vehicles-management-page';
 
@@ -9,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function VehiclesPage(): JSX.Element {
-  return <VehiclesManagementPage />;
+  return (
+    <Suspense fallback={<div className="h-32 w-full" />}>
+      <VehiclesManagementPage />
+    </Suspense>
+  );
 }
