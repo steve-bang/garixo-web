@@ -6,6 +6,8 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 ## [Unreleased]
 
+## [0.1.10] - 2026-02-28
+
 ### Added
 
 - Basic Invoice MVP module integrated with Work Orders:
@@ -44,6 +46,10 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 - `/src/lib/email/templates/subscription-cancelled-template.ts`
 - `/src/lib/email/templates/subscription-suspended-template.ts`
 
+- Google Analytics 4 integration:
+- Root GA loader and App Router pageview tracking in `/src/components/analytics/*`.
+- Shared analytics helpers in `/src/lib/analytics/ga.ts`.
+
 ### Changed
 
 - Invoice detail UX improvements:
@@ -67,6 +73,12 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 - `BILLING.SUBSCRIPTION.SUSPENDED`
 - Webhook post-processing now exits early for duplicate/no-op events to avoid side effects after idempotency checks.
 - Centralized subscription notification senders in `/src/services/email.service.ts`.
+
+- Added product event tracking for onboarding, checkout intent, and invoice actions:
+- `/src/features/onboarding/components/setup-garage-form.tsx`
+- `/src/features/settings/components/subscription-settings.tsx`
+- `/src/features/invoices/components/invoice-detail-page.tsx`
+- `/src/features/invoices/components/public-invoice-page.tsx`
 
 ### Fixed
 
