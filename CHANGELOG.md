@@ -6,6 +6,36 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 ## [Unreleased]
 
+## [0.1.12] - 2026-02-28
+
+### Added
+
+- New admin-only users management route:
+- `/dashboard/administrator/users`
+- New Users Management UI with simple KPI cards and read-only detail drawer:
+- `/src/features/user/components/users-management-page.tsx`
+- `/src/features/user/components/user-detail-drawer.tsx`
+- New sidebar section for admin accounts:
+- `Administrator` -> `Users`
+
+### Changed
+
+- Users API now returns system-wide user list for admin accounts:
+- `GET /api/users` reads from Firestore `users` collection (replacing mock-only flow).
+- Route migration:
+- `/dashboard/users` removed.
+- Sidebar links updated to `/dashboard/administrator/users`.
+
+- Work orders default list filter now uses `today`:
+- `/src/features/work-orders/components/work-orders-management-page.tsx`
+- Preserved explicit `all` query behavior when selected in filters.
+
+### Fixed
+
+- Resolved client-side env crash when loading users management:
+- Removed client dependency chain that imported server env validation (`NEXTAUTH_URL`, `NEXTAUTH_SECRET`) into browser bundle.
+- Updated API client config to use `NEXT_PUBLIC_API_URL` directly in client context.
+
 ## [0.1.10] - 2026-02-28
 
 ### Added
