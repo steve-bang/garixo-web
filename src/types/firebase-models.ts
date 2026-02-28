@@ -1,3 +1,13 @@
+/**
+ * Firestore persistence models for Garixo domain documents.
+ *
+ * Notes:
+ * - These types represent storage shape (not UI view models).
+ * - Date/time fields use ISO-8601 UTC strings for cross-platform consistency.
+ * - Subcollection path conventions are documented near each related interface.
+ * - Keep these models stable and append fields carefully to avoid data migration churn.
+ */
+
 import type { UserRole } from '@/types/user';
 import type { WorkOrderStatus as UnifiedWorkOrderStatus } from '@/features/work-orders/types';
 import type { GarageIndustryType } from '@/types/garage';
@@ -86,6 +96,129 @@ export interface GarageWorkOrderDocument {
   vehicleId?: string;
   vehicleModel?: string;
   isOverdue?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type UsageResetPolicy = 'monthly' | 'yearly' | 'forever';
+
+/**
+ * Single usage counter item for one feature in the current billing period.
+ * Stored as an array item to keep the model flexible as new tracked features are added.
+ */
+export interface GarageUsageCounterItem {
+  key: string;
+  value: number;
+  limit: number;
+  resetPolicy: UsageResetPolicy;
+  enabled: boolean;
+  updatedAt: string;
+}
+
+/**
+ * Live usage snapshot for a garage.
+ * Path: garages/{garageId}/usage/current
+ */
+export interface GarageUsageCurrentDocument {
+  periodKey: string;
+  periodStartAt: string;
+  periodEndAt: string;
+  counters: GarageUsageCounterItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Historical usage snapshot archived by period.
+ * Path: garages/{garageId}/usage/history/{periodKey}
+ */
+export interface GarageUsageHistoryDocument {
+  periodKey: string;
+  periodStartAt: string;
+  periodEndAt: string;
+  counters: GarageUsageCounterItem[];
+  snapshotAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type GarageInvoicePaymentTerm =
+  | 'DUE_ON_RECEIPT'
+  | 'NET_7'
+  | 'NET_15'
+  | 'NET_30';
+
+/**
+ * Invoice settings configured at garage scope.
+ * Path: garages/{garageId}/settings/invoice
+ */
+export interface GarageInvoiceSettingsDocument {
+  tax: {
+    enabled: boolean;
+    rate: number;
+    label: string;
+  };
+  paymentTerm: GarageInvoicePaymentTerm;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type GarageInvoiceLineItemType = 'service' | 'part' | 'custom';
+
+export interface GarageInvoiceLineItemDocument {
+  key: string;
+  type: GarageInvoiceLineItemType;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  amount: number;
+}
+
+export interface GarageInvoiceDocument {
+  invoiceNumber: string;
+  workOrderId: string;
+  orderCode: string;
+  customerId: string | null;
+  customerName: string;
+  customerEmail: string | null;
+  customerPhone: string | null;
+  vehicleId: string | null;
+  vehicleLabel: string;
+  issuedAt: string;
+  dueDate: string;
+  paymentTerm: GarageInvoicePaymentTerm;
+  lineItems: GarageInvoiceLineItemDocument[];
+  subtotal: number;
+  tax: {
+    enabled: boolean;
+    rate: number;
+    label: string;
+    amount: number;
+  };
+  total: number;
+  notes: string | null;
+  sentAt: string | null;
+  lastSentAt: string | null;
+  sentCount: number;
+  createdAt: string;
+  updatedAt: string;
+  createdByUserId: string;
+  updatedByUserId: string;
+}
+
+/**
+ * Public invoice share token record.
+ * Path: invoicePublicShares/{shareId}
+ */
+export interface InvoicePublicShareDocument {
+  garageId: string;
+  invoiceId: string;
+  tokenHash: string;
+  publicToken: string;
+  isActive: boolean;
+  expiresAt: string | null;
+  createdByUserId: string;
+  lastViewedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

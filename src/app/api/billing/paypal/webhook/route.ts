@@ -25,14 +25,30 @@ import { NextResponse } from 'next/server';
  */
 
 import type { BillingStatus } from '@/features/billing/types';
+import { getPayPalPlanMap } from '@/config/billing';
 import { env } from '@/config/env';
+import {
+  getPriceByCycle,
+  subscriptionPlanConfig
+} from '@/features/billing/plan-feature-config';
 import { firebaseAdmin } from '@/lib/firebase-admin';
 import {
   getPayPalSubscription,
   type PayPalSubscription,
   verifyPayPalWebhookSignature
 } from '@/services/paypal/paypal-client';
+import {
+  sendSubscriptionActivatedEmail,
+  sendSubscriptionCancelledEmail,
+  sendSubscriptionPaymentFailedEmail,
+  sendSubscriptionPaymentSucceededEmail,
+  sendSubscriptionSuspendedEmail
+} from '@/services/email.service';
+import { getGarageById } from '@/services/firebase/garage-service';
+import { getUserDocument } from '@/services/firebase/user-sync-service';
+import { syncUsageCurrentByPlan } from '@/services/firebase/usage-plan-sync-service';
 import type { GarageBillingDocument } from '@/types/firebase-models';
+import type { BillingCycle, PlanCode } from '@/features/billing/types';
 
 const BILLING_DOC_ID = 'current';
 const MAX_RECENT_WEBHOOK_IDS = 50;
@@ -199,7 +215,10 @@ function isTrialingSubscription(subscription: PayPalSubscription): boolean {
 async function resolveBillingRef(
   event: PayPalWebhookEvent,
   subscriptionId: string
-) {
+): Promise<{
+  garageId: string;
+  billingRef: any;
+} | null> {
   let garageId = event.resource?.custom_id?.trim();
   if (!garageId) {
     try {
@@ -212,11 +231,12 @@ async function resolveBillingRef(
 
   if (garageId) {
     // `custom_id` is written at checkout creation and binds event -> garage scope.
-    return firebaseAdmin.db
+    const billingRef = firebaseAdmin.db
       .collection('garages')
       .doc(garageId)
       .collection('billing')
       .doc(BILLING_DOC_ID);
+    return { garageId, billingRef };
   }
 
   return null;
@@ -276,6 +296,75 @@ function eventStatus(eventType: string): BillingStatus | null {
   }
 
   return null;
+}
+
+function resolvePlan(planId: string | null): {
+  planCode: PlanCode;
+  billingCycle: BillingCycle;
+} | null {
+  if (!planId) return null;
+
+  const planMap = getPayPalPlanMap();
+  const entries: Array<{
+    planCode: PlanCode;
+    billingCycle: BillingCycle;
+    id: string;
+  }> = [
+    {
+      planCode: 'starter',
+      billingCycle: 'monthly',
+      id: planMap.starter.monthly
+    },
+    { planCode: 'starter', billingCycle: 'annual', id: planMap.starter.annual },
+    { planCode: 'growth', billingCycle: 'monthly', id: planMap.growth.monthly },
+    { planCode: 'growth', billingCycle: 'annual', id: planMap.growth.annual }
+  ];
+
+  const matched = entries.find((item) => item.id === planId);
+  if (!matched) return null;
+
+  return {
+    planCode: matched.planCode,
+    billingCycle: matched.billingCycle
+  };
+}
+
+function shouldSyncUsageForEvent(eventType: string): boolean {
+  return (
+    eventType === 'BILLING.SUBSCRIPTION.ACTIVATED' ||
+    eventType === 'BILLING.SUBSCRIPTION.RE-ACTIVATED' ||
+    eventType === 'BILLING.SUBSCRIPTION.CANCELLED' ||
+    eventType === 'BILLING.SUBSCRIPTION.SUSPENDED'
+  );
+}
+
+function shouldSendActivatedEmail(eventType: string): boolean {
+  return (
+    eventType === 'BILLING.SUBSCRIPTION.ACTIVATED' ||
+    eventType === 'BILLING.SUBSCRIPTION.RE-ACTIVATED'
+  );
+}
+
+function shouldSendPaymentFailedEmail(eventType: string): boolean {
+  return eventType === 'BILLING.SUBSCRIPTION.PAYMENT.FAILED';
+}
+
+function shouldSendPaymentSucceededEmail(eventType: string): boolean {
+  return eventType === 'PAYMENT.SALE.COMPLETED';
+}
+
+function shouldSendCancelledEmail(eventType: string): boolean {
+  return eventType === 'BILLING.SUBSCRIPTION.CANCELLED';
+}
+
+function shouldSendSuspendedEmail(eventType: string): boolean {
+  return eventType === 'BILLING.SUBSCRIPTION.SUSPENDED';
+}
+
+function toFirstName(fullName?: string): string | undefined {
+  if (!fullName) return undefined;
+  const first = fullName.trim().split(/\s+/)[0];
+  return first || undefined;
 }
 
 function hasLocalTrialSignal(billing: GarageBillingDocument): boolean {
@@ -401,8 +490,8 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ success: true });
   }
 
-  const billingRef = await resolveBillingRef(event, subscriptionId);
-  if (!billingRef) {
+  const billingScope = await resolveBillingRef(event, subscriptionId);
+  if (!billingScope) {
     console.warn('[billing][webhook] billing document not resolved', {
       eventId,
       eventType,
@@ -411,11 +500,17 @@ export async function POST(request: Request): Promise<NextResponse> {
     });
     return NextResponse.json({ success: true });
   }
+  const { garageId, billingRef } = billingScope;
+
+  let syncedPlanCode: PlanCode | null = null;
+  let previousBillingStatus: BillingStatus | null = null;
+  let skipPostProcessing = false;
 
   await firebaseAdmin.db.runTransaction(async (transaction: any) => {
     const snap = await transaction.get(billingRef);
     if (!snap.exists) {
-      return NextResponse.json({ success: true });
+      skipPostProcessing = true;
+      return;
     }
 
     const billing = snap.data() as GarageBillingDocument;
@@ -426,8 +521,10 @@ export async function POST(request: Request): Promise<NextResponse> {
         eventType,
         subscriptionId
       });
-      return NextResponse.json({ success: true });
+      skipPostProcessing = true;
+      return;
     }
+    previousBillingStatus = billing.status;
 
     const subscriptionSnapshot = await fetchSubscriptionSnapshot(
       subscriptionId,
@@ -435,6 +532,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
     const fallbackNow = new Date().toISOString();
     const now = subscriptionSnapshot?.updatedAt ?? fallbackNow;
+    const resolvedPlan = resolvePlan(subscriptionSnapshot?.planId ?? null);
     const shouldKeepTrialing =
       status === 'active' &&
       (subscriptionSnapshot?.isTrialing === true ||
@@ -447,6 +545,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       paypalSubscriptionId: subscriptionId,
       paypalPlanId:
         subscriptionSnapshot?.planId ?? billing.paypalPlanId ?? null,
+      planCode: resolvedPlan?.planCode ?? billing.planCode,
+      billingCycle: resolvedPlan?.billingCycle ?? billing.billingCycle,
       payerId: subscriptionSnapshot?.payerId ?? billing.payerId ?? null,
       paypalCustomerId:
         subscriptionSnapshot?.paypalCustomerId ??
@@ -504,7 +604,295 @@ export async function POST(request: Request): Promise<NextResponse> {
         lastPaidAt: updates.lastPaidAt ?? null
       });
     }
+
+    syncedPlanCode = updates.planCode ?? billing.planCode;
   });
+
+  if (skipPostProcessing) {
+    return NextResponse.json({ success: true });
+  }
+
+  // Keep usage feature gates and limits aligned with the current effective plan
+  // for key subscription lifecycle transitions.
+  if (shouldSyncUsageForEvent(eventType) && syncedPlanCode) {
+    await syncUsageCurrentByPlan(garageId, syncedPlanCode);
+  }
+
+  if (shouldSendActivatedEmail(eventType)) {
+    try {
+      const [garage, billingSnap] = await Promise.all([
+        getGarageById(garageId),
+        billingRef.get()
+      ]);
+
+      const billing = billingSnap.exists
+        ? (billingSnap.data() as GarageBillingDocument)
+        : null;
+
+      if (garage?.ownerUserId && billing) {
+        const owner = await getUserDocument(garage.ownerUserId);
+        if (owner?.email) {
+          const plan =
+            subscriptionPlanConfig.find(
+              (item) => item.id === billing.planCode
+            ) ?? null;
+          const dashboardUrl = new URL(
+            '/dashboard',
+            env.NEXTAUTH_URL
+          ).toString();
+          const websiteUrl = new URL('/', env.NEXTAUTH_URL).toString();
+          const nextBillingDate = billing.currentPeriodEnd
+            ? new Date(billing.currentPeriodEnd)
+            : new Date();
+
+          await sendSubscriptionActivatedEmail({
+            recipientEmail: owner.email,
+            firstName: toFirstName(owner.name),
+            planName: plan?.name ?? billing.planCode,
+            billingCycle: billing.billingCycle,
+            price: plan ? getPriceByCycle(plan, billing.billingCycle) : 0,
+            nextBillingDate: Number.isNaN(nextBillingDate.getTime())
+              ? new Date()
+              : nextBillingDate,
+            dashboardLink: dashboardUrl,
+            supportEmail:
+              env.NEXT_PUBLIC_APP_SUPPORT_EMAIL ?? 'support@garixo.com',
+            websiteUrl
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[billing][webhook] activation email send failed', {
+        eventId,
+        eventType,
+        subscriptionId,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  if (shouldSendPaymentFailedEmail(eventType)) {
+    try {
+      const [garage, billingSnap] = await Promise.all([
+        getGarageById(garageId),
+        billingRef.get()
+      ]);
+
+      const billing = billingSnap.exists
+        ? (billingSnap.data() as GarageBillingDocument)
+        : null;
+
+      if (garage?.ownerUserId && billing) {
+        const owner = await getUserDocument(garage.ownerUserId);
+        if (owner?.email) {
+          const plan =
+            subscriptionPlanConfig.find(
+              (item) => item.id === billing.planCode
+            ) ?? null;
+          const updateBillingLink = new URL(
+            '/dashboard/settings/subscription',
+            env.NEXTAUTH_URL
+          ).toString();
+          const websiteUrl = new URL('/', env.NEXTAUTH_URL).toString();
+          const billingDate = billing.updatedAt
+            ? new Date(billing.updatedAt)
+            : new Date();
+          const gracePeriodDate = new Date(
+            Date.now() + 7 * 24 * 60 * 60 * 1000
+          );
+
+          await sendSubscriptionPaymentFailedEmail({
+            recipientEmail: owner.email,
+            firstName: toFirstName(owner.name),
+            planName: plan?.name ?? billing.planCode,
+            amount: plan ? getPriceByCycle(plan, billing.billingCycle) : 0,
+            billingDate: Number.isNaN(billingDate.getTime())
+              ? new Date()
+              : billingDate,
+            gracePeriodDate,
+            updateBillingLink,
+            supportEmail:
+              env.NEXT_PUBLIC_APP_SUPPORT_EMAIL ?? 'support@garixo.com',
+            websiteUrl
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[billing][webhook] payment failed email send failed', {
+        eventId,
+        eventType,
+        subscriptionId,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  if (shouldSendPaymentSucceededEmail(eventType)) {
+    try {
+      const [garage, billingSnap] = await Promise.all([
+        getGarageById(garageId),
+        billingRef.get()
+      ]);
+
+      const billing = billingSnap.exists
+        ? (billingSnap.data() as GarageBillingDocument)
+        : null;
+
+      if (garage?.ownerUserId && billing) {
+        const owner = await getUserDocument(garage.ownerUserId);
+        if (owner?.email) {
+          const plan =
+            subscriptionPlanConfig.find(
+              (item) => item.id === billing.planCode
+            ) ?? null;
+          const dashboardUrl = new URL(
+            '/dashboard',
+            env.NEXTAUTH_URL
+          ).toString();
+          const websiteUrl = new URL('/', env.NEXTAUTH_URL).toString();
+          const billedAt = billing.lastPaidAt
+            ? new Date(billing.lastPaidAt)
+            : new Date();
+          const nextBillingDate = billing.currentPeriodEnd
+            ? new Date(billing.currentPeriodEnd)
+            : new Date();
+
+          const emailInput = {
+            recipientEmail: owner.email,
+            firstName: toFirstName(owner.name),
+            planName: plan?.name ?? billing.planCode,
+            billingCycle: billing.billingCycle,
+            amount: plan ? getPriceByCycle(plan, billing.billingCycle) : 0,
+            billedAt: Number.isNaN(billedAt.getTime()) ? new Date() : billedAt,
+            nextBillingDate: Number.isNaN(nextBillingDate.getTime())
+              ? new Date()
+              : nextBillingDate,
+            dashboardLink: dashboardUrl,
+            supportEmail:
+              env.NEXT_PUBLIC_APP_SUPPORT_EMAIL ?? 'support@garixo.com',
+            websiteUrl
+          } as const;
+
+          await sendSubscriptionPaymentSucceededEmail(emailInput);
+        }
+      }
+    } catch (error) {
+      console.error('[billing][webhook] payment succeeded email send failed', {
+        eventId,
+        eventType,
+        subscriptionId,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  if (shouldSendCancelledEmail(eventType)) {
+    try {
+      const [garage, billingSnap] = await Promise.all([
+        getGarageById(garageId),
+        billingRef.get()
+      ]);
+
+      const billing = billingSnap.exists
+        ? (billingSnap.data() as GarageBillingDocument)
+        : null;
+
+      if (garage?.ownerUserId && billing) {
+        const owner = await getUserDocument(garage.ownerUserId);
+        if (owner?.email) {
+          const plan =
+            subscriptionPlanConfig.find(
+              (item) => item.id === billing.planCode
+            ) ?? null;
+          const dashboardUrl = new URL(
+            '/dashboard',
+            env.NEXTAUTH_URL
+          ).toString();
+          const resubscribeLink = new URL(
+            '/dashboard/settings/subscription',
+            env.NEXTAUTH_URL
+          ).toString();
+          const websiteUrl = new URL('/', env.NEXTAUTH_URL).toString();
+          const accessEndsAt = billing.currentPeriodEnd
+            ? new Date(billing.currentPeriodEnd)
+            : new Date();
+
+          await sendSubscriptionCancelledEmail({
+            recipientEmail: owner.email,
+            firstName: toFirstName(owner.name),
+            planName: plan?.name ?? billing.planCode,
+            billingCycle: billing.billingCycle,
+            accessEndsAt: Number.isNaN(accessEndsAt.getTime())
+              ? new Date()
+              : accessEndsAt,
+            dashboardLink: dashboardUrl,
+            resubscribeLink,
+            supportEmail:
+              env.NEXT_PUBLIC_APP_SUPPORT_EMAIL ?? 'support@garixo.com',
+            websiteUrl
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[billing][webhook] cancelled email send failed', {
+        eventId,
+        eventType,
+        subscriptionId,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  if (shouldSendSuspendedEmail(eventType)) {
+    try {
+      const [garage, billingSnap] = await Promise.all([
+        getGarageById(garageId),
+        billingRef.get()
+      ]);
+
+      const billing = billingSnap.exists
+        ? (billingSnap.data() as GarageBillingDocument)
+        : null;
+
+      if (garage?.ownerUserId && billing) {
+        const owner = await getUserDocument(garage.ownerUserId);
+        if (owner?.email) {
+          const plan =
+            subscriptionPlanConfig.find(
+              (item) => item.id === billing.planCode
+            ) ?? null;
+          const dashboardUrl = new URL(
+            '/dashboard',
+            env.NEXTAUTH_URL
+          ).toString();
+          const restoreAccessLink = new URL(
+            '/dashboard/settings/subscription',
+            env.NEXTAUTH_URL
+          ).toString();
+          const websiteUrl = new URL('/', env.NEXTAUTH_URL).toString();
+
+          await sendSubscriptionSuspendedEmail({
+            recipientEmail: owner.email,
+            firstName: toFirstName(owner.name),
+            planName: plan?.name ?? billing.planCode,
+            billingCycle: billing.billingCycle,
+            restoreAccessLink,
+            dashboardLink: dashboardUrl,
+            supportEmail:
+              env.NEXT_PUBLIC_APP_SUPPORT_EMAIL ?? 'support@garixo.com',
+            websiteUrl
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[billing][webhook] suspended email send failed', {
+        eventId,
+        eventType,
+        subscriptionId,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
 
   if (WEBHOOK_DEBUG_ENABLED) {
     console.info('[billing][webhook] processed successfully', {

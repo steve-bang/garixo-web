@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import type { OnboardingState } from '@/features/onboarding/types';
 import { seedGarageDefaults } from '@/services/firebase/garage-defaults-seeder';
+import { ensureGarageBillingAndUsageBootstrap } from '@/services/firebase/garage-billing-usage-bootstrap-service';
+import { ensureGarageInvoiceSettings } from '@/services/firebase/garage-invoice-settings-service';
 import { createGarageForOwner } from '@/services/firebase/garage-service';
 import { garageIndustryTypes } from '@/types/garage';
 import type { ApiResponse } from '@/types/api';
@@ -54,6 +56,8 @@ export async function POST(
     garageId: garage.id,
     industryType: garage.industryType
   });
+  await ensureGarageBillingAndUsageBootstrap(garage.id);
+  await ensureGarageInvoiceSettings(garage.id);
 
   const next: OnboardingState = {
     garageConfigured: true,

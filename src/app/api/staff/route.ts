@@ -6,13 +6,15 @@ import {
   updateStaffSchema
 } from '@/features/staff/schema';
 import type { Staff } from '@/features/staff/types';
+import { auth } from '@/lib/auth';
 import { getRequestGarageId } from '@/lib/auth/garage-context';
 import {
-  createGarageStaff,
+  createGarageStaffWithUsageCheck,
   deleteGarageStaff,
   findGarageStaffById,
   isGarageStaffPhoneExists,
   listGarageStaff,
+  StaffQuotaExceededError,
   updateGarageStaff
 } from '@/services/firebase/staff-service';
 import type { ApiResponse } from '@/types/api';
@@ -37,7 +39,22 @@ export async function GET(): Promise<NextResponse<ApiResponse<Staff[]>>> {
 export async function POST(
   request: Request
 ): Promise<NextResponse<ApiResponse<Staff>>> {
-  const garageId = await getRequestGarageId();
+  const session = await auth();
+  if (!session?.user?.id) {
+    return response({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  if (session.user.role !== 'owner') {
+    return response(
+      {
+        success: false,
+        error: 'Only garage owners can add staff members.'
+      },
+      403
+    );
+  }
+
+  const garageId = await getRequestGarageId(session);
   if (!garageId) {
     return response({ success: false, error: 'Unauthorized' }, 401);
   }
@@ -59,16 +76,36 @@ export async function POST(
     return response({ success: false, error: 'Phone must be unique.' }, 409);
   }
 
-  const created = await createGarageStaff(garageId, {
-    fullName: parsed.data.fullName,
-    phone: parsed.data.phone,
-    email: parsed.data.email,
-    avatar: parsed.data.avatar,
-    role: parsed.data.role,
-    status: parsed.data.status ?? 'ACTIVE',
-    currentJobs: parsed.data.currentJobs ?? 0,
-    branchId: parsed.data.branchId
-  });
+  let created: Staff;
+  try {
+    created = await createGarageStaffWithUsageCheck(
+      garageId,
+      {
+        fullName: parsed.data.fullName,
+        phone: parsed.data.phone,
+        email: parsed.data.email,
+        avatar: parsed.data.avatar,
+        role: parsed.data.role,
+        status: parsed.data.status ?? 'ACTIVE',
+        currentJobs: parsed.data.currentJobs ?? 0,
+        branchId: parsed.data.branchId
+      },
+      1
+    );
+  } catch (error) {
+    if (error instanceof StaffQuotaExceededError) {
+      return response(
+        {
+          success: false,
+          error:
+            'You reached your current user limit. Upgrade your plan to add more staff.'
+        },
+        403
+      );
+    }
+
+    throw error;
+  }
 
   return response({ success: true, data: created }, 201);
 }

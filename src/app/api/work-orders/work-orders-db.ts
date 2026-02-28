@@ -1,16 +1,143 @@
 import type { WorkOrder, Worker } from '@/features/work-orders/types';
+import type { PlanCode } from '@/features/billing/types';
 import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import { normalizePlate } from '@/features/work-orders/utils';
 import { firebaseAdmin } from '@/lib/firebase-admin';
+import type {
+  GarageBillingDocument,
+  GarageUsageCurrentDocument
+} from '@/types/firebase-models';
 import { listGarageStaff } from '@/services/firebase/staff-service';
+import {
+  deleteVehicleWorkOrderHistory,
+  toVehicleWorkOrderHistoryPayload,
+  vehicleWorkOrderHistoryRef,
+  upsertVehicleWorkOrderHistory
+} from '@/services/firebase/vehicle-work-order-history-service';
 
 type WorkOrderFirestoreDoc = Partial<Omit<WorkOrder, 'id'>>;
+type WorkOrderUsageState = {
+  counters: NonNullable<GarageUsageCurrentDocument['counters']>;
+  workOrdersIndex: number;
+  currentCount: number;
+  limit: number;
+  enabled: boolean;
+};
+
+const BILLING_DOC_ID = 'current';
+const USAGE_DOC_ID = 'current';
+const WORK_ORDERS_COUNTER_KEY = 'workOrders';
+
+const PLAN_WORK_ORDER_LIMITS: Record<PlanCode, number> = {
+  free: 25,
+  starter: -1,
+  growth: -1
+};
+
+export class WorkOrderUsageLimitExceededError extends Error {
+  constructor(message = 'Work order limit reached for current plan.') {
+    super(message);
+    this.name = 'WorkOrderUsageLimitExceededError';
+  }
+}
+
+export class WorkOrderFeatureDisabledError extends Error {
+  constructor(message = 'Work order creation is not enabled for this plan.') {
+    super(message);
+    this.name = 'WorkOrderFeatureDisabledError';
+  }
+}
 
 function workOrdersCollection(garageId: string) {
   return firebaseAdmin.db
     .collection('garages')
     .doc(garageId)
     .collection('workOrders');
+}
+
+function billingDocRef(garageId: string) {
+  return firebaseAdmin.db
+    .collection('garages')
+    .doc(garageId)
+    .collection('billing')
+    .doc(BILLING_DOC_ID);
+}
+
+function usageDocRef(garageId: string) {
+  return firebaseAdmin.db
+    .collection('garages')
+    .doc(garageId)
+    .collection('usage')
+    .doc(USAGE_DOC_ID);
+}
+
+function sanitizeQuantity(quantity: number): number {
+  if (!Number.isFinite(quantity)) {
+    return 1;
+  }
+
+  return Math.max(1, Math.floor(quantity));
+}
+
+function resolvePlanWorkOrderLimit(
+  planCode: PlanCode | null | undefined
+): number {
+  if (!planCode) {
+    return PLAN_WORK_ORDER_LIMITS.free;
+  }
+
+  return PLAN_WORK_ORDER_LIMITS[planCode] ?? PLAN_WORK_ORDER_LIMITS.free;
+}
+
+function resolveWorkOrderUsageState(
+  usage: Partial<GarageUsageCurrentDocument> | null,
+  billing: Partial<GarageBillingDocument> | null
+): WorkOrderUsageState {
+  const counters = usage?.counters ?? [];
+  const workOrdersIndex = counters.findIndex(
+    (counter) => counter.key === WORK_ORDERS_COUNTER_KEY
+  );
+  const workOrdersCounter =
+    workOrdersIndex >= 0 ? counters[workOrdersIndex] : undefined;
+
+  return {
+    counters,
+    workOrdersIndex,
+    currentCount: Math.max(0, workOrdersCounter?.value ?? 0),
+    limit: Math.max(
+      -1,
+      workOrdersCounter?.limit ?? resolvePlanWorkOrderLimit(billing?.planCode)
+    ),
+    enabled: workOrdersCounter?.enabled ?? true
+  };
+}
+
+function withWorkOrdersCounterUpdated(
+  state: WorkOrderUsageState,
+  nextCount: number,
+  now: string
+): NonNullable<GarageUsageCurrentDocument['counters']> {
+  const nextCounters = [...state.counters];
+
+  if (state.workOrdersIndex >= 0) {
+    nextCounters[state.workOrdersIndex] = {
+      ...nextCounters[state.workOrdersIndex],
+      value: nextCount,
+      updatedAt: now
+    };
+    return nextCounters;
+  }
+
+  nextCounters.push({
+    key: WORK_ORDERS_COUNTER_KEY,
+    value: nextCount,
+    limit: state.limit,
+    resetPolicy: 'monthly',
+    enabled: true,
+    updatedAt: now
+  });
+
+  return nextCounters;
 }
 
 function withoutUndefined<T extends Record<string, unknown>>(value: T): T {
@@ -84,6 +211,69 @@ export async function createGarageWorkOrder(
   return mapDoc(ref.id, safePayload);
 }
 
+/**
+ * Creates a work order and consumes usage in one transaction.
+ * This guarantees we never create an order without incrementing usage (or vice versa).
+ */
+export async function createGarageWorkOrderWithUsageConsume(
+  garageId: string,
+  payload: Omit<WorkOrder, 'id'>,
+  quantity = 1
+): Promise<WorkOrder> {
+  const ref = workOrdersCollection(garageId).doc();
+  const usageRef = usageDocRef(garageId);
+  const billingRef = billingDocRef(garageId);
+  const safePayload = withoutUndefined(payload);
+  const safeQuantity = sanitizeQuantity(quantity);
+  const now = new Date().toISOString();
+
+  await firebaseAdmin.db.runTransaction(async (transaction: any) => {
+    const [usageSnap, billingSnap] = await Promise.all([
+      transaction.get(usageRef),
+      transaction.get(billingRef)
+    ]);
+
+    const usage = usageSnap.exists
+      ? (usageSnap.data() as Partial<GarageUsageCurrentDocument>)
+      : null;
+    const billing = billingSnap.exists
+      ? (billingSnap.data() as Partial<GarageBillingDocument>)
+      : null;
+    const state = resolveWorkOrderUsageState(usage, billing);
+
+    if (!state.enabled) {
+      throw new WorkOrderFeatureDisabledError();
+    }
+
+    const nextCount = state.currentCount + safeQuantity;
+    if (state.limit >= 0 && nextCount > state.limit) {
+      throw new WorkOrderUsageLimitExceededError();
+    }
+
+    const nextCounters = withWorkOrdersCounterUpdated(state, nextCount, now);
+
+    transaction.set(ref, safePayload);
+    if (payload.vehicleId) {
+      const orderForHistory = mapDoc(ref.id, safePayload);
+      transaction.set(
+        vehicleWorkOrderHistoryRef(garageId, payload.vehicleId, ref.id),
+        toVehicleWorkOrderHistoryPayload(orderForHistory),
+        { merge: true }
+      );
+    }
+    transaction.set(
+      usageRef,
+      {
+        counters: nextCounters,
+        updatedAt: now
+      },
+      { merge: true }
+    );
+  });
+
+  return mapDoc(ref.id, safePayload);
+}
+
 export async function updateGarageWorkOrder(
   garageId: string,
   id: string,
@@ -95,6 +285,7 @@ export async function updateGarageWorkOrder(
     return null;
   }
 
+  const currentOrder = mapDoc(id, current.data() as WorkOrderFirestoreDoc);
   const next = {
     ...(current.data() as WorkOrderFirestoreDoc),
     ...patch,
@@ -103,6 +294,14 @@ export async function updateGarageWorkOrder(
 
   const safeNext = withoutUndefined(next);
   await ref.set(safeNext, { merge: true });
+  const nextOrder = mapDoc(id, safeNext);
+  if (
+    currentOrder.vehicleId &&
+    currentOrder.vehicleId !== nextOrder.vehicleId
+  ) {
+    await deleteVehicleWorkOrderHistory(garageId, currentOrder.vehicleId, id);
+  }
+  await upsertVehicleWorkOrderHistory(garageId, nextOrder);
   return mapDoc(id, safeNext);
 }
 

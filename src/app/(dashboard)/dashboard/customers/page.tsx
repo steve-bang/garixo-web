@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { JSX } from 'react';
+import { JSX, Suspense } from 'react';
 
 import { CustomersManagementPage } from '@/features/customers/components/customers-management-page';
 
@@ -9,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function CustomersPage(): JSX.Element {
-  return <CustomersManagementPage />;
+  return (
+    <Suspense fallback={<div className="h-32 w-full" />}>
+      <CustomersManagementPage />
+    </Suspense>
+  );
 }

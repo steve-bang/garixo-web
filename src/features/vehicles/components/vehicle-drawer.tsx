@@ -14,13 +14,14 @@ import {
   type CreateVehicleInput
 } from '@/features/vehicles/schema';
 import type {
-  VehicleServiceRecord,
+  VehicleWorkOrderHistoryRecord,
   Vehicle,
   VehicleStatus
 } from '@/features/vehicles/types';
 import { averageTicket, toPlateDisplay } from '@/features/vehicles/utils';
 import type { Customer } from '@/features/customers/types';
 import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
+import Link from 'next/link';
 
 type DrawerMode = 'view' | 'create' | 'edit';
 
@@ -29,7 +30,7 @@ type VehicleDrawerProps = {
   mode: DrawerMode;
   vehicle?: Vehicle | null;
   detail?: Vehicle;
-  services?: VehicleServiceRecord[];
+  history?: VehicleWorkOrderHistoryRecord[];
   loadingDetail?: boolean;
   customers?: Customer[];
   onClose: () => void;
@@ -101,7 +102,7 @@ export function VehicleDrawer({
   mode,
   vehicle,
   detail,
-  services,
+  history,
   loadingDetail,
   customers = [],
   onClose,
@@ -239,12 +240,19 @@ export function VehicleDrawer({
                       {detailVehicle.customerName}
                     </p>
                   </div>
-                  <Badge
-                    variant="default"
-                    className={statusStyle(detailVehicle.status).className}
-                  >
-                    {statusStyle(detailVehicle.status).text}
-                  </Badge>
+                  <div className="flex items-center gap-s2">
+                    <Button asChild size="sm" variant="secondary">
+                      <Link href={`/dashboard/vehicles/${detailVehicle.id}`}>
+                        Open Full Details
+                      </Link>
+                    </Button>
+                    <Badge
+                      variant="default"
+                      className={statusStyle(detailVehicle.status).className}
+                    >
+                      {statusStyle(detailVehicle.status).text}
+                    </Badge>
+                  </div>
                 </div>
               </Card>
 
@@ -293,33 +301,52 @@ export function VehicleDrawer({
                 <h4 className="text-small font-semibold text-text-primary">
                   Service History
                 </h4>
-                {services?.length ? (
+                {history?.length ? (
                   <div className="mt-s3 max-h-[240px] overflow-y-auto">
-                    <table className="w-full min-w-[620px] text-left text-small">
+                    <table className="w-full min-w-[760px] text-left text-small">
                       <thead className="border-b border-border text-text-secondary">
                         <tr>
+                          <th className="pb-s2 font-medium">Order</th>
                           <th className="pb-s2 font-medium">Date</th>
                           <th className="pb-s2 font-medium">Service</th>
+                          <th className="pb-s2 font-medium">Status</th>
                           <th className="pb-s2 text-right font-medium">
                             Amount
                           </th>
-                          <th className="pb-s2 font-medium">Status</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {services.map((record) => (
+                        {history.map((record) => (
                           <tr
                             key={record.id}
                             className="border-t border-border"
                           >
-                            <td className="py-s2 text-text-secondary">
-                              {formatVehicleDate(record.date)}
+                            <td className="py-s2">
+                              <Link
+                                href={`/dashboard/work-orders/${record.workOrderId}`}
+                                className="text-primary-700 hover:underline"
+                              >
+                                {record.orderCode}
+                              </Link>
                             </td>
-                            <td className="py-s2">{record.serviceName}</td>
-                            <td className="py-s2 text-right font-medium tabular-nums">
-                              {formatCurrencyUsd(record.amount)}
+                            <td className="py-s2 text-text-secondary">
+                              {formatVehicleDate(
+                                record.completedAt ??
+                                  record.paidAt ??
+                                  record.updatedAt
+                              )}
+                            </td>
+                            <td className="py-s2">
+                              {record.services.length > 0
+                                ? record.services
+                                    .map((service) => service.name)
+                                    .join(', ')
+                                : 'General service'}
                             </td>
                             <td className="py-s2">{record.status}</td>
+                            <td className="py-s2 text-right font-medium tabular-nums">
+                              {formatCurrencyUsd(record.totalAmount)}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -327,7 +354,7 @@ export function VehicleDrawer({
                   </div>
                 ) : (
                   <p className="mt-s3 text-small text-text-muted">
-                    No service history.
+                    No work order history.
                   </p>
                 )}
               </Card>

@@ -89,6 +89,7 @@ Common optional integrations:
 - Firebase Admin: `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `FIREBASE_STORAGE_BUCKET`
 - Firebase Client: `NEXT_PUBLIC_FIREBASE_*`
 - SMTP: `NEXT_PUBLIC_SMTP_*`
+- Google Analytics (GA4): `NEXT_PUBLIC_GA_MEASUREMENT_ID` (production only)
 
 ### 3) Run
 

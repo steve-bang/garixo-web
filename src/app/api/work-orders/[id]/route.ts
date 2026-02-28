@@ -12,6 +12,7 @@ import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import type { WorkOrder } from '@/features/work-orders/types';
 import {
   computeTotalAmount,
+  canTransitionTo,
   toPlateDisplay
 } from '@/features/work-orders/utils';
 import { auth } from '@/lib/auth';
@@ -157,6 +158,17 @@ export async function PATCH(
       {
         success: false,
         error: parsed.error.issues[0]?.message ?? 'Invalid payload.'
+      },
+      400
+    );
+  }
+
+  const transition = canTransitionTo(current.status, parsed.data.status);
+  if (!transition.ok) {
+    return response(
+      {
+        success: false,
+        error: transition.error ?? 'Invalid status transition.'
       },
       400
     );

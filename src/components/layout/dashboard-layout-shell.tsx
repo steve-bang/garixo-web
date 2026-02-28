@@ -3,6 +3,7 @@
 import {
   Car,
   ClipboardList,
+  FileText,
   HelpCircle,
   Home,
   LayoutDashboard,
@@ -30,6 +31,7 @@ import {
   useCreateWorkOrder,
   useWorkOrders
 } from '@/features/work-orders/hooks';
+import type { BillingStatus, PlanCode } from '@/features/billing/types';
 import type { CreateWorkOrderInput } from '@/features/work-orders/schema';
 import type { OrderService } from '@/features/work-orders/types';
 import { cn } from '@/lib/utils/cn';
@@ -49,6 +51,7 @@ type SidebarItem = {
 const menuItems: SidebarItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/work-orders', label: 'Work Orders', icon: ClipboardList },
+  { href: '/dashboard/invoices', label: 'Invoices', icon: FileText },
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/vehicles', label: 'Vehicles', icon: Car },
   { href: '/dashboard/services', label: 'Services', icon: Wrench },
@@ -66,6 +69,10 @@ const menuItems: SidebarItem[] = [
       {
         href: '/dashboard/settings/subscription',
         label: 'Subscription'
+      },
+      {
+        href: '/dashboard/settings/invoice-settings',
+        label: 'Invoice'
       }
     ]
   }
@@ -108,9 +115,13 @@ export function buildBreadcrumb(pathname: string): BreadcrumbItem[] {
 }
 
 export function DashboardLayoutShell({
-  children
+  children,
+  currentPlan,
+  billingStatus
 }: {
   children: ReactNode;
+  currentPlan: PlanCode;
+  billingStatus: BillingStatus;
 }): JSX.Element {
   const pathname = usePathname();
   const router = useRouter();
@@ -242,7 +253,10 @@ export function DashboardLayoutShell({
         })}
       </nav>
 
-      <SidebarUserSection />
+      <SidebarUserSection
+        currentPlan={currentPlan}
+        billingStatus={billingStatus}
+      />
     </div>
   );
 

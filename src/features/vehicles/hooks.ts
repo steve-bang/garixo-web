@@ -9,10 +9,14 @@ import {
   getVehicleById,
   getVehicles,
   getVehicleServices,
+  getVehicleWorkOrderHistory,
   updateVehicle,
   type GetVehiclesParams
 } from '@/features/vehicles/service';
-import type { CreateVehicleInput, UpdateVehicleInput } from '@/features/vehicles/schema';
+import type {
+  CreateVehicleInput,
+  UpdateVehicleInput
+} from '@/features/vehicles/schema';
 import type { Vehicle } from '@/features/vehicles/types';
 import { toVehicleKpis } from '@/features/vehicles/utils';
 
@@ -39,6 +43,14 @@ export function useVehicleServices(id?: string) {
   });
 }
 
+export function useVehicleWorkOrderHistory(id?: string) {
+  return useQuery({
+    queryKey: [...vehiclesQueryKey, 'work-order-history', id],
+    queryFn: () => getVehicleWorkOrderHistory(id as string),
+    enabled: Boolean(id)
+  });
+}
+
 export function useVehicleKpis(items: Vehicle[]) {
   return toVehicleKpis(items);
 }
@@ -58,7 +70,13 @@ export function useUpdateVehicle() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Omit<UpdateVehicleInput, 'id'> }) => updateVehicle(id, payload),
+    mutationFn: ({
+      id,
+      payload
+    }: {
+      id: string;
+      payload: Omit<UpdateVehicleInput, 'id'>;
+    }) => updateVehicle(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: vehiclesQueryKey });
     }

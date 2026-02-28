@@ -7,7 +7,11 @@ import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import type { PlanCode } from '@/features/billing/types';
+import {
+  getPriceByCycle,
+  subscriptionPlanConfig
+} from '@/features/billing/plan-feature-config';
+import type { BillingCycle, PlanCode } from '@/features/billing/types';
 import {
   captureSubscriptionApproval,
   createSubscription,
@@ -15,76 +19,27 @@ import {
   type BillingSnapshotResult
 } from '@/features/settings/subscription.service';
 import { useToast } from '@/hooks/use-toast';
+import { trackEvent } from '@/lib/analytics/ga';
 import { cn } from '@/lib/utils/cn';
 import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
-
-type Plan = {
-  id: 'starter' | 'growth';
-  name: string;
-  priceMonthly: number;
-  priceAnnual: number;
-  annualDiscountPercent: number;
-  trialDays: number;
-  subtitle: string;
-  ctaLabel: string;
-  isRecommended?: boolean;
-  features: string[];
-};
-type BillingCycle = 'monthly' | 'annual';
-
-const plans: Plan[] = [
-  {
-    id: 'starter',
-    name: 'Starter',
-    priceMonthly: 79,
-    priceAnnual: 790,
-    annualDiscountPercent: 17,
-    trialDays: 14,
-    subtitle: 'For shop owners who want better control and fewer mistakes.',
-    ctaLabel: 'Start Free for 14 Days',
-    isRecommended: true,
-    features: [
-      'Up to 5 users',
-      '1 location',
-      'Work order management and status tracking',
-      'Customer and vehicle history',
-      'Services and parts listing',
-      'Basic invoice generation',
-      'Email support'
-    ]
-  },
-  {
-    id: 'growth',
-    name: 'Growth',
-    priceMonthly: 129,
-    priceAnnual: 1290,
-    annualDiscountPercent: 17,
-    trialDays: 14,
-    subtitle: 'For busy garages that need structure and team accountability.',
-    ctaLabel: 'Scale My Shop',
-    features: [
-      'Up to 12 users',
-      '1 location',
-      'Everything in Starter',
-      'Staff workflow management',
-      'Deeper reports',
-      'Priority email support'
-    ]
-  }
-];
 
 function isNoSubscriptionYet(snapshot: BillingSnapshotResult): boolean {
   return (
     snapshot.paypalSubscriptionId == null &&
     snapshot.trialEndsAt == null &&
     snapshot.currentPeriodEnd == null &&
-    snapshot.lastPaidAt == null
+    snapshot.lastPaidAt == null &&
+    snapshot.planCode == null
   );
 }
 
 function getStatusMessage(snapshot: BillingSnapshotResult): string {
   if (isNoSubscriptionYet(snapshot)) {
     return 'You are almost ready. Pick a plan to start running your shop with Garixo.';
+  }
+
+  if (snapshot.planCode === 'free') {
+    return 'You are on the Free plan. Upgrade anytime when your shop is ready for more users and advanced workflows.';
   }
 
   if (snapshot.status === 'trialing') {
@@ -229,6 +184,10 @@ export function SubscriptionSettings(): JSX.Element {
     setPendingPlan(pendingKey);
 
     try {
+      trackEvent('begin_checkout', {
+        plan_code: planCode,
+        billing_cycle: billingCycle
+      });
       const result = await createSubscription({
         planCode,
         billingCycle
@@ -243,8 +202,6 @@ export function SubscriptionSettings(): JSX.Element {
       setPendingPlan(null);
     }
   };
-
-  const maxTrialDays = Math.max(...plans.map((plan) => plan.trialDays));
 
   return (
     <div className="mx-auto max-w-[920px] space-y-s4">
@@ -310,77 +267,78 @@ export function SubscriptionSettings(): JSX.Element {
       </div>
 
       <div className="grid gap-s3 md:grid-cols-2">
-        {plans.map((plan) => {
-          const currentPrice =
-            billingCycle === 'monthly' ? plan.priceMonthly : plan.priceAnnual;
-          const pendingKey = `${plan.id}-${billingCycle}`;
-          const isPending = pendingPlan === pendingKey;
+        {subscriptionPlanConfig
+          .filter((plan) => plan.id !== 'free')
+          .map((plan) => {
+            const currentPrice = getPriceByCycle(plan, billingCycle);
+            const pendingKey = `${plan.id}-${billingCycle}`;
+            const isPending = pendingPlan === pendingKey;
 
-          return (
-            <Card
-              key={plan.id}
-              className={cn(
-                'relative flex h-full flex-col p-s4',
-                plan.isRecommended ? 'border-primary-300 shadow-sm' : ''
-              )}
-            >
-              {plan.isRecommended ? (
-                <Badge
-                  variant="success"
-                  className="absolute right-s3 top-s3 px-s2 py-1"
-                >
-                  Most popular
-                </Badge>
-              ) : null}
-
-              <div className="space-y-s1">
-                <h3 className="text-h3">{plan.name}</h3>
-                <p className="text-small text-text-muted">{plan.subtitle}</p>
-              </div>
-
-              <div className="mt-s3 rounded-md border border-border bg-surface-default p-s3">
-                <p className="text-h2 font-bold text-text-primary">
-                  {formatCurrencyUsd(currentPrice)}
-                  <span className="ml-1 text-small font-medium text-text-muted">
-                    /{billingCycle === 'monthly' ? 'month' : 'year'}
-                  </span>
-                </p>
-                <p className="text-caption text-text-muted">
-                  {billingCycle === 'monthly'
-                    ? `${formatCurrencyUsd(plan.priceAnnual)}/year • save ${plan.annualDiscountPercent}%`
-                    : `${formatCurrencyUsd(plan.priceMonthly)}/month equivalent`}
-                </p>
-              </div>
-
-              <ul className="mt-s4 space-y-s2">
-                {plan.features.map((feature) => (
-                  <li
-                    key={`${plan.id}-${feature}`}
-                    className="flex items-start gap-s2 text-small text-text-secondary"
+            return (
+              <Card
+                key={plan.id}
+                className={cn(
+                  'relative flex h-full flex-col p-s4',
+                  plan.isRecommended ? 'border-primary-300 shadow-sm' : ''
+                )}
+              >
+                {plan.isRecommended ? (
+                  <Badge
+                    variant="success"
+                    className="absolute right-s3 top-s3 px-s2 py-1"
                   >
-                    <Check className="mt-[2px] size-4 text-success-700" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+                    Most popular
+                  </Badge>
+                ) : null}
 
-              <div className="mt-auto space-y-s2 pt-s4">
-                <p className="text-caption text-text-muted">
-                  {plan.trialDays}-day free trial included
-                </p>
-                <Button
-                  type="button"
-                  className="w-full"
-                  variant={plan.isRecommended ? 'default' : 'secondary'}
-                  disabled={pendingPlan !== null || isHandlingCallback}
-                  onClick={() => void onUpgrade(plan.id)}
-                >
-                  {isPending ? 'Opening secure checkout...' : plan.ctaLabel}
-                </Button>
-              </div>
-            </Card>
-          );
-        })}
+                <div className="space-y-s1">
+                  <h3 className="text-h3">{plan.name}</h3>
+                  <p className="text-small text-text-muted">{plan.subtitle}</p>
+                </div>
+
+                <div className="mt-s3 rounded-md border border-border bg-surface-default p-s3">
+                  <p className="text-h2 font-bold text-text-primary">
+                    {formatCurrencyUsd(currentPrice)}
+                    <span className="ml-1 text-small font-medium text-text-muted">
+                      /{billingCycle === 'monthly' ? 'month' : 'year'}
+                    </span>
+                  </p>
+                  <p className="text-caption text-text-muted">
+                    {billingCycle === 'monthly'
+                      ? `${formatCurrencyUsd(plan.priceAnnual)}/year • save ${plan.annualDiscountPercent}%`
+                      : `${formatCurrencyUsd(plan.priceMonthly)}/month equivalent`}
+                  </p>
+                </div>
+
+                <ul className="mt-s4 space-y-s2">
+                  {plan.features.map((feature) => (
+                    <li
+                      key={`${plan.id}-${feature}`}
+                      className="flex items-start gap-s2 text-small text-text-secondary"
+                    >
+                      <Check className="mt-[2px] size-4 text-success-700" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-auto space-y-s2 pt-s4">
+                  <p className="text-caption text-text-muted">
+                    {plan.trialDays}-day free trial included
+                  </p>
+                  <Button
+                    type="button"
+                    className="w-full"
+                    variant={plan.isRecommended ? 'default' : 'secondary'}
+                    disabled={pendingPlan !== null || isHandlingCallback}
+                    onClick={() => void onUpgrade(plan.id)}
+                  >
+                    {isPending ? 'Opening secure checkout...' : plan.ctaLabel}
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
       </div>
     </div>
   );

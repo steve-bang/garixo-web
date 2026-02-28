@@ -1,6 +1,6 @@
 export type BillingProvider = 'paypal';
 
-export type PlanCode = 'starter' | 'growth';
+export type PlanCode = 'free' | 'starter' | 'growth';
 
 export type BillingCycle = 'monthly' | 'annual';
 

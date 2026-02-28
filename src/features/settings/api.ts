@@ -36,6 +36,12 @@ const settingsSections: Record<SettingsSectionKey, SettingsSection> = {
     title: 'Subscription',
     description: 'Plans and billing options for your garage.',
     cards: []
+  },
+  'invoice-settings': {
+    key: 'invoice-settings',
+    title: 'Invoice Settings',
+    description: 'Set your default tax and payment terms for invoices.',
+    cards: []
   }
 };
 

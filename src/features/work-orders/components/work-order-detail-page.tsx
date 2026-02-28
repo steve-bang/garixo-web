@@ -31,6 +31,7 @@ import {
 } from '@/features/work-orders/utils';
 import type { InventoryItem } from '@/features/inventory/types';
 import { WorkOrderActionPanel } from '@/features/work-orders/components/work-order-action-panel';
+import { InvoiceSummaryCard } from '@/features/invoices/components/invoice-summary-card';
 import { WorkOrderPartsList } from '@/features/work-orders/components/work-order-parts-list';
 import { WorkOrderServicesList } from '@/features/work-orders/components/work-order-services-list';
 import { WorkOrderStatusBadge } from '@/features/work-orders/components/work-order-status-badge';
@@ -750,6 +751,7 @@ export function WorkOrderDetailPage({ orderId }: Props): JSX.Element {
           nextStatuses={nextStatuses}
           onRequestStatusChange={setPendingStatus}
         />
+        <InvoiceSummaryCard workOrderId={order.id} orderStatus={order.status} />
         {isSavingStatus ? (
           <p className="text-caption text-text-muted">Updating status...</p>
         ) : null}
