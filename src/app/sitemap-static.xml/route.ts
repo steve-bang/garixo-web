@@ -31,37 +31,74 @@ function buildXmlUrlset(
 }
 
 export async function GET(): Promise<Response> {
-  const nowIso = new Date().toISOString();
-
-  const staticPaths = [
-    '/',
-    '/features',
-    '/features/customers-management',
-    '/features/staff-management',
-    '/features/inventory-management',
-    '/features/work-orders-management',
-    '/pricing',
-    '/book-demo',
-    '/case-studies',
-    '/blog'
+  const staticPath = [
+    {
+      path: '/',
+      lastmod: '2026-01-01T00:00:00Z',
+      changefreq: 'monthly',
+      priority: '1.0'
+    },
+    {
+      path: '/features',
+      lastmod: '2026-01-10T00:00:00Z',
+      changefreq: 'monthly',
+      priority: '0.9'
+    },
+    {
+      path: '/features/customers-management',
+      lastmod: '2026-01-10T00:00:00Z',
+      changefreq: 'monthly',
+      priority: '0.9'
+    },
+    {
+      path: '/features/staff-management',
+      lastmod: '2026-01-11T00:00:00Z',
+      changefreq: 'monthly',
+      priority: '0.9'
+    },
+    {
+      path: '/features/inventory-management',
+      lastmod: '2026-01-12T00:00:00Z',
+      changefreq: 'monthly',
+      priority: '0.9'
+    },
+    {
+      path: '/features/work-orders-management',
+      lastmod: '2026-01-13T00:00:00Z',
+      changefreq: 'monthly',
+      priority: '0.9'
+    },
+    {
+      path: '/pricing',
+      lastmod: '2026-01-20T00:00:00Z',
+      changefreq: 'monthly',
+      priority: '0.9'
+    },
+    {
+      path: '/case-studies',
+      lastmod: '2026-01-25T00:00:00Z',
+      changefreq: 'monthly',
+      priority: '0.8'
+    },
+    {
+      path: '/blog',
+      lastmod: '2026-03-01T00:00:00Z',
+      changefreq: 'weekly',
+      priority: '0.8'
+    }
   ];
 
-  const staticUrls = staticPaths.map((path) => ({
-    loc: toAbsoluteUrl(path),
-    lastmod: nowIso,
-    changefreq: 'weekly',
-    priority:
-      path === '/'
-        ? '1.0'
-        : path === '/pricing' || path === '/features'
-          ? '0.9'
-          : '0.8'
+  const staticUrls = staticPath.map((path) => ({
+    loc: toAbsoluteUrl(path.path),
+    lastmod: path.lastmod,
+    changefreq: path.changefreq,
+    priority: path.priority
   }));
 
   const caseStudyUrls = caseStudies.map((study) => ({
     loc: toAbsoluteUrl(`/case-studies/${study.slug}`),
-    lastmod: nowIso,
-    changefreq: 'weekly',
+    lastmod: '2026-02-03T00:00:00Z',
+    changefreq: 'monthly',
     priority: '0.7'
   }));
 
