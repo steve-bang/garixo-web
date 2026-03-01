@@ -213,6 +213,75 @@
 }
 
 @layer utilities {
+  .prose-ui {
+    @apply max-w-none;
+  }
+
+  .prose-ui h2 {
+    @apply mt-s8 border-b border-border pb-s2 text-h2 text-text-primary;
+  }
+
+  .prose-ui h3 {
+    @apply mt-s6 text-h3 text-text-primary;
+  }
+
+  .prose-ui p {
+    @apply text-[16px] leading-7 text-text-secondary;
+  }
+
+  .prose-ui strong {
+    @apply font-semibold text-text-primary;
+  }
+
+  .prose-ui a {
+    @apply font-medium text-primary-700 underline decoration-primary-300 underline-offset-4 hover:text-primary-800;
+  }
+
+  .prose-ui ul,
+  .prose-ui ol {
+    @apply pl-5;
+  }
+
+  .prose-ui li {
+    @apply my-1 text-text-secondary;
+  }
+
+  .prose-ui blockquote {
+    @apply border-l-4 border-primary-300 bg-primary-50 px-s3 py-s2 text-text-primary;
+  }
+
+  .prose-ui code {
+    @apply rounded bg-surface-hover px-1 py-0.5 text-[14px] text-text-primary;
+  }
+
+  .prose-ui pre {
+    @apply rounded-lg border border-border bg-slate-900 p-s4 text-slate-100;
+  }
+
+  .prose-ui img {
+    @apply rounded-lg border border-border shadow-sm;
+  }
+
+  .prose-ui hr {
+    @apply border-border;
+  }
+
+  .prose-ui table {
+    @apply table-auto border border-border;
+  }
+
+  .prose-ui thead {
+    @apply bg-surface-hover;
+  }
+
+  .prose-ui th {
+    @apply border border-border px-s3 py-s2 text-left text-[13px] font-semibold text-text-primary;
+  }
+
+  .prose-ui td {
+    @apply border border-border px-s3 py-s2 text-[14px] text-text-secondary;
+  }
+
   .btn-ripple {
     position: relative;
     overflow: hidden;
@@ -223,17 +292,25 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle, hsl(var(--color-text-inverse) / 0.25) 12%, transparent 13%);
+    background: radial-gradient(
+      circle,
+      hsl(var(--color-text-inverse) / 0.25) 12%,
+      transparent 13%
+    );
     transform: scale(0);
     opacity: 0;
-    transition: transform 200ms ease, opacity 200ms ease;
+    transition:
+      transform 200ms ease,
+      opacity 200ms ease;
     pointer-events: none;
   }
 
   .btn-ripple:active::after {
     transform: scale(3);
     opacity: 1;
-    transition: transform 200ms ease, opacity 200ms ease;
+    transition:
+      transform 200ms ease,
+      opacity 200ms ease;
   }
 
   @keyframes modal-fade-in {

@@ -61,6 +61,31 @@ const primitive = {
 const config: Config = {
   darkMode: ['class'],
   content: ['./src/**/*.{ts,tsx}'],
+  safelist: [
+    'text-base',
+    'text-lg',
+    'text-xl',
+    'text-2xl',
+    'text-3xl',
+    'font-medium',
+    'font-semibold',
+    'font-bold',
+    'leading-relaxed',
+    'underline',
+    'mt-2',
+    'mt-3',
+    'mt-4',
+    'mt-6',
+    'mb-2',
+    'mb-4',
+    'text-gray-700',
+    'text-gray-800',
+    'text-gray-900',
+    'text-blue-600',
+    'text-blue-700',
+    'md:text-2xl',
+    'md:text-3xl'
+  ],
   theme: {
     extend: {
       colors: {
@@ -165,7 +190,8 @@ const config: Config = {
           'primary-hover': 'hsl(var(--button-primary-hover) / <alpha-value>)',
           'primary-text': 'hsl(var(--button-primary-text) / <alpha-value>)',
           secondary: 'hsl(var(--button-secondary-bg) / <alpha-value>)',
-          'secondary-hover': 'hsl(var(--button-secondary-hover) / <alpha-value>)',
+          'secondary-hover':
+            'hsl(var(--button-secondary-hover) / <alpha-value>)',
           'secondary-text': 'hsl(var(--button-secondary-text) / <alpha-value>)'
         },
         card: {
@@ -223,41 +249,62 @@ const config: Config = {
         lg: 'var(--shadow-lg)'
       },
       fontSize: {
-        display: [primitive.typography.display.size, {
-          lineHeight: primitive.typography.display.lineHeight,
-          letterSpacing: primitive.typography.display.letterSpacing,
-          fontWeight: primitive.typography.display.weight
-        }],
-        h1: [primitive.typography.h1.size, {
-          lineHeight: primitive.typography.h1.lineHeight,
-          letterSpacing: primitive.typography.h1.letterSpacing,
-          fontWeight: primitive.typography.h1.weight
-        }],
-        h2: [primitive.typography.h2.size, {
-          lineHeight: primitive.typography.h2.lineHeight,
-          letterSpacing: primitive.typography.h2.letterSpacing,
-          fontWeight: primitive.typography.h2.weight
-        }],
-        h3: [primitive.typography.h3.size, {
-          lineHeight: primitive.typography.h3.lineHeight,
-          letterSpacing: primitive.typography.h3.letterSpacing,
-          fontWeight: primitive.typography.h3.weight
-        }],
-        body: [primitive.typography.body.size, {
-          lineHeight: primitive.typography.body.lineHeight,
-          letterSpacing: primitive.typography.body.letterSpacing,
-          fontWeight: primitive.typography.body.weight
-        }],
-        small: [primitive.typography.small.size, {
-          lineHeight: primitive.typography.small.lineHeight,
-          letterSpacing: primitive.typography.small.letterSpacing,
-          fontWeight: primitive.typography.small.weight
-        }],
-        caption: [primitive.typography.caption.size, {
-          lineHeight: primitive.typography.caption.lineHeight,
-          letterSpacing: primitive.typography.caption.letterSpacing,
-          fontWeight: primitive.typography.caption.weight
-        }]
+        display: [
+          primitive.typography.display.size,
+          {
+            lineHeight: primitive.typography.display.lineHeight,
+            letterSpacing: primitive.typography.display.letterSpacing,
+            fontWeight: primitive.typography.display.weight
+          }
+        ],
+        h1: [
+          primitive.typography.h1.size,
+          {
+            lineHeight: primitive.typography.h1.lineHeight,
+            letterSpacing: primitive.typography.h1.letterSpacing,
+            fontWeight: primitive.typography.h1.weight
+          }
+        ],
+        h2: [
+          primitive.typography.h2.size,
+          {
+            lineHeight: primitive.typography.h2.lineHeight,
+            letterSpacing: primitive.typography.h2.letterSpacing,
+            fontWeight: primitive.typography.h2.weight
+          }
+        ],
+        h3: [
+          primitive.typography.h3.size,
+          {
+            lineHeight: primitive.typography.h3.lineHeight,
+            letterSpacing: primitive.typography.h3.letterSpacing,
+            fontWeight: primitive.typography.h3.weight
+          }
+        ],
+        body: [
+          primitive.typography.body.size,
+          {
+            lineHeight: primitive.typography.body.lineHeight,
+            letterSpacing: primitive.typography.body.letterSpacing,
+            fontWeight: primitive.typography.body.weight
+          }
+        ],
+        small: [
+          primitive.typography.small.size,
+          {
+            lineHeight: primitive.typography.small.lineHeight,
+            letterSpacing: primitive.typography.small.letterSpacing,
+            fontWeight: primitive.typography.small.weight
+          }
+        ],
+        caption: [
+          primitive.typography.caption.size,
+          {
+            lineHeight: primitive.typography.caption.lineHeight,
+            letterSpacing: primitive.typography.caption.letterSpacing,
+            fontWeight: primitive.typography.caption.weight
+          }
+        ]
       }
     }
   },

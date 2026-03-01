@@ -12,6 +12,7 @@ IMPORTANT WRITING REQUIREMENTS:
    - Avoid phrases like “In today’s digital world…”
    - Avoid obvious AI patterns.
    - Use natural transitions and practical examples.
+   - Write like someone who has actually worked with auto repair shop owners.
 
 2. Target Audience:
    - Auto repair shop owners
@@ -27,15 +28,19 @@ IMPORTANT WRITING REQUIREMENTS:
    - Use H2 and H3 structure properly.
    - Include FAQ section with clear question-based headings.
    - Add internal links naturally inside the body:
-       - https://www.garixo.com/pricing
-       - https://www.garixo.com/features
-       - https://www.garixo.com
-   - Use descriptive anchor texts (not raw URLs).
-   - Add structured, scannable formatting (short paragraphs, bullet points, bold highlights).
+       - https://www.garixo.com/pricing (anchor text: garage software pricing)
+       - https://www.garixo.com/features (anchor text: garage management features)
+       - https://www.garixo.com (anchor text: Garixo garage software)
+   - Do NOT show raw URLs.
+   - Use descriptive anchor texts.
+   - Add structured, scannable formatting.
+   - Use short paragraphs (2–4 sentences max).
+   - Add bullet lists where helpful.
+   - Add bold highlights for key ideas.
 
 4. AI SEO Optimization:
-   - Include direct answer sections for key questions.
-   - Add a short “Quick Answer” summary near the beginning.
+   - Include a short “Quick Answer” summary near the beginning.
+   - Add direct answer sections for key questions.
    - Add FAQ section optimized for search engines and AI engines (ChatGPT, Perplexity, Gemini).
    - Clear, factual, structured explanations.
 
@@ -57,16 +62,74 @@ IMPORTANT WRITING REQUIREMENTS:
    - Position it as practical, affordable, simple.
    - Include CTA at the end encouraging free trial.
 
-8. HTML Formatting Rules:
-   - The Body must be valid clean HTML.
-   - Use:
-     <h2>, <h3>, <p>, <ul>, <li>, <strong>
-   - Do NOT include <html>, <head>, <body>.
-   - No inline CSS.
-   - No markdown.
-   - Only clean HTML content inside Body.
+8. Readability & Layout Requirements:
+   - Maintain clean small spacing.
+   - Keep paragraphs short and visually comfortable.
+   - Add section breaks between major parts.
+   - Avoid large text blocks.
+   - Use subheadings frequently.
+   - Make it highly scannable.
+
+9. Image Placement Requirements:
+   - Insert 2–3 relevant image blocks in logical sections.
+   - Use this format:
+
+<div class="my-8">
+       <p class="text-sm text-gray-500 italic">
+         Image Suggestion: Description of realistic photo or dashboard screenshot relevant to this section.
+       </p>
+     </div>
+   - Do NOT use <img> tags.
+   - Just describe what image should be placed.
+   - Images should feel authentic (garage, mechanics, dashboard screen, invoice screen, etc.)
+   - Place images after major H2 sections.
+
+10. HTML + Tailwind Formatting Rules:
+
+   The Body must be valid clean HTML.
+
+   Allowed tags:
+   <section>, <div>, <h2>, <h3>, <p>, <ul>, <li>, <strong>, <a>
+
+   You ARE allowed to use TailwindCSS classes.
+   You MUST use class attributes for styling.
+
+   Use these styling guidelines:
+
+   - Wrap entire article inside:
+
+     <section class="max-w-4xl mx-auto px-6 py-12 space-y-10">
+
+   - H2:
+     class="text-2xl md:text-3xl font-bold text-gray-900"
+
+   - H3:
+     class="text-xl font-semibold text-gray-800 mt-6"
+
+   - Paragraph:
+     class="text-base text-gray-700 leading-relaxed mt-4"
+
+   - UL:
+     class="list-disc pl-6 mt-4 space-y-2 text-gray-700"
+
+   - Strong:
+     no class needed
+
+   - Links:
+     class="text-blue-600 font-medium underline"
+
+   Do NOT:
+   - Use inline styles
+   - Use markdown
+   - Include <html>, <head>, <body>
+   - Include script tags
+   - Include style tags
+
+   Clean HTML only with Tailwind utility classes.
+   Must be production-ready for NextJS + Tailwind environment.
 
 ----------------------------------------
+
 TOPIC:
 [INSERT BLOG TOPIC HERE]
 
@@ -119,7 +182,9 @@ IMPORTANT HTML OUTPUT RULES:
 - Do NOT use inline styles.
 - Do NOT include <html>, <head>, or <body> tags.
 - Do NOT include classes or ids.
-- Use only these tags: <h2>, <h3>, <p>, <ul>, <li>, <strong>
+- Use only these tags:
+  <h2>, <h3>, <p>, <ul>, <li>, <strong>, <a>
 - Keep paragraphs short (2–4 sentences max).
-- Use proper spacing between sections.
-- Make it ready for direct copy-paste into CKEditor without editing.
+- Maintain natural spacing between sections.
+- Make it visually clean and easy to read.
+- Ensure it is ready for direct copy-paste into CKEditor without editing.

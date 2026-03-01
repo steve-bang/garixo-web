@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { MarkdownEditor } from '@/features/blogs/components/markdown-editor';
 import { RichTextEditor } from '@/features/blogs/components/rich-text-editor';
 import { createBlogSchema } from '@/features/blogs/schema';
 import { useBlog, useCreateBlog, useUpdateBlog } from '@/features/blogs/hooks';
@@ -20,6 +21,7 @@ import {
   countWords,
   getSeoChecks,
   htmlToPlainText,
+  markdownToHtml,
   slugify
 } from '@/features/blogs/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -41,6 +43,7 @@ type BlogFormState = {
   slug: string;
   excerpt: string;
   contentHtml: string;
+  contentMarkdown: string;
   metaTitle: string;
   metaDescription: string;
   focusKeyword: string;
@@ -69,6 +72,7 @@ function emptyForm(): BlogFormState {
     slug: '',
     excerpt: '',
     contentHtml: '<p>Start writing your article...</p>',
+    contentMarkdown: '',
     metaTitle: '',
     metaDescription: '',
     focusKeyword: '',
@@ -113,6 +117,7 @@ function mapBlogToForm(blog: Blog): BlogFormState {
     slug: blog.slug,
     excerpt: blog.excerpt,
     contentHtml: blog.content.html,
+    contentMarkdown: blog.content.markdown ?? '',
     metaTitle: blog.metaTitle,
     metaDescription: blog.metaDescription,
     focusKeyword: blog.focusKeyword,
@@ -161,6 +166,7 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
   const sourceBlog = blogQuery.data;
   const [form, setForm] = useState<BlogFormState>(emptyForm);
   const [isPreview, setIsPreview] = useState(false);
+  const [contentMode, setContentMode] = useState<'html' | 'markdown'>('html');
 
   useEffect(() => {
     if (!isEditMode || !sourceBlog) {
@@ -170,6 +176,10 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
     // Initialize form from fetched blog once for edit mode.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm((prev) => (prev.title ? prev : mapBlogToForm(sourceBlog)));
+    if (sourceBlog.content.markdown) {
+       
+      setContentMode('markdown');
+    }
   }, [isEditMode, sourceBlog]);
 
   const contentText = useMemo(() => htmlToPlainText(form.contentHtml), [form]);
@@ -217,7 +227,12 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
       excerpt: form.excerpt,
       content: {
         type: 'html' as const,
-        html: form.contentHtml
+        html:
+          contentMode === 'markdown'
+            ? markdownToHtml(form.contentMarkdown)
+            : form.contentHtml,
+        markdown:
+          form.contentMarkdown.trim().length > 0 ? form.contentMarkdown : null
       },
       metaTitle: form.metaTitle,
       metaDescription: form.metaDescription,
@@ -411,10 +426,40 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
                 tables, and images.
               </p>
             </div>
-            <RichTextEditor
-              value={form.contentHtml}
-              onChange={(value) => onField('contentHtml', value)}
-            />
+            <div className="flex items-center gap-s2">
+              <Button
+                type="button"
+                size="sm"
+                variant={contentMode === 'html' ? 'default' : 'secondary'}
+                onClick={() => setContentMode('html')}
+              >
+                HTML Editor
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={contentMode === 'markdown' ? 'default' : 'secondary'}
+                onClick={() => setContentMode('markdown')}
+              >
+                Markdown Editor
+              </Button>
+            </div>
+
+            {contentMode === 'html' ? (
+              <RichTextEditor
+                value={form.contentHtml}
+                onChange={(value) => onField('contentHtml', value)}
+              />
+            ) : (
+              <MarkdownEditor
+                value={form.contentMarkdown}
+                onChange={(value) => {
+                  onField('contentMarkdown', value);
+                  onField('contentHtml', markdownToHtml(value));
+                }}
+                rows={16}
+              />
+            )}
           </div>
 
           <Card className="space-y-s3 p-s4">

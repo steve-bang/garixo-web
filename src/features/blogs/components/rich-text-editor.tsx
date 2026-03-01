@@ -113,11 +113,23 @@ function looksLikeHtmlSnippet(text: string): boolean {
   );
 }
 
-function withRawHtmlPasteSupport(editor: any): void {
-  const clipboardPipeline = editor.plugins.get('ClipboardPipeline');
+function looksLikeEncodedHtmlSnippet(text: string): boolean {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return false;
+  }
 
-  clipboardPipeline.on(
-    'inputTransformation',
+  return /&lt;[a-z][\s\S]*?&gt;/i.test(trimmed);
+}
+
+function withRawHtmlPasteSupport(editor: any): void {
+  const viewDocument = editor.editing.view.document;
+
+  // If pasted payload only exposes text/plain but looks like HTML,
+  // promote it to text/html so CKEditor's native clipboard pipeline
+  // handles it as real HTML (including class/attribute processing).
+  viewDocument.on(
+    'clipboardInput',
     (_event: unknown, data: any): void => {
       const html = data?.dataTransfer?.getData?.('text/html');
       if (typeof html === 'string' && html.trim()) {
@@ -125,14 +137,21 @@ function withRawHtmlPasteSupport(editor: any): void {
       }
 
       const text = data?.dataTransfer?.getData?.('text/plain');
-      if (typeof text !== 'string' || !looksLikeHtmlSnippet(text)) {
+      if (typeof text !== 'string') {
         return;
       }
 
-      const viewFragment = editor.data.processor.toView(text);
-      const modelFragment = editor.data.toModel(viewFragment);
-      data.content = modelFragment;
-    }
+      const normalizedText = looksLikeEncodedHtmlSnippet(text)
+        ? decodeHtmlEntities(text)
+        : text;
+
+      if (!looksLikeHtmlSnippet(normalizedText)) {
+        return;
+      }
+
+      data.dataTransfer.setData('text/html', normalizedText);
+    },
+    { priority: 'high' }
   );
 }
 
@@ -260,7 +279,8 @@ export function RichTextEditor({
           withRawHtmlPasteSupport(readyEditor);
         }}
         onChange={(_event, editor) => {
-          onChange(editor.getData());
+          const html = decodeHtmlEntities(editor.getData());
+          onChange(html);
         }}
       />
     </Card>
