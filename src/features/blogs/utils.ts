@@ -5,6 +5,7 @@ import type {
   BlogSeoScoreItem,
   BlogStatus
 } from '@/features/blogs/types';
+import { marked } from 'marked';
 
 const DANGEROUS_TAG_PATTERN =
   /<(script|style|iframe|object|embed)[\s\S]*?>[\s\S]*?<\/\1>/gi;
@@ -28,6 +29,20 @@ export function sanitizeRichHtml(value: string): string {
     .replace(EVENT_HANDLER_ATTR_PATTERN, '')
     .replace(JAVASCRIPT_URL_PATTERN, '')
     .trim();
+}
+
+export function markdownToHtml(value: string): string {
+  const markdown = value.trim();
+  if (!markdown) {
+    return '<p></p>';
+  }
+
+  const parsed = marked.parse(markdown, {
+    gfm: true,
+    breaks: true
+  });
+
+  return typeof parsed === 'string' ? parsed : '<p></p>';
 }
 
 export function htmlToPlainText(value: string): string {

@@ -235,6 +235,7 @@ export interface BlogDocument {
   content: {
     type: 'html';
     html: string;
+    markdown: string | null;
   };
   contentText: string;
   metaTitle: string;

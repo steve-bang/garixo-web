@@ -22,7 +22,8 @@ export const blogCtaBlockSchema = z.object({
 
 export const blogContentSchema = z.object({
   type: z.literal('html'),
-  html: z.string().trim().min(1, 'Please add your article content.')
+  html: z.string().nullable().optional().default(null),
+  markdown: z.string().nullable().optional().default(null)
 });
 
 const createBlogShape = z.object({

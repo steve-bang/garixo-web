@@ -27,6 +27,7 @@ export type BlogContentType = 'html';
 export interface BlogContentDocument {
   type: BlogContentType;
   html: string;
+  markdown: string | null;
 }
 
 export interface BlogFaqItem {

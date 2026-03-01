@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { findBlogBySlug, incrementBlogViews } from '@/app/api/blogs/blogs-db';
+import { Markdown } from '@/components/markdown/Markdown';
 import { LandingFooter } from '@/components/sections/LandingFooter';
 import { LandingHeader } from '@/components/sections/LandingHeader';
 import { Button } from '@/components/ui/button';
@@ -157,10 +158,14 @@ export default async function BlogDetailPage({
             <p className="text-body text-text-secondary">{post.excerpt}</p>
           </header>
 
-          <div
-            className="prose prose-slate max-w-none"
-            dangerouslySetInnerHTML={{ __html: post.content.html }}
-          />
+          {post.content.markdown?.trim() ? (
+            <Markdown source={post.content.markdown} />
+          ) : (
+            <article
+              className="prose-ui"
+              dangerouslySetInnerHTML={{ __html: post.content.html }}
+            />
+          )}
 
           {post.faqItems.length ? (
             <section className="space-y-s2 border-t border-border pt-s4">

@@ -80,7 +80,13 @@ function mapBlog(id: string, raw: Partial<BlogDocument>): Blog {
     title: raw.title ?? '',
     slug: raw.slug ?? '',
     excerpt: raw.excerpt ?? '',
-    content: raw.content ?? { type: 'html', html: '' },
+    content: raw.content
+      ? {
+          type: 'html',
+          html: raw.content.html ?? '',
+          markdown: raw.content.markdown ?? null
+        }
+      : { type: 'html', html: '', markdown: null },
     contentText: raw.contentText ?? '',
     metaTitle: raw.metaTitle ?? raw.title ?? '',
     metaDescription: raw.metaDescription ?? raw.excerpt ?? '',
@@ -211,7 +217,7 @@ function toStoredDocument(
   const cleanTitle = input.title.trim();
   const cleanExcerpt = input.excerpt.trim();
   const cleanSlug = slugify(input.slug || input.title);
-  const cleanHtml = sanitizeRichHtml(input.content.html);
+  const cleanHtml = sanitizeRichHtml(input.content.html ?? '');
   const contentText = htmlToPlainText(cleanHtml);
   const cleanMetaTitle = input.metaTitle.trim() || cleanTitle;
   const cleanMetaDescription = input.metaDescription.trim() || cleanExcerpt;
@@ -238,7 +244,8 @@ function toStoredDocument(
     excerpt: cleanExcerpt,
     content: {
       type: 'html',
-      html: cleanHtml
+      html: cleanHtml,
+      markdown: input.content.markdown ?? null
     },
     contentText,
     metaTitle: cleanMetaTitle,
