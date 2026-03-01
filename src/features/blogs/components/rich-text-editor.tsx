@@ -15,6 +15,7 @@ type CKEditorComponentProps = {
   editor: unknown;
   data: string;
   config?: Record<string, unknown>;
+  onReady?: (editor: unknown) => void;
   onChange: (_event: unknown, editor: { getData: () => string }) => void;
 };
 
@@ -83,6 +84,58 @@ function withUploadAdapter(editor: any): void {
     new FirebaseStorageUploadAdapter(loader);
 }
 
+function decodeHtmlEntities(input: string): string {
+  if (!input) {
+    return input;
+  }
+
+  if (
+    !input.includes('&lt;') &&
+    !input.includes('&gt;') &&
+    !input.includes('&amp;')
+  ) {
+    return input;
+  }
+
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = input;
+  return textarea.value;
+}
+
+function looksLikeHtmlSnippet(text: string): boolean {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  return /<([a-z][^/\s>]*)\b[^>]*>([\s\S]*?)<\/\1>|<([a-z][^/\s>]*)\b[^>]*\/?>/i.test(
+    trimmed
+  );
+}
+
+function withRawHtmlPasteSupport(editor: any): void {
+  const clipboardPipeline = editor.plugins.get('ClipboardPipeline');
+
+  clipboardPipeline.on(
+    'inputTransformation',
+    (_event: unknown, data: any): void => {
+      const html = data?.dataTransfer?.getData?.('text/html');
+      if (typeof html === 'string' && html.trim()) {
+        return;
+      }
+
+      const text = data?.dataTransfer?.getData?.('text/plain');
+      if (typeof text !== 'string' || !looksLikeHtmlSnippet(text)) {
+        return;
+      }
+
+      const viewFragment = editor.data.processor.toView(text);
+      const modelFragment = editor.data.toModel(viewFragment);
+      data.content = modelFragment;
+    }
+  );
+}
+
 export function RichTextEditor({
   value,
   onChange,
@@ -124,6 +177,8 @@ export function RichTextEditor({
     () => ({
       placeholder,
       toolbar: [
+        'sourceEditing',
+        '|',
         'heading',
         '|',
         'bold',
@@ -149,12 +204,32 @@ export function RichTextEditor({
       table: {
         contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
       },
+      /**
+       * General HTML Support:
+       * - Allows preserving custom/unknown HTML nodes and attributes while editing.
+       * - This keeps user-provided HTML structure from being stripped by the editor model.
+       *
+       * Security note:
+       * - This setting preserves HTML in the editor output; it does not sanitize unsafe input.
+       * - Always sanitize HTML again on the server before persistence/rendering to avoid XSS.
+       */
+      htmlSupport: {
+        allow: [
+          {
+            name: /.*/,
+            attributes: true,
+            classes: true,
+            styles: true
+          }
+        ]
+      },
       extraPlugins: [withUploadAdapter]
     }),
     [placeholder]
   );
 
   const minEditorHeight = Math.max(10, rows) * 24;
+  const editorData = decodeHtmlEntities(value || '<p></p>');
 
   if (!CKEditor || !editorClass) {
     return (
@@ -178,8 +253,12 @@ export function RichTextEditor({
       `}</style>
       <CKEditor
         editor={editorClass}
-        data={value || '<p></p>'}
+        data={editorData}
         config={config}
+        onReady={(editor) => {
+          const readyEditor = editor as any;
+          withRawHtmlPasteSupport(readyEditor);
+        }}
         onChange={(_event, editor) => {
           onChange(editor.getData());
         }}
