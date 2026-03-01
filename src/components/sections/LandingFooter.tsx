@@ -20,7 +20,8 @@ export function LandingFooter(): JSX.Element {
               <p className="text-h3 text-white">Garixo</p>
             </div>
             <p className="text-small text-slate-400">
-              Garage management software for auto repair shop owners.
+              Simple garage management software for independent auto repair shop
+              owners.
             </p>
           </div>
 
@@ -28,8 +29,19 @@ export function LandingFooter(): JSX.Element {
             <p className="text-small font-semibold text-white">Product</p>
             <div className="space-y-s1 text-small text-slate-400">
               <p>
-                <Link href="/features" className="hover:text-white">
-                  Garage Management
+                <Link
+                  href="/features/work-orders-management"
+                  className="hover:text-white"
+                >
+                  Work Orders
+                </Link>
+              </p>
+              <p>
+                <Link
+                  href="/features/customers-management"
+                  className="hover:text-white"
+                >
+                  Customers
                 </Link>
               </p>
               <p>
@@ -37,15 +49,15 @@ export function LandingFooter(): JSX.Element {
                   href="/features/inventory-management"
                   className="hover:text-white"
                 >
-                  Inventory Management
+                  Inventory
                 </Link>
               </p>
               <p>
                 <Link
-                  href="/features/technician-tracking"
+                  href="/features/staff-management"
                   className="hover:text-white"
                 >
-                  Technician Tracking
+                  Staff
                 </Link>
               </p>
             </div>
@@ -67,6 +79,11 @@ export function LandingFooter(): JSX.Element {
               <p>
                 <Link href="/pricing" className="hover:text-white">
                   Pricing
+                </Link>
+              </p>
+              <p>
+                <Link href="/features" className="hover:text-white">
+                  Feature Guides
                 </Link>
               </p>
             </div>

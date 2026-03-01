@@ -17,6 +17,7 @@ import type {
   BillingStatus,
   PlanCode
 } from '@/features/billing/types';
+import type { BlogSchemaType, BlogStatus } from '@/features/blogs/types';
 
 export type FirebaseRole = UserRole;
 
@@ -219,6 +220,77 @@ export interface InvoicePublicShareDocument {
   expiresAt: string | null;
   createdByUserId: string;
   lastViewedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Marketing blog post record.
+ * Path: blogs/{blogId}
+ */
+export interface BlogDocument {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: {
+    type: 'html';
+    html: string;
+  };
+  contentText: string;
+  metaTitle: string;
+  metaDescription: string;
+  focusKeyword: string;
+  secondaryKeywords: string[];
+  category: string;
+  tags: string[];
+  status: BlogStatus;
+  schemaType: BlogSchemaType;
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  canonical: string;
+  isIndexed: boolean;
+  faqItems: Array<{
+    question: string;
+    answer: string;
+  }>;
+  ctaBlock: {
+    title: string;
+    description: string;
+    ctaLabel: string;
+    ctaHref: string;
+  } | null;
+  seoScore: number;
+  views: number;
+  readingTime: number;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string | null;
+  scheduledAt: string | null;
+  authorId: string;
+  authorName: string;
+}
+
+/**
+ * Blog category reference document used for admin filters and content taxonomy.
+ * Path: blogCategories/{categoryId}
+ */
+export interface BlogCategoryDocument {
+  name: string;
+  slug: string;
+  postCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Blog tag reference document used for admin filters and content taxonomy.
+ * Path: blogTags/{tagId}
+ */
+export interface BlogTagDocument {
+  name: string;
+  slug: string;
+  postCount: number;
   createdAt: string;
   updatedAt: string;
 }

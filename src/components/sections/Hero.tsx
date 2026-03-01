@@ -78,11 +78,12 @@ export function Hero(): JSX.Element {
         <div className="relative">
           <Card className="rounded-xl border border-border bg-surface-default p-s3 shadow-md">
             <Image
-              src="/images/world-garage-command.svg"
+              src="/images/home-hero-section.webp"
               alt="Global auto repair shop management software overview by Garixo"
               width={1280}
               height={853}
               className="h-auto w-full rounded-lg"
+              sizes="(max-width: 1024px) 100vw, 50vw"
               priority
             />
           </Card>

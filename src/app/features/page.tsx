@@ -83,6 +83,7 @@ export default function FeaturesPage(): JSX.Element {
             key={feature.id}
             feature={feature}
             reverse={index % 2 === 1}
+            imagePriority={index === 0}
           />
         ))}
 

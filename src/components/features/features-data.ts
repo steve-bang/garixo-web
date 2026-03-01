@@ -1,6 +1,15 @@
 import { Boxes, ClipboardList, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+export type ImageCoreFeature = {
+  url: string;
+  title: string;
+  alt: string;
+  width: number;
+  height: number;
+  sizes: string;
+};
+
 export type CoreFeature = {
   id: 'work-order' | 'customers' | 'inventory' | 'staff';
   title: string;
@@ -10,6 +19,8 @@ export type CoreFeature = {
   href: string;
   icon: LucideIcon;
   bullets: string[];
+  imageUrl?: string;
+  image?: ImageCoreFeature;
 };
 
 export type FeatureFaq = {
@@ -32,7 +43,15 @@ export const coreFeatures: CoreFeature[] = [
       'Live status flow: Draft, In Progress, Waiting Parts, Completed, Paid',
       'Board and table views for faster daily dispatch',
       'Assign workers clearly and reduce missed handoffs'
-    ]
+    ],
+    image: {
+      url: '/images/auto-repair-work-order-management-system.webp',
+      title: 'Garage work order workflow management software',
+      alt: 'Auto repair shop work order management system from check-in to delivery',
+      width: 1536,
+      height: 1024,
+      sizes: '(max-width: 1024px) 100vw, 52vw'
+    }
   },
   {
     id: 'customers',
@@ -48,7 +67,15 @@ export const coreFeatures: CoreFeature[] = [
       'Link customers to vehicles for cleaner service context',
       'Review work-order history before creating new jobs',
       'Track repeat visits and spending behavior over time'
-    ]
+    ],
+    image: {
+      url: '/images/auto-repair-customer-history-management-software.webp',
+      title: 'Garage customer management system with service history tracking',
+      alt: 'Garage customer management system with service history tracking',
+      width: 1536,
+      height: 1024,
+      sizes: '(max-width: 1024px) 100vw, 52vw'
+    }
   },
   {
     id: 'inventory',
@@ -64,7 +91,15 @@ export const coreFeatures: CoreFeature[] = [
       'Low stock alerts before critical shortages',
       'Supplier and cost tracking by part',
       'Real-time inventory valuation and usage'
-    ]
+    ],
+    image: {
+      url: '/images/auto-parts-inventory-management-dashboard.webp',
+      title: 'Garage auto parts inventory management software',
+      alt: 'Smart auto parts inventory control dashboard for auto repair shops',
+      width: 1536,
+      height: 1024,
+      sizes: '(max-width: 1024px) 100vw, 52vw'
+    }
   },
   {
     id: 'staff',
@@ -80,7 +115,15 @@ export const coreFeatures: CoreFeature[] = [
       'Track active, free, and overloaded team members',
       'Keep role and status data clear for daily planning',
       'Enforce user-seat limits with upgrade guidance when needed'
-    ]
+    ],
+    image: {
+      url: '/images/garage-staff-workload-management-dashboard.webp',
+      title: 'Auto repair shop team workload management software',
+      alt: 'Garage staff workload visibility dashboard for small auto repair shops',
+      width: 1536,
+      height: 1024,
+      sizes: '(max-width: 1024px) 100vw, 52vw'
+    }
   }
 ];
 

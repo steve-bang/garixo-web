@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 import { Card } from '@/components/ui/card';
@@ -5,10 +6,12 @@ import type { CoreFeature } from '@/components/features/features-data';
 
 export function FeatureSection({
   feature,
-  reverse = false
+  reverse = false,
+  imagePriority = false
 }: {
   feature: CoreFeature;
   reverse?: boolean;
+  imagePriority?: boolean;
 }): JSX.Element {
   const Icon = feature.icon;
 
@@ -54,25 +57,38 @@ export function FeatureSection({
           </Link>
         </div>
 
-        <Card
-          className={`${reverse ? 'lg:order-1' : ''} rounded-xl border border-border bg-background-primary p-s4 shadow-sm`}
-        >
-          <div className="space-y-s3">
-            <p className="text-caption font-semibold uppercase tracking-wide text-text-muted">
-              Live Dashboard Snapshot
-            </p>
-            <div className="grid gap-s3 sm:grid-cols-3">
-              <Metric label="Open Jobs" value="18" tone="primary" />
-              <Metric label="Active Techs" value="7" tone="success" />
-              <Metric label="Today Revenue" value="$8,420" tone="warning" />
+        {feature.image ? (
+          <Image
+            src={feature.image.url}
+            alt={feature.image.alt}
+            title={feature.image.title}
+            width={feature.image.width}
+            height={feature.image.height}
+            sizes={feature.image.sizes}
+            priority={imagePriority}
+            className="h-auto w-full rounded-md border border-border object-cover"
+          />
+        ) : (
+          <Card
+            className={`${reverse ? 'lg:order-1' : ''} rounded-xl border border-border bg-background-primary p-s4 shadow-sm`}
+          >
+            <div className="space-y-s3">
+              <p className="text-caption font-semibold uppercase tracking-wide text-text-muted">
+                Live Dashboard Snapshot
+              </p>
+              <div className="grid gap-s3 sm:grid-cols-3">
+                <Metric label="Open Jobs" value="18" tone="primary" />
+                <Metric label="Active Techs" value="7" tone="success" />
+                <Metric label="Today Revenue" value="$8,420" tone="warning" />
+              </div>
+              <div className="space-y-s2">
+                <Row title="BMW 3 Series" status="In Progress" />
+                <Row title="Toyota Camry" status="Waiting Approval" />
+                <Row title="Ford F-150" status="Completed" />
+              </div>
             </div>
-            <div className="space-y-s2">
-              <Row title="BMW 3 Series" status="In Progress" />
-              <Row title="Toyota Camry" status="Waiting Approval" />
-              <Row title="Ford F-150" status="Completed" />
-            </div>
-          </div>
-        </Card>
+          </Card>
+        )}
       </div>
     </section>
   );
