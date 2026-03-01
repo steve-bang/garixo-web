@@ -109,9 +109,9 @@ export default async function BlogIndexPage(): Promise<JSX.Element> {
             <div className="mx-auto grid w-full max-w-[980px] gap-s4 px-s4">
               {posts.map((post) => (
                 <article key={post.id} className="group">
-                  <Card className="max-h-[230px] overflow-hidden rounded-xl border border-border p-s4 shadow-sm transition-all duration-200 group-hover:border-primary-200 group-hover:shadow-md">
+                  <Card className="overflow-hidden rounded-xl border border-border p-s4 shadow-sm transition-all duration-200 group-hover:border-primary-200 group-hover:shadow-md lg:max-h-[320px]">
                     <div className="grid gap-s4 md:grid-cols-[260px_1fr] md:items-stretch">
-                      <div className="h-[160px] overflow-hidden rounded-lg border border-border bg-surface-hover md:h-[190px]">
+                      <div className="h-[180px] overflow-hidden rounded-lg border border-border bg-surface-hover sm:h-[200px] md:h-[220px] lg:h-[250px]">
                         {post.ogImage ? (
                           <img
                             src={post.ogImage}
@@ -129,7 +129,7 @@ export default async function BlogIndexPage(): Promise<JSX.Element> {
                         )}
                       </div>
 
-                      <div className="flex h-[160px] flex-col space-y-s3 overflow-hidden md:h-[190px]">
+                      <div className="flex min-h-[170px] flex-col space-y-s3 md:h-[220px] md:overflow-hidden lg:h-[250px]">
                         <div className="flex flex-wrap items-center gap-s2">
                           <span className="rounded-full bg-primary-50 px-s2 py-1 text-caption font-medium text-primary-700">
                             {post.category}
@@ -154,7 +154,7 @@ export default async function BlogIndexPage(): Promise<JSX.Element> {
                           </Link>
                         </h2>
 
-                        <p className="line-clamp-2 text-small leading-6 text-text-secondary">
+                        <p className="line-clamp-3 text-small leading-6 text-text-secondary md:line-clamp-2">
                           {post.excerpt}
                         </p>
 
