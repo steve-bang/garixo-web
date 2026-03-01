@@ -1,3 +1,4 @@
+// This route generates the sitemap XML for blog posts. It queries the database for published blog entries and constructs an XML sitemap that search engines can use to discover and index the blog content.
 import { listPublishedIndexedBlogSitemapEntries } from '@/app/api/blogs/blogs-db';
 import {
   toAbsoluteUrl,

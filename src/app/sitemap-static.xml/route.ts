@@ -1,3 +1,4 @@
+// This route generates the sitemap XML for static pages and case studies. It defines a list of static paths with their last modified dates, change frequencies, and priorities, and also includes URLs for case studies. The generated XML is returned as a response with appropriate headers for caching and content type.
 import { caseStudies } from '@/lib/caseStudies';
 import {
   toAbsoluteUrl,

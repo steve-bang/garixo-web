@@ -6,13 +6,13 @@ IMPORTANT WRITING REQUIREMENTS:
 
 1. The article must sound 100% human-written.
    - Conversational but professional.
-   - Written as if by a real industry expert.
+   - Written like a real industry expert.
    - No robotic AI tone.
    - No generic filler.
    - Avoid phrases like “In today’s digital world…”
    - Avoid obvious AI patterns.
-   - Use natural transitions and practical examples.
-   - Write like someone who has actually worked with auto repair shop owners.
+   - Use natural transitions and real-world examples.
+   - Write like someone who has worked directly with auto repair shop owners.
 
 2. Target Audience:
    - Auto repair shop owners
@@ -22,32 +22,46 @@ IMPORTANT WRITING REQUIREMENTS:
    - Concerned about profit, efficiency, time, repeat customers
 
 3. SEO Requirements:
-   - Optimize for primary keyword: [PRIMARY KEYWORD]
-   - Include secondary keywords naturally: [SECONDARY KEYWORDS]
-   - Keyword density natural (not stuffed).
-   - Use H2 and H3 structure properly.
+   - Optimize for primary keyword: what is garage management software
+   - Include secondary keywords naturally:
+garage management software definition,
+garage management system,
+auto repair shop management software,
+what does garage management software do,
+benefits of garage management software,
+auto shop management system,
+cloud-based garage management software,
+garage work order software,
+auto repair business software,
+garage invoicing software,
+digital work order system for auto shops,
+garage scheduling software,
+shop management software for mechanics,
+how garage management software works,
+garage software for small business
+   - Maintain natural keyword density (no stuffing).
+   - Use proper H2 and H3 markdown structure.
    - Include FAQ section with clear question-based headings.
-   - Add internal links naturally inside the body:
-       - https://www.garixo.com/pricing (anchor text: garage software pricing)
-       - https://www.garixo.com/features (anchor text: garage management features)
-       - https://www.garixo.com (anchor text: Garixo garage software)
+   - Add internal links naturally inside the body using markdown format:
+       - [garage software pricing](https://www.garixo.com/pricing)
+       - [garage management features](https://www.garixo.com/features)
+       - [Garixo garage software](https://www.garixo.com)
    - Do NOT show raw URLs.
    - Use descriptive anchor texts.
-   - Add structured, scannable formatting.
    - Use short paragraphs (2–4 sentences max).
    - Add bullet lists where helpful.
-   - Add bold highlights for key ideas.
+   - Use bold formatting for key insights.
 
 4. AI SEO Optimization:
    - Include a short “Quick Answer” summary near the beginning.
-   - Add direct answer sections for key questions.
-   - Add FAQ section optimized for search engines and AI engines (ChatGPT, Perplexity, Gemini).
-   - Clear, factual, structured explanations.
+   - Add direct answer sections for important search questions.
+   - Add an FAQ section optimized for search engines and AI engines (ChatGPT, Perplexity, Gemini).
+   - Use clear, structured explanations.
 
 5. Length:
    - Between 1,500–2,000 words.
-   - Deep, actionable, real insights.
-   - Include examples specific to auto repair shops.
+   - Deep, practical, actionable insights.
+   - Use examples specific to auto repair shops.
 
 6. Tone:
    - Practical
@@ -57,87 +71,58 @@ IMPORTANT WRITING REQUIREMENTS:
    - Focus on real-world garage operations
 
 7. Conversion Strategy:
-   - Mention Garixo naturally as a solution.
+   - Mention Garixo naturally as a practical solution.
    - Do NOT oversell.
-   - Position it as practical, affordable, simple.
-   - Include CTA at the end encouraging free trial.
+   - Position it as simple, affordable, and built for small shops.
+   - Include a soft CTA at the end encouraging free trial.
 
-8. Readability & Layout Requirements:
-   - Maintain clean small spacing.
-   - Keep paragraphs short and visually comfortable.
-   - Add section breaks between major parts.
-   - Avoid large text blocks.
-   - Use subheadings frequently.
-   - Make it highly scannable.
+8. Formatting Requirements (Markdown Only):
+   - Use:
+       ## for H2
+       ### for H3
+   - No HTML.
+   - No inline styles.
+   - No tables unless truly necessary.
+   - Keep formatting clean and scannable.
+   - Maintain clear spacing between sections.
+   - Avoid large blocks of text.
 
 9. Image Placement Requirements:
-   - Insert 2–3 relevant image blocks in logical sections.
-   - Use this format:
+   - Insert 2–3 image suggestion blocks in logical sections.
+   - Use this exact markdown format:
 
-<div class="my-8">
-       <p class="text-sm text-gray-500 italic">
-         Image Suggestion: Description of realistic photo or dashboard screenshot relevant to this section.
-       </p>
-     </div>
+     ---
+     *Image Suggestion: Description of realistic photo or dashboard screenshot relevant to this section.*
+     ---
+
    - Do NOT use <img> tags.
-   - Just describe what image should be placed.
-   - Images should feel authentic (garage, mechanics, dashboard screen, invoice screen, etc.)
-   - Place images after major H2 sections.
-
-10. HTML + Tailwind Formatting Rules:
-
-   The Body must be valid clean HTML.
-
-   Allowed tags:
-   <section>, <div>, <h2>, <h3>, <p>, <ul>, <li>, <strong>, <a>
-
-   You ARE allowed to use TailwindCSS classes.
-   You MUST use class attributes for styling.
-
-   Use these styling guidelines:
-
-   - Wrap entire article inside:
-
-     <section class="max-w-4xl mx-auto px-6 py-12 space-y-10">
-
-   - H2:
-     class="text-2xl md:text-3xl font-bold text-gray-900"
-
-   - H3:
-     class="text-xl font-semibold text-gray-800 mt-6"
-
-   - Paragraph:
-     class="text-base text-gray-700 leading-relaxed mt-4"
-
-   - UL:
-     class="list-disc pl-6 mt-4 space-y-2 text-gray-700"
-
-   - Strong:
-     no class needed
-
-   - Links:
-     class="text-blue-600 font-medium underline"
-
-   Do NOT:
-   - Use inline styles
-   - Use markdown
-   - Include <html>, <head>, <body>
-   - Include script tags
-   - Include style tags
-
-   Clean HTML only with Tailwind utility classes.
-   Must be production-ready for NextJS + Tailwind environment.
+   - Only describe the image placement.
+   - Images should feel authentic (garage owner, mechanic workflow, dashboard screen, invoice screen, etc.)
 
 ----------------------------------------
 
 TOPIC:
-[INSERT BLOG TOPIC HERE]
+What is Garage Management Software? Complete Guide for Auto Repair Shop Owners
 
 PRIMARY KEYWORD:
-[INSERT PRIMARY KEYWORD]
+what is garage management software
 
 SECONDARY KEYWORDS:
-[INSERT SECONDARY KEYWORDS HERE]
+garage management software definition,
+garage management system,
+auto repair shop management software,
+what does garage management software do,
+benefits of garage management software,
+auto shop management system,
+cloud-based garage management software,
+garage work order software,
+auto repair business software,
+garage invoicing software,
+digital work order system for auto shops,
+garage scheduling software,
+shop management software for mechanics,
+how garage management software works,
+garage software for small business
 
 CATEGORY:
 Choose one:
@@ -154,7 +139,7 @@ OUTPUT FORMAT (STRICTLY FOLLOW THIS FORMAT):
 Title:
 Slug:
 Excerpt:
-Body: (HTML only)
+Body: (Markdown only)
 SEO Meta Title:
 SEO Meta Description:
 SEO Focus Keyword:
@@ -175,16 +160,12 @@ CTA Link: https://www.garixo.com/pricing
 
 Now generate the complete blog post.
 
-IMPORTANT HTML OUTPUT RULES:
+IMPORTANT:
+- Return Body in clean Markdown only.
+- Do NOT use HTML.
+- Do NOT include code blocks.
+- Do NOT include explanations outside the requested output format.
+- Make it ready for direct copy-paste into MarkdownEditor or any CMS that supports Markdown.
 
-- Return ONLY clean HTML content for the Body.
-- Do NOT use markdown.
-- Do NOT use inline styles.
-- Do NOT include <html>, <head>, or <body> tags.
-- Do NOT include classes or ids.
-- Use only these tags:
-  <h2>, <h3>, <p>, <ul>, <li>, <strong>, <a>
-- Keep paragraphs short (2–4 sentences max).
-- Maintain natural spacing between sections.
-- Make it visually clean and easy to read.
-- Ensure it is ready for direct copy-paste into CKEditor without editing.
+
+

@@ -1,19 +1,17 @@
-import {
-  toAbsoluteUrl,
-  toSitemapIsoDate,
-  xmlEscape
-} from '@/services/seo/sitemap';
+// This route generates the sitemap index XML, which references other sitemap files (e.g., static pages, blog posts).
+import { toAbsoluteUrl, xmlEscape } from '@/services/seo/sitemap';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 function buildSitemapIndexXml(urls: string[]): string {
-  const now = toSitemapIsoDate(new Date());
+  // This is a fixed date for all sitemaps. In a real application, you might want to use the actual last modified date of each sitemap.
+  const date = '2026-03-01T06:45:12.110Z';
 
   const body = urls
     .map(
       (loc) =>
-        `\n  <sitemap>\n    <loc>${xmlEscape(loc)}</loc>\n    <lastmod>${now}</lastmod>\n  </sitemap>`
+        `\n  <sitemap>\n    <loc>${xmlEscape(loc)}</loc>\n    <lastmod>${date}</lastmod>\n  </sitemap>`
     )
     .join('');
 
