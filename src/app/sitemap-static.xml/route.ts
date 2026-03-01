@@ -31,8 +31,6 @@ function buildXmlUrlset(
 }
 
 export async function GET(): Promise<Response> {
-  const nowIso = new Date().toISOString();
-
   const staticPath = [
     {
       path: '/',
