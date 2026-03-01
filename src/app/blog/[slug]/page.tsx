@@ -138,7 +138,7 @@ export default async function BlogDetailPage({
 
       <LandingHeader />
       <main className="bg-background-primary">
-        <article className="space-y-s5 mx-auto w-full max-w-[820px] px-s4 py-s10">
+        <article className="mx-auto w-full max-w-[820px] space-y-s4 px-s4 py-s10">
           <header className="space-y-s2">
             <p className="text-caption text-text-muted">
               {post.category} · {post.readingTime} min read ·{' '}
@@ -163,7 +163,7 @@ export default async function BlogDetailPage({
           />
 
           {post.faqItems.length ? (
-            <section className="pt-s5 space-y-s2 border-t border-border">
+            <section className="space-y-s2 border-t border-border pt-s4">
               <h2 className="text-h2">Frequently Asked Questions</h2>
               {post.faqItems.map((item) => (
                 <div
