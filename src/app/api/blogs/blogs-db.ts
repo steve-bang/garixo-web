@@ -347,6 +347,110 @@ export async function listPublishedBlogs(): Promise<Blog[]> {
     );
 }
 
+export type PublishScheduledBlogsResult = {
+  scanned: number;
+  published: number;
+};
+
+/**
+ * Publish all scheduled blogs that are due at or before `nowIso`.
+ *
+ * Notes:
+ * - Uses batched looping for predictable memory usage.
+ * - Safe to run repeatedly (idempotent with status filter).
+ */
+export async function publishDueScheduledBlogs(
+  nowIso: string,
+  pageSize = 200
+): Promise<PublishScheduledBlogsResult> {
+  const safePageSize = Math.max(1, Math.min(500, pageSize));
+  const root = blogsCollection() as any;
+
+  let scanned = 0;
+  let published = 0;
+
+  const publishFromDocs = async (docs: any[]) => {
+    scanned += docs.length;
+
+    await Promise.all(
+      docs.map(async (doc: any) => {
+        const raw = doc.data() as Partial<BlogDocument>;
+        if ((raw.status ?? 'draft') !== 'scheduled') {
+          return;
+        }
+
+        const nextPublishedAt = raw.publishedAt ?? nowIso;
+        await doc.ref.set(
+          {
+            status: 'published',
+            publishedAt: nextPublishedAt,
+            updatedAt: nowIso
+          },
+          { merge: true }
+        );
+        published += 1;
+      })
+    );
+  };
+
+  try {
+    while (true) {
+      const snapshot = await root
+        .where('status', '==', 'scheduled')
+        .where('scheduledAt', '<=', nowIso)
+        .orderBy('scheduledAt', 'asc')
+        .limit(safePageSize)
+        .get();
+
+      if (!snapshot.docs?.length) {
+        break;
+      }
+
+      await publishFromDocs(snapshot.docs);
+
+      if (snapshot.docs.length < safePageSize) {
+        break;
+      }
+    }
+  } catch (error) {
+    if (!isMissingFirestoreIndexError(error)) {
+      throw error;
+    }
+
+    // Fallback path while the composite index is being created:
+    // query scheduled posts only, then filter due time in memory.
+    const fallbackSnapshot = await root
+      .where('status', '==', 'scheduled')
+      .get();
+    const dueDocs = (fallbackSnapshot.docs ?? []).filter((doc: any) => {
+      const raw = doc.data() as Partial<BlogDocument>;
+      if (!raw.scheduledAt) {
+        return false;
+      }
+
+      const scheduledTime = new Date(raw.scheduledAt).getTime();
+      if (Number.isNaN(scheduledTime)) {
+        return false;
+      }
+
+      return scheduledTime <= new Date(nowIso).getTime();
+    });
+
+    if (dueDocs.length > 0) {
+      await publishFromDocs(dueDocs);
+    }
+  }
+
+  if (published > 0) {
+    void notifySearchEnginesBlogUpdated();
+  }
+
+  return {
+    scanned,
+    published
+  };
+}
+
 /**
  * Returns SEO-indexable, published blog URLs for sitemap generation.
  *

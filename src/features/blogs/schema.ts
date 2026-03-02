@@ -85,6 +85,13 @@ export const blogListQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(50).default(20)
 });
 
+export const publishScheduledBlogsSchema = z.object({
+  keySecret: z.string().min(1, 'Missing scheduler secret.')
+});
+
 export type CreateBlogInput = z.infer<typeof createBlogSchema>;
 export type UpdateBlogInput = z.infer<typeof updateBlogSchema>;
 export type BlogListQueryInput = z.infer<typeof blogListQuerySchema>;
+export type PublishScheduledBlogsInput = z.infer<
+  typeof publishScheduledBlogsSchema
+>;
