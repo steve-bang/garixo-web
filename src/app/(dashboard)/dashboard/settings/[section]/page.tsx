@@ -38,6 +38,14 @@ export async function generateMetadata({
     };
   }
 
+  if (sectionData.key === 'support') {
+    return {
+      title: 'Support | Garixo',
+      description:
+        'Report product issues, ask questions, and request features from your dashboard.'
+    };
+  }
+
   return {
     title: `${sectionData.title} | Garixo`,
     description: sectionData.description

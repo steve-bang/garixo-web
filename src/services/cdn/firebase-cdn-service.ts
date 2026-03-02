@@ -45,6 +45,12 @@ export type UploadGarageVehicleImageInput = {
   file: File;
 };
 
+export type UploadGarageSupportTicketScreenshotInput = {
+  garageId: string;
+  ticketId: string;
+  file: File;
+};
+
 export type UploadSystemImageInput = {
   scope: 'blogs' | 'branding' | 'images';
   ownerId: string;
@@ -185,6 +191,16 @@ function buildGarageVehicleImagePath(params: {
 }): string {
   const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   return `garages/${params.garageId}/vehicles/${params.vehicleId}/images/${params.fileName || 'image'}-${unique}.${params.extension}`;
+}
+
+function buildGarageSupportTicketScreenshotPath(params: {
+  garageId: string;
+  ticketId: string;
+  fileName: string;
+  extension: string;
+}): string {
+  const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  return `garages/${params.garageId}/support/tickets/${params.ticketId}/${params.fileName || 'screenshot'}-${unique}.${params.extension}`;
 }
 
 function buildSystemImagePath(params: {
@@ -434,6 +450,49 @@ export async function uploadGarageVehicleImageToCdn({
     buffer,
     contentType: file.type,
     cacheControl: 'public,max-age=31536000,immutable',
+    signedUrlExpiresAt: '03-01-2035'
+  });
+
+  return {
+    url: uploaded.url,
+    path: filePath,
+    name: file.name,
+    contentType: file.type as 'image/jpeg' | 'image/png' | 'image/webp',
+    size: file.size
+  };
+}
+
+export async function uploadGarageSupportTicketScreenshotToCdn({
+  garageId,
+  ticketId,
+  file
+}: UploadGarageSupportTicketScreenshotInput): Promise<{
+  url: string;
+  path: string;
+  name: string;
+  contentType: 'image/jpeg' | 'image/png' | 'image/webp';
+  size: number;
+}> {
+  validateImageFile(file, {
+    maxSizeBytes: 3 * 1024 * 1024,
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp']
+  });
+
+  const ext = extensionFromMime(file.type);
+  const baseName = sanitizeFileName(file.name.replace(/\.[^.]+$/, ''));
+  const filePath = buildGarageSupportTicketScreenshotPath({
+    garageId,
+    ticketId,
+    fileName: baseName,
+    extension: ext
+  });
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  const uploaded = await uploadBufferToCdn({
+    filePath,
+    buffer,
+    contentType: file.type,
+    cacheControl: 'private,max-age=3600,must-revalidate',
     signedUrlExpiresAt: '03-01-2035'
   });
 

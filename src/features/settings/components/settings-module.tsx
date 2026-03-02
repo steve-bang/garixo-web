@@ -2,6 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { GarageInformationForm } from '@/features/settings/components/garage-information-form';
 import { InvoiceSettingsForm } from '@/features/settings/components/invoice-settings-form';
+import { SupportTicketSection } from '@/features/settings/components/support-ticket-section';
 import { SubscriptionSettings } from '@/features/settings/components/subscription-settings';
 import type { SettingsSection } from '@/features/settings/types';
 
@@ -18,6 +19,8 @@ export function SettingsModule({ section }: SettingsModuleProps): JSX.Element {
         <SubscriptionSettings />
       ) : section.key === 'invoice-settings' ? (
         <InvoiceSettingsForm />
+      ) : section.key === 'support' ? (
+        <SupportTicketSection />
       ) : (
         <div className="mx-auto max-w-[820px] space-y-s4">
           <header className="space-y-s1">

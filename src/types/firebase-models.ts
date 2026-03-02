@@ -265,6 +265,35 @@ export interface InvoicePublicShareDocument {
   updatedAt: string;
 }
 
+export type GarageSupportTicketType = 'problem' | 'question' | 'feature';
+export type GarageSupportTicketStatus = 'open' | 'resolved';
+
+/**
+ * Garage support/help desk request.
+ * Path: garages/{garageId}/supportTickets/{ticketId}
+ */
+export interface GarageSupportTicketDocument {
+  id?: string;
+  garageId: string;
+  createdByUserId: string;
+  createdByName: string;
+  createdByEmail: string;
+  type: GarageSupportTicketType;
+  shortDescription: string;
+  message: string;
+  screenshot: {
+    url: string;
+    path: string;
+    name: string;
+    contentType: 'image/jpeg' | 'image/png' | 'image/webp';
+    size: number;
+  } | null;
+  status: GarageSupportTicketStatus;
+  source: 'dashboard';
+  createdAt: string;
+  updatedAt: string;
+}
+
 /**
  * Marketing blog post record.
  * Path: blogs/{blogId}

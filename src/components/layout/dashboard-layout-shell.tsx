@@ -80,6 +80,10 @@ const operationsMenuItems: SidebarItem[] = [
       {
         href: '/dashboard/settings/invoice-settings',
         label: 'Invoice'
+      },
+      {
+        href: '/dashboard/settings/support',
+        label: 'Support'
       }
     ]
   }
@@ -92,7 +96,11 @@ const administratorMenuItems: SidebarItem[] = [
     icon: UserCog,
     children: [
       { href: '/dashboard/administrator/users', label: 'Users' },
-      { href: '/dashboard/administrator/blogs', label: 'Blogs' }
+      { href: '/dashboard/administrator/blogs', label: 'Blogs' },
+      {
+        href: '/dashboard/administrator/support-tickets',
+        label: 'Support Tickets'
+      }
     ]
   }
 ];

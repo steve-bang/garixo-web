@@ -42,6 +42,12 @@ const settingsSections: Record<SettingsSectionKey, SettingsSection> = {
     title: 'Invoice Settings',
     description: 'Set your default tax and payment terms for invoices.',
     cards: []
+  },
+  support: {
+    key: 'support',
+    title: 'Support',
+    description: 'Report issues, ask questions, or request product features.',
+    cards: []
   }
 };
 
