@@ -25,17 +25,17 @@ setGlobalOptions({
  */
 export const weeklyBlogPublish = onSchedule(
   {
-    // Every Wednesday at 00:40 (Asia/Ho_Chi_Minh).
-    schedule: '40 0 * * 3',
+    // every day at 00:40 UTC (Etc/UTC).
+    schedule: '40 0 * * *',
     // Explicit timezone ensures deterministic schedule execution.
-    timeZone: 'Asia/Ho_Chi_Minh',
+    timeZone: 'Etc/UTC',
     region: 'us-central1'
   },
   async (event) => {
     try {
       // Start log includes both runtime clock and scheduler-provided trigger time.
       logger.info(
-        `Starting scheduled function to publish blogs at ${new Date().toISOString()} (${event.scheduleTime}) with timezone Asia/Ho_Chi_Minh UTC+7`
+        `Starting scheduled function to publish blogs at ${new Date().toISOString()} (${event.scheduleTime}) with timezone Etc/UTC`
       );
 
       // Trigger the app endpoint that publishes all due scheduled blog posts.

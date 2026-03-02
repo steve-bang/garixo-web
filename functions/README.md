@@ -93,7 +93,7 @@ From repository root:
 
 ```bash
 firebase login
-firebase use <your-firebase-project-id>
+firebase use <your-firebase-project-id> | garixo-pro or garixo-dev
 ```
 
 ### 2) Install and build functions
