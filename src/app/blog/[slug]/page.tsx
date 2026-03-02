@@ -17,7 +17,7 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -166,23 +166,6 @@ export default async function BlogDetailPage({
               dangerouslySetInnerHTML={{ __html: post.content.html }}
             />
           )}
-
-          {post.faqItems.length ? (
-            <section className="space-y-s2 border-t border-border pt-s4">
-              <h2 className="text-h2">Frequently Asked Questions</h2>
-              {post.faqItems.map((item) => (
-                <div
-                  key={item.question}
-                  className="rounded-md border border-border bg-surface-default p-s3"
-                >
-                  <h3 className="text-h3">{item.question}</h3>
-                  <p className="mt-s1 text-small text-text-secondary">
-                    {item.answer}
-                  </p>
-                </div>
-              ))}
-            </section>
-          ) : null}
 
           {post.ctaBlock ? (
             <section className="rounded-md border border-primary-200 bg-primary-50 p-s4">

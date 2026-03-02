@@ -58,13 +58,24 @@ type BlogFormState = {
   ogImage: string;
   canonical: string;
   isIndexed: boolean;
-  faqQuestion: string;
-  faqAnswer: string;
+  faqItems: Array<{
+    id: string;
+    question: string;
+    answer: string;
+  }>;
   ctaTitle: string;
   ctaDescription: string;
   ctaLabel: string;
   ctaHref: string;
 };
+
+function createFaqItem() {
+  return {
+    id: `faq-${Math.random().toString(36).slice(2, 10)}`,
+    question: '',
+    answer: ''
+  };
+}
 
 function emptyForm(): BlogFormState {
   return {
@@ -87,8 +98,7 @@ function emptyForm(): BlogFormState {
     ogImage: '',
     canonical: '',
     isIndexed: true,
-    faqQuestion: '',
-    faqAnswer: '',
+    faqItems: [],
     ctaTitle: '',
     ctaDescription: '',
     ctaLabel: '',
@@ -132,8 +142,11 @@ function mapBlogToForm(blog: Blog): BlogFormState {
     ogImage: blog.ogImage,
     canonical: blog.canonical,
     isIndexed: blog.isIndexed,
-    faqQuestion: blog.faqItems[0]?.question ?? '',
-    faqAnswer: blog.faqItems[0]?.answer ?? '',
+    faqItems: blog.faqItems.map((item) => ({
+      id: `faq-${Math.random().toString(36).slice(2, 10)}`,
+      question: item.question,
+      answer: item.answer
+    })),
     ctaTitle: blog.ctaBlock?.title ?? '',
     ctaDescription: blog.ctaBlock?.description ?? '',
     ctaLabel: blog.ctaBlock?.ctaLabel ?? '',
@@ -177,7 +190,6 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm((prev) => (prev.title ? prev : mapBlogToForm(sourceBlog)));
     if (sourceBlog.content.markdown) {
-       
       setContentMode('markdown');
     }
   }, [isEditMode, sourceBlog]);
@@ -214,6 +226,33 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
 
   const handleAutoSlug = () => {
     onField('slug', slugify(form.title));
+  };
+
+  const addFaqItem = () => {
+    setForm((prev) => ({
+      ...prev,
+      faqItems: [...prev.faqItems, createFaqItem()]
+    }));
+  };
+
+  const removeFaqItem = (id: string) => {
+    setForm((prev) => ({
+      ...prev,
+      faqItems: prev.faqItems.filter((item) => item.id !== id)
+    }));
+  };
+
+  const updateFaqItem = (
+    id: string,
+    key: 'question' | 'answer',
+    value: string
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      faqItems: prev.faqItems.map((item) =>
+        item.id === id ? { ...item, [key]: value } : item
+      )
+    }));
   };
 
   const buildPayload = (statusOverride?: BlogStatus) => {
@@ -253,15 +292,12 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
       ogImage: form.ogImage,
       canonical: form.canonical,
       isIndexed: form.isIndexed,
-      faqItems:
-        form.faqQuestion.trim() && form.faqAnswer.trim()
-          ? [
-              {
-                question: form.faqQuestion.trim(),
-                answer: form.faqAnswer.trim()
-              }
-            ]
-          : [],
+      faqItems: form.faqItems
+        .filter((item) => item.question.trim() && item.answer.trim())
+        .map((item) => ({
+          question: item.question.trim(),
+          answer: item.answer.trim()
+        })),
       ctaBlock:
         form.ctaTitle.trim() &&
         form.ctaDescription.trim() &&
@@ -280,6 +316,20 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
 
   const save = async (statusOverride?: BlogStatus) => {
     try {
+      const hasIncompleteFaq = form.faqItems.some(
+        (item) =>
+          (item.question.trim().length > 0 &&
+            item.answer.trim().length === 0) ||
+          (item.question.trim().length === 0 && item.answer.trim().length > 0)
+      );
+
+      if (hasIncompleteFaq) {
+        toast.error(
+          'Please complete both question and answer, or remove empty FAQ items.'
+        );
+        return;
+      }
+
       const payload = buildPayload(statusOverride);
       const parsed = createBlogSchema.safeParse(payload);
 
@@ -463,29 +513,12 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
           </div>
 
           <Card className="space-y-s3 p-s4">
-            <h3 className="text-h3">Structured Blocks</h3>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
-                FAQ Question
-              </label>
-              <Input
-                value={form.faqQuestion}
-                onChange={(event) => onField('faqQuestion', event.target.value)}
-                placeholder="What is garage work order software?"
-              />
+              <h3 className="text-h3">CTA Block</h3>
+              <p className="text-small text-text-muted">
+                Add a clear call-to-action shown at the end of this blog post.
+              </p>
             </div>
-            <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
-                FAQ Answer
-              </label>
-              <Textarea
-                value={form.faqAnswer}
-                onChange={(event) => onField('faqAnswer', event.target.value)}
-                rows={3}
-                placeholder="Short, clear answer for snippet-friendly SEO."
-              />
-            </div>
-
             <div className="grid gap-s3 md:grid-cols-2">
               <div className="space-y-s1">
                 <label className="text-small font-medium text-text-secondary">
@@ -527,6 +560,73 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
                   placeholder="/pricing"
                 />
               </div>
+            </div>
+          </Card>
+
+          <Card className="space-y-s3 p-s4">
+            <div className="space-y-s1">
+              <h3 className="text-h3">FAQ Schema</h3>
+              <p className="text-small text-text-muted">
+                Add common customer questions to improve SEO rich results.
+              </p>
+            </div>
+            <div className="space-y-s3">
+              {form.faqItems.length === 0 ? (
+                <p className="text-small text-text-muted">
+                  No FAQ items yet. Add at least one if this article includes a
+                  FAQ section.
+                </p>
+              ) : null}
+
+              {form.faqItems.map((item, index) => (
+                <Card
+                  key={item.id}
+                  className="space-y-s3 border border-border p-s3"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-small font-medium text-text-primary">
+                      FAQ #{index + 1}
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => removeFaqItem(item.id)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                  <div className="space-y-s1">
+                    <label className="text-small font-medium text-text-secondary">
+                      Question
+                    </label>
+                    <Input
+                      value={item.question}
+                      onChange={(event) =>
+                        updateFaqItem(item.id, 'question', event.target.value)
+                      }
+                      placeholder="What is garage work order software?"
+                    />
+                  </div>
+                  <div className="space-y-s1">
+                    <label className="text-small font-medium text-text-secondary">
+                      Answer
+                    </label>
+                    <Textarea
+                      value={item.answer}
+                      onChange={(event) =>
+                        updateFaqItem(item.id, 'answer', event.target.value)
+                      }
+                      rows={3}
+                      placeholder="Short, clear answer for snippet-friendly SEO."
+                    />
+                  </div>
+                </Card>
+              ))}
+
+              <Button type="button" variant="secondary" onClick={addFaqItem}>
+                Add FAQ
+              </Button>
             </div>
           </Card>
 
