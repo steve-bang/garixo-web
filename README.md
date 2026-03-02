@@ -115,6 +115,40 @@ Firebase function:
 - Initiate your project: `firebase init`
 - Deploy your functions: `firebase deploy`
 
+## Firebase Functions and Blog Scheduler
+
+Garixo uses Firebase Cloud Functions (Gen 2) for scheduled background jobs.
+
+Current scheduled job:
+
+- `weeklyBlogPublish` in `/functions/src/index.ts`
+- Region: `us-central1`
+- Schedule: `40 0 * * 3` (every Wednesday, `Asia/Ho_Chi_Minh`)
+- Action: calls `GET https://www.garixo.com/api/blogs/publish-scheduled` to publish due scheduled blog posts.
+
+How scheduled blog publishing works:
+
+1. Scheduler triggers `weeklyBlogPublish`.
+2. Function calls `/api/blogs/publish-scheduled`.
+3. API scans blogs with `status=scheduled` and `scheduledAt <= now`.
+4. API updates each due post to `status=published` and sets timestamps.
+
+Important env/config:
+
+- App API secret for scheduled publishing: `BLOG_SCHEDULER_SECRET` (if endpoint auth is enabled).
+- Firebase function deployment/config is managed in `/functions`.
+- Scheduler configuration and deploy steps are documented in `/functions/README.md`.
+
+Deploy functions:
+
+```bash
+cd functions
+npm install
+npm run build
+cd ..
+firebase deploy --only functions
+```
+
 ## Notable directories
 
 ```text
