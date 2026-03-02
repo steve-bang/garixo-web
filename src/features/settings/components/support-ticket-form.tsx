@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Upload } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateSupportTicket } from '@/features/support/hooks';
+import { SupportRequestError } from '@/features/support/service';
 import {
   createSupportTicketSchema,
   type CreateSupportTicketInput
@@ -24,10 +25,24 @@ type SupportTicketFormProps = {
 export function SupportTicketForm({
   onSubmitted
 }: SupportTicketFormProps): JSX.Element {
+  const SUCCESS_COOLDOWN_MS = 15 * 1000;
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
+  const [isCooldown, setIsCooldown] = useState(false);
   const createMutation = useCreateSupportTicket();
+
+  useEffect(() => {
+    if (!isCooldown) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setIsCooldown(false);
+    }, SUCCESS_COOLDOWN_MS);
+
+    return () => clearTimeout(timer);
+  }, [isCooldown]);
 
   const form = useForm<CreateSupportTicketInput>({
     resolver: zodResolver(createSupportTicketSchema),
@@ -70,9 +85,16 @@ export function SupportTicketForm({
         type: 'problem'
       });
       setScreenshotFile(null);
+      setIsCooldown(true);
       toast.success('Thanks. Your support request has been sent.');
       onSubmitted?.();
     } catch (error) {
+      if (error instanceof SupportRequestError && error.status === 429) {
+        toast.error(
+          'You have sent several requests in a short time. Please wait a few minutes and try again.'
+        );
+        return;
+      }
       toast.error(
         error instanceof Error
           ? error.message
@@ -174,9 +196,19 @@ export function SupportTicketForm({
         </div>
 
         <div className="flex justify-end border-t border-border pt-s4">
-          <Button type="submit" disabled={createMutation.isPending}>
-            {createMutation.isPending ? 'Sending...' : 'Send Request'}
-          </Button>
+          <div className="space-y-s1 text-right">
+            <Button
+              type="submit"
+              disabled={createMutation.isPending || isCooldown}
+            >
+              {createMutation.isPending ? 'Sending...' : 'Send Request'}
+            </Button>
+            {isCooldown ? (
+              <p className="text-caption text-text-muted">
+                Please wait a few seconds before sending another request.
+              </p>
+            ) : null}
+          </div>
         </div>
       </form>
     </Card>

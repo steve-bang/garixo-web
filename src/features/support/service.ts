@@ -6,13 +6,23 @@ import type {
 } from '@/features/support/types';
 import type { CreateSupportTicketInput } from '@/features/support/schema';
 
+export class SupportRequestError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'SupportRequestError';
+    this.status = status;
+  }
+}
+
 async function readJson<T>(response: Response): Promise<ApiResponse<T>> {
   return (await response.json()) as ApiResponse<T>;
 }
 
-function ensureSuccess<T>(payload: ApiResponse<T>): T {
+function ensureSuccess<T>(payload: ApiResponse<T>, status = 200): T {
   if (!payload.success || payload.data === undefined) {
-    throw new Error(payload.error ?? 'Request failed');
+    throw new SupportRequestError(payload.error ?? 'Request failed', status);
   }
 
   return payload.data;
@@ -21,7 +31,7 @@ function ensureSuccess<T>(payload: ApiResponse<T>): T {
 export async function getSupportTickets(limit = 10): Promise<SupportTicket[]> {
   const response = await fetch(`/api/support/tickets?limit=${limit}`);
   const payload = await readJson<SupportTicket[]>(response);
-  return ensureSuccess(payload);
+  return ensureSuccess(payload, response.status);
 }
 
 export async function createSupportTicket(
@@ -44,7 +54,7 @@ export async function createSupportTicket(
     body: formData
   });
   const payload = await readJson<SupportTicket>(response);
-  return ensureSuccess(payload);
+  return ensureSuccess(payload, response.status);
 }
 
 function toQuery(params: AdminSupportTicketsQuery): string {
@@ -68,7 +78,7 @@ export async function getAdminSupportTickets(
     `/api/support/admin/tickets${query ? `?${query}` : ''}`
   );
   const payload = await readJson<SupportTicketListResponse>(response);
-  return ensureSuccess(payload);
+  return ensureSuccess(payload, response.status);
 }
 
 export async function getAdminSupportTicket(
@@ -79,7 +89,7 @@ export async function getAdminSupportTicket(
     `/api/support/admin/tickets/${garageId}/${ticketId}`
   );
   const payload = await readJson<SupportTicket>(response);
-  return ensureSuccess(payload);
+  return ensureSuccess(payload, response.status);
 }
 
 export async function updateAdminSupportTicketStatus(
@@ -98,5 +108,5 @@ export async function updateAdminSupportTicketStatus(
     }
   );
   const payload = await readJson<SupportTicket>(response);
-  return ensureSuccess(payload);
+  return ensureSuccess(payload, response.status);
 }
