@@ -3,6 +3,7 @@ import type {
   UpdateVehicleInput
 } from '@/features/vehicles/schema';
 import type {
+  VehicleImage,
   VehicleServiceRecord,
   VehicleWorkOrderHistoryRecord,
   Vehicle,
@@ -112,4 +113,41 @@ export async function deleteVehicle(id: string): Promise<Vehicle> {
 
   const payload = await readJson<Vehicle>(response);
   return ensureSuccess(payload);
+}
+
+export async function uploadVehicleImage(
+  vehicleId: string,
+  file: File
+): Promise<Vehicle> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`/api/vehicles/${vehicleId}/images`, {
+    method: 'POST',
+    body: formData
+  });
+
+  const payload = await readJson<Vehicle>(response);
+  return ensureSuccess(payload);
+}
+
+export async function deleteVehicleImage(
+  vehicleId: string,
+  imageId: string
+): Promise<Vehicle> {
+  const response = await fetch(`/api/vehicles/${vehicleId}/images/${imageId}`, {
+    method: 'DELETE'
+  });
+
+  const payload = await readJson<Vehicle>(response);
+  return ensureSuccess(payload);
+}
+
+export function sortVehicleImagesByNewest(
+  images: VehicleImage[]
+): VehicleImage[] {
+  return [...images].sort(
+    (a, b) =>
+      new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+  );
 }

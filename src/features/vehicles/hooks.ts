@@ -5,11 +5,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { vehiclesQueryKey } from '@/features/vehicles/api';
 import {
   createVehicle,
+  deleteVehicleImage,
   deleteVehicle,
   getVehicleById,
   getVehicles,
   getVehicleServices,
   getVehicleWorkOrderHistory,
+  uploadVehicleImage,
   updateVehicle,
   type GetVehiclesParams
 } from '@/features/vehicles/service';
@@ -88,6 +90,35 @@ export function useDeleteVehicle() {
 
   return useMutation({
     mutationFn: (id: string) => deleteVehicle(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: vehiclesQueryKey });
+    }
+  });
+}
+
+export function useUploadVehicleImage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ vehicleId, file }: { vehicleId: string; file: File }) =>
+      uploadVehicleImage(vehicleId, file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: vehiclesQueryKey });
+    }
+  });
+}
+
+export function useDeleteVehicleImage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      vehicleId,
+      imageId
+    }: {
+      vehicleId: string;
+      imageId: string;
+    }) => deleteVehicleImage(vehicleId, imageId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: vehiclesQueryKey });
     }

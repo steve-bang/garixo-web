@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,14 +14,17 @@ import {
   type CreateVehicleInput
 } from '@/features/vehicles/schema';
 import {
+  useDeleteVehicleImage,
   useUpdateVehicle,
   useVehicleDetail,
+  useUploadVehicleImage,
   useVehicleWorkOrderHistory
 } from '@/features/vehicles/hooks';
 import type { VehicleStatus } from '@/features/vehicles/types';
 import { averageTicket } from '@/features/vehicles/utils';
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrencyUsd, formatDate } from '@/lib/utils/format';
+import { Trash, Upload } from 'lucide-react';
 
 type Props = {
   vehicleId: string;
@@ -98,13 +101,28 @@ function formatVehicleDate(value?: string | null): string {
   });
 }
 
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export function VehicleDetailPage({ vehicleId }: Props): JSX.Element {
   const toast = useToast();
   const detailQuery = useVehicleDetail(vehicleId);
   const historyQuery = useVehicleWorkOrderHistory(vehicleId);
   const updateMutation = useUpdateVehicle();
+  const uploadImageMutation = useUploadVehicleImage();
+  const deleteImageMutation = useDeleteVehicleImage();
   const [draft, setDraft] = useState<CreateVehicleInput | null>(null);
   const [editing, setEditing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const vehicle = detailQuery.data;
   const history = historyQuery.data ?? [];
@@ -131,6 +149,14 @@ export function VehicleDetailPage({ vehicleId }: Props): JSX.Element {
   const badge = useMemo(
     () => (vehicle ? statusStyle(vehicle.status) : null),
     [vehicle]
+  );
+  const images = useMemo(
+    () =>
+      [...(vehicle?.images ?? [])].sort(
+        (a, b) =>
+          new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+      ),
+    [vehicle?.images]
   );
 
   if (detailQuery.isLoading) {
@@ -188,6 +214,38 @@ export function VehicleDetailPage({ vehicleId }: Props): JSX.Element {
   const onReset = () => {
     setDraft(null);
     setEditing(false);
+  };
+
+  const onFileSelected = async (event: ChangeEvent<HTMLInputElement>) => {
+    const selected = event.target.files?.[0];
+    // Reset input immediately so selecting the same file again still fires change.
+    event.target.value = '';
+
+    if (!selected) {
+      return;
+    }
+
+    try {
+      await uploadImageMutation.mutateAsync({ vehicleId, file: selected });
+      await detailQuery.refetch();
+      toast.success('Vehicle photo uploaded.');
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Could not upload photo.'
+      );
+    }
+  };
+
+  const onDeleteImage = async (imageId: string) => {
+    try {
+      await deleteImageMutation.mutateAsync({ vehicleId, imageId });
+      await detailQuery.refetch();
+      toast.success('Vehicle photo removed.');
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Could not remove photo.'
+      );
+    }
   };
 
   return (
@@ -407,6 +465,101 @@ export function VehicleDetailPage({ vehicleId }: Props): JSX.Element {
           <p className="text-small text-text-secondary">
             Phone: {vehicle.customerPhone}
           </p>
+        </div>
+      </Card>
+
+      <Card className="p-s4">
+        <div className="flex flex-wrap items-center justify-between gap-s2">
+          <div>
+            <h2 className="text-h3">Photos</h2>
+            <p className="text-small text-text-muted">
+              Add clear photos so your team and customers can review vehicle
+              condition quickly.
+            </p>
+          </div>
+          <div className="flex items-center gap-s2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={onFileSelected}
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadImageMutation.isPending || images.length >= 10}
+            >
+              {uploadImageMutation.isPending ? (
+                'Uploading...'
+              ) : (
+                <>
+                  {' '}
+                  <Upload className="mr-s1 h-4 w-4" /> Upload
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-s3">
+          {images.length === 0 ? (
+            <p className="text-small text-text-muted">
+              No photos yet. Upload up to 10 images (JPG, PNG, WEBP, max 5MB
+              each).
+            </p>
+          ) : (
+            <div className="grid gap-s3 sm:grid-cols-2 lg:grid-cols-3">
+              {images.map((image) => (
+                <div
+                  key={image.id}
+                  className="overflow-hidden rounded-md border border-border bg-surface-default"
+                >
+                  <a
+                    href={image.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block bg-surface-hover"
+                  >
+                    <img
+                      src={image.url}
+                      alt={image.name || 'Vehicle photo'}
+                      className="h-44 w-full object-cover"
+                      loading="lazy"
+                    />
+                  </a>
+                  <div className="space-y-s1 p-s2">
+                    {/* <p className="truncate text-small font-medium text-text-primary">
+                      {image.name}
+                    </p> */}
+                    {/* <p className="text-caption text-text-muted">
+                      {formatFileSize(image.size)} •{' '}
+                      {formatVehicleDate(image.uploadedAt)}
+                    </p> */}
+                    <div className="flex items-center justify-between">
+                      <a
+                        href={image.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-caption font-medium text-primary-700 hover:underline"
+                      >
+                        View full size
+                      </a>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onDeleteImage(image.id)}
+                        disabled={deleteImageMutation.isPending}
+                      >
+                        <Trash className="h-4 w-4 text-rose-500" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </Card>
 

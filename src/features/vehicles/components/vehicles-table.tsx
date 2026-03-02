@@ -168,13 +168,28 @@ export function VehiclesTable({
                   )}
                 >
                   <td className="px-s4 py-s3">
-                    <button
-                      type="button"
-                      className="text-left text-[15px] font-semibold"
-                      onClick={() => onView(vehicle)}
-                    >
-                      {vehicle.plateNumber}
-                    </button>
+                    <div className="flex items-center gap-s2">
+                      {vehicle.images?.[0]?.url ? (
+                        <img
+                          src={vehicle.images[0].url}
+                          alt={`${vehicle.plateNumber} photo`}
+                          className="size-10 shrink-0 rounded-md border border-border object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="grid size-8 shrink-0 place-items-center rounded-md border border-border bg-surface-hover text-text-muted">
+                          <Car className="size-4" />
+                        </span>
+                      )}
+
+                      <button
+                        type="button"
+                        className="text-left text-[15px] font-semibold"
+                        onClick={() => onView(vehicle)}
+                      >
+                        {vehicle.plateNumber}
+                      </button>
+                    </div>
                   </td>
                   <td className="px-s4 py-s3">
                     <p className="font-medium">{vehicle.customerName}</p>

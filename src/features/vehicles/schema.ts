@@ -26,6 +26,20 @@ export const vehicleSchema = z.object({
   totalSpent: z.number().min(0),
   lastServiceDate: z.string().optional(),
   notes: z.string().optional(),
+  images: z
+    .array(
+      z.object({
+        id: z.string(),
+        url: z.string().url(),
+        path: z.string(),
+        name: z.string(),
+        contentType: z.enum(['image/jpeg', 'image/png', 'image/webp']),
+        size: z.number().int().min(0),
+        uploadedByUserId: z.string(),
+        uploadedAt: z.string()
+      })
+    )
+    .optional(),
   createdAt: z.string(),
   updatedAt: z.string()
 });

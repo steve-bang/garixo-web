@@ -299,6 +299,43 @@ export function VehicleDrawer({
 
               <Card className="p-s4">
                 <h4 className="text-small font-semibold text-text-primary">
+                  Photos
+                </h4>
+                {detailVehicle.images?.length ? (
+                  <div className="mt-s3 grid grid-cols-3 gap-s2">
+                    {detailVehicle.images.slice(0, 6).map((image) => (
+                      <a
+                        key={image.id}
+                        href={image.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="overflow-hidden rounded-md border border-border bg-surface-hover"
+                      >
+                        <img
+                          src={image.url}
+                          alt={image.name || 'Vehicle photo'}
+                          className="h-20 w-full object-cover"
+                          loading="lazy"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-s2 text-small text-text-muted">
+                    No photos added yet.
+                  </p>
+                )}
+                <div className="mt-s3">
+                  <Button asChild size="sm" variant="secondary">
+                    <Link href={`/dashboard/vehicles/${detailVehicle.id}`}>
+                      Manage Photos
+                    </Link>
+                  </Button>
+                </div>
+              </Card>
+
+              <Card className="p-s4">
+                <h4 className="text-small font-semibold text-text-primary">
                   Service History
                 </h4>
                 {history?.length ? (

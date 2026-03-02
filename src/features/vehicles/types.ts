@@ -33,8 +33,20 @@ export interface Vehicle {
   totalSpent: number;
   lastServiceDate?: ISODateString;
   notes?: string;
+  images?: VehicleImage[];
   createdAt: ISODateString;
   updatedAt: ISODateString;
+}
+
+export interface VehicleImage {
+  id: string;
+  url: string;
+  path: string;
+  name: string;
+  contentType: 'image/jpeg' | 'image/png' | 'image/webp';
+  size: number;
+  uploadedByUserId: string;
+  uploadedAt: ISODateString;
 }
 
 export interface VehicleServiceRecord {

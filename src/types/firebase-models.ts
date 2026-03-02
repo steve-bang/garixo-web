@@ -81,6 +81,47 @@ export interface GarageServiceDocument {
   updatedAt: string;
 }
 
+/**
+ * Vehicle record stored per garage.
+ * Path: garages/{garageId}/vehicles/{vehicleId}
+ */
+export interface GarageVehicleDocument {
+  id?: string;
+  plateNumber?: string;
+  plateNormalized?: string;
+  brand?: string;
+  model?: string;
+  year?: number;
+  color?: string;
+  vin?: string;
+  customerId?: string;
+  customerName?: string;
+  customerPhone?: string;
+  status?: 'ACTIVE' | 'IN_SERVICE' | 'COMPLETED' | 'OVERDUE' | 'INACTIVE';
+  totalVisits?: number;
+  totalSpent?: number;
+  lastServiceDate?: string;
+  notes?: string;
+  images?: GarageVehicleImageDocument[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Vehicle image metadata stored inline on a vehicle document.
+ * Path: garages/{garageId}/vehicles/{vehicleId}.images[]
+ */
+export interface GarageVehicleImageDocument {
+  id: string;
+  url: string;
+  path: string;
+  name: string;
+  contentType: 'image/jpeg' | 'image/png' | 'image/webp';
+  size: number;
+  uploadedByUserId: string;
+  uploadedAt: string;
+}
+
 export type WorkOrderStatus = UnifiedWorkOrderStatus;
 
 export interface GarageWorkOrderDocument {

@@ -5,6 +5,7 @@ import type { Vehicle } from '@/features/vehicles/types';
 import { toPlateDisplay } from '@/features/vehicles/utils';
 import { auth } from '@/lib/auth';
 import { getRequestGarageId } from '@/lib/auth/garage-context';
+import { deleteCdnFile } from '@/services/cdn/firebase-cdn-service';
 import {
   deleteGarageVehicle,
   findGarageVehicleById,
@@ -142,6 +143,19 @@ export async function DELETE(
   const deleted = await deleteGarageVehicle(garageId, id);
   if (!deleted) {
     return response({ success: false, error: 'Vehicle not found.' }, 404);
+  }
+
+  // Cleanup linked vehicle photos from CDN after document deletion.
+  if (Array.isArray(current.images) && current.images.length > 0) {
+    await Promise.all(
+      current.images.map(async (image) => {
+        try {
+          await deleteCdnFile({ filePath: image.path });
+        } catch {
+          // Best effort cleanup only; metadata is already removed with vehicle.
+        }
+      })
+    );
   }
 
   return response({ success: true, data: deleted });

@@ -39,6 +39,12 @@ export type UploadGarageInvoiceFileInput = {
   file: File;
 };
 
+export type UploadGarageVehicleImageInput = {
+  garageId: string;
+  vehicleId: string;
+  file: File;
+};
+
 export type UploadSystemImageInput = {
   scope: 'blogs' | 'branding' | 'images';
   ownerId: string;
@@ -169,6 +175,16 @@ function buildGarageInvoiceFilePath(params: {
 }): string {
   const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   return `garages/${params.garageId}/invoices/${params.invoiceId}/files/${params.fileName || 'invoice-file'}-${unique}.${params.extension}`;
+}
+
+function buildGarageVehicleImagePath(params: {
+  garageId: string;
+  vehicleId: string;
+  fileName: string;
+  extension: string;
+}): string {
+  const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  return `garages/${params.garageId}/vehicles/${params.vehicleId}/images/${params.fileName || 'image'}-${unique}.${params.extension}`;
 }
 
 function buildSystemImagePath(params: {
@@ -385,4 +401,47 @@ export async function uploadSystemImageToCdn({
     cacheControl: 'public,max-age=31536000,immutable',
     signedUrlExpiresAt: '03-01-2035'
   });
+}
+
+export async function uploadGarageVehicleImageToCdn({
+  garageId,
+  vehicleId,
+  file
+}: UploadGarageVehicleImageInput): Promise<{
+  url: string;
+  path: string;
+  name: string;
+  contentType: 'image/jpeg' | 'image/png' | 'image/webp';
+  size: number;
+}> {
+  validateImageFile(file, {
+    maxSizeBytes: 5 * 1024 * 1024,
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp']
+  });
+
+  const ext = extensionFromMime(file.type);
+  const baseName = sanitizeFileName(file.name.replace(/\.[^.]+$/, ''));
+  const filePath = buildGarageVehicleImagePath({
+    garageId,
+    vehicleId,
+    fileName: baseName,
+    extension: ext
+  });
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  const uploaded = await uploadBufferToCdn({
+    filePath,
+    buffer,
+    contentType: file.type,
+    cacheControl: 'public,max-age=31536000,immutable',
+    signedUrlExpiresAt: '03-01-2035'
+  });
+
+  return {
+    url: uploaded.url,
+    path: filePath,
+    name: file.name,
+    contentType: file.type as 'image/jpeg' | 'image/png' | 'image/webp',
+    size: file.size
+  };
 }
