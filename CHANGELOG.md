@@ -6,6 +6,25 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 ## [Unreleased]
 
+### Added
+
+- Scheduled blog publishing API endpoint:
+- `POST /api/blogs/publish-scheduled` (secret-key protected).
+- `GET /api/blogs/publish-scheduled` (cron-oriented auth via bearer secret).
+- Automatically publishes blogs where `status=scheduled` and `scheduledAt <= now`.
+- Updates `status`, `publishedAt`, and `updatedAt` in publish flow.
+
+- Vercel cron configuration:
+- New `vercel.json` cron job to call `/api/blogs/publish-scheduled` every 5 minutes.
+
+### Changed
+
+- Blog scheduler query path now includes a safe fallback when Firestore composite index is missing:
+- Prevents hard failure and allows local/dev execution while index is being provisioned.
+
+- Environment configuration documentation in `/src/config/env.ts`:
+- Added clearer inline comments and spacing for easier maintenance.
+
 ## [0.1.13] - 2026-02-28
 
 ### Added

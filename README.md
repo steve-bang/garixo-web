@@ -109,6 +109,12 @@ App: [http://localhost:3000](http://localhost:3000)
 - `npm run format` - format code
 - `npm run format:check` - check formatting
 
+Firebase function:
+
+- Install Firebase tools: `npm install -g firebase-tools`
+- Initiate your project: `firebase init`
+- Deploy your functions: `firebase deploy`
+
 ## Notable directories
 
 ```text
