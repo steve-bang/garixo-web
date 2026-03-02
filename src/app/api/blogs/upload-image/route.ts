@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 
 import { auth } from '@/lib/auth';
-import { firebaseAdmin } from '@/lib/firebase-admin';
+import {
+  CdnValidationError,
+  uploadBlogImageToCdn
+} from '@/services/cdn/firebase-cdn-service';
 import type { ApiResponse } from '@/types/api';
 
 function response<T>(
@@ -9,26 +12,6 @@ function response<T>(
   status = 200
 ): NextResponse<ApiResponse<T>> {
   return NextResponse.json(payload, { status });
-}
-
-function validImageType(type: string): boolean {
-  return ['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(type);
-}
-
-function extensionFromMime(type: string): string {
-  if (type === 'image/png') return 'png';
-  if (type === 'image/webp') return 'webp';
-  if (type === 'image/gif') return 'gif';
-  return 'jpg';
-}
-
-function sanitizeFileName(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9.-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 80);
 }
 
 export async function POST(
@@ -59,51 +42,26 @@ export async function POST(
     );
   }
 
-  if (!validImageType(imageFile.type)) {
+  try {
+    const uploaded = await uploadBlogImageToCdn({
+      userId: session.user.id,
+      file: imageFile
+    });
+
+    return response({
+      success: true,
+      data: {
+        url: uploaded.url
+      }
+    });
+  } catch (error) {
+    if (error instanceof CdnValidationError) {
+      return response({ success: false, error: error.message }, 400);
+    }
+
     return response(
-      {
-        success: false,
-        error: 'Only JPG, PNG, WEBP, or GIF files are allowed.'
-      },
-      400
+      { success: false, error: 'Could not upload image right now.' },
+      500
     );
   }
-
-  if (imageFile.size > 5 * 1024 * 1024) {
-    return response(
-      {
-        success: false,
-        error: 'Image must be 5MB or smaller.'
-      },
-      400
-    );
-  }
-
-  const ext = extensionFromMime(imageFile.type);
-  const baseName = sanitizeFileName(imageFile.name.replace(/\.[^.]+$/, ''));
-  const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const filePath = `blogs/images/${session.user.id}/${baseName || 'image'}-${unique}.${ext}`;
-
-  const buffer = Buffer.from(await imageFile.arrayBuffer());
-  const file = firebaseAdmin.storage.bucket().file(filePath);
-
-  await file.save(buffer, {
-    contentType: imageFile.type,
-    resumable: false,
-    metadata: {
-      cacheControl: 'public,max-age=31536000,immutable'
-    }
-  });
-
-  const [signedUrl] = await file.getSignedUrl({
-    action: 'read',
-    expires: '03-01-2035'
-  });
-
-  return response({
-    success: true,
-    data: {
-      url: signedUrl
-    }
-  });
 }

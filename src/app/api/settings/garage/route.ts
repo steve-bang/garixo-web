@@ -4,7 +4,10 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { getRequestGarage } from '@/lib/auth/garage-context';
 import type { GarageSettings } from '@/features/settings/garage-information.types';
-import { firebaseAdmin } from '@/lib/firebase-admin';
+import {
+  CdnValidationError,
+  uploadGarageLogoToCdn
+} from '@/services/cdn/firebase-cdn-service';
 import { updateGarage } from '@/services/firebase/garage-service';
 import { garageIndustryTypes } from '@/types/garage';
 import type { ApiResponse } from '@/types/api';
@@ -116,23 +119,21 @@ export async function PUT(
       );
     }
 
-    const buffer = Buffer.from(await logoFile.arrayBuffer());
-    const bucket = firebaseAdmin.storage.bucket();
-    const filePath = `garages/${garage.id}/logo.png`;
-    const file = bucket.file(filePath);
-    await file.save(buffer, {
-      contentType: logoFile.type,
-      resumable: false,
-      metadata: {
-        cacheControl: 'public,max-age=3600'
+    try {
+      const uploaded = await uploadGarageLogoToCdn({
+        garageId: garage.id,
+        file: logoFile
+      });
+      nextLogoUrl = uploaded.url;
+    } catch (error) {
+      if (error instanceof CdnValidationError) {
+        return response({ success: false, error: error.message }, 400);
       }
-    });
-
-    const [signedUrl] = await file.getSignedUrl({
-      action: 'read',
-      expires: '03-01-2035'
-    });
-    nextLogoUrl = signedUrl;
+      return response(
+        { success: false, error: 'Could not upload logo right now.' },
+        500
+      );
+    }
   }
 
   const updatedGarage = await updateGarage(garage.id, {

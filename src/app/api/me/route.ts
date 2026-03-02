@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 
 import { auth } from '@/lib/auth';
+import { getRequestGarageId } from '@/lib/auth/garage-context';
 import { firebaseAdmin } from '@/lib/firebase-admin';
+import {
+  CdnValidationError,
+  uploadUserAvatarToCdn
+} from '@/services/cdn/firebase-cdn-service';
 import type { UserDocument } from '@/types/firebase-models';
 import type { ApiResponse } from '@/types/api';
 import { USER_ROLES, type User, type UserRole } from '@/types/user';
@@ -27,12 +32,6 @@ function validEmail(email: string): boolean {
 
 function mapRole(role: string | undefined): UserRole {
   return USER_ROLES.includes(role as UserRole) ? (role as UserRole) : 'owner';
-}
-
-function extensionFromMime(type: string): string {
-  if (type === 'image/png') return 'png';
-  if (type === 'image/webp') return 'webp';
-  return 'jpg';
 }
 
 function toProfile(
@@ -129,6 +128,7 @@ export async function PUT(
   const currentData = currentSnapshot.exists
     ? (currentSnapshot.data() as UserDocument & { avatarUrl?: string })
     : null;
+  const garageId = await getRequestGarageId(session);
 
   let avatarUrl = currentData?.avatarUrl;
 
@@ -147,21 +147,22 @@ export async function PUT(
       );
     }
 
-    const buffer = Buffer.from(await avatarFile.arrayBuffer());
-    const ext = extensionFromMime(avatarFile.type);
-    const filePath = `users/${session.user.id}/avatar.${ext}`;
-    const file = firebaseAdmin.storage.bucket().file(filePath);
-
-    await file.save(buffer, {
-      contentType: avatarFile.type,
-      resumable: false
-    });
-
-    const [signedUrl] = await file.getSignedUrl({
-      action: 'read',
-      expires: '2100-01-01'
-    });
-    avatarUrl = signedUrl;
+    try {
+      const uploaded = await uploadUserAvatarToCdn({
+        garageId: garageId ?? undefined,
+        userId: session.user.id,
+        file: avatarFile
+      });
+      avatarUrl = uploaded.url;
+    } catch (error) {
+      if (error instanceof CdnValidationError) {
+        return response({ success: false, error: error.message }, 400);
+      }
+      return response(
+        { success: false, error: 'Could not upload image right now.' },
+        500
+      );
+    }
   }
 
   const createdAt = currentData?.createdAt ?? new Date().toISOString();
