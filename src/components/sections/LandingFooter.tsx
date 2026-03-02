@@ -5,7 +5,7 @@ export function LandingFooter(): JSX.Element {
   return (
     <footer className="border-t border-border bg-slate-900 text-slate-300">
       <div className="mx-auto w-full max-w-[1200px] px-s4 py-s12">
-        <div className="grid gap-s8 md:grid-cols-4">
+        <div className="grid gap-s8 md:grid-cols-5">
           <div className="space-y-s2">
             <div className="flex items-center gap-s2">
               <span className="grid size-10 place-items-center overflow-hidden rounded-md border border-slate-700 bg-white">
@@ -102,6 +102,21 @@ export function LandingFooter(): JSX.Element {
                   Terms of Service
                 </Link>
               </p>
+            </div>
+          </div>
+
+          <div className="space-y-s2">
+            <p className="text-small font-semibold text-white">Contact</p>
+            <div className="space-y-s1 text-small text-slate-400">
+              <p>
+                <a
+                  href="mailto:contact@garixo.com"
+                  className="break-all hover:text-white"
+                >
+                  contact@garixo.com
+                </a>
+              </p>
+              <p>Austin, TX, United States</p>
             </div>
           </div>
         </div>
