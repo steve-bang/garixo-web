@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
@@ -32,6 +32,80 @@ export function LandingHeader(): JSX.Element {
           className="hidden items-center gap-s6 md:flex"
           aria-label="Primary"
         >
+          <div className="group relative">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-small text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
+              aria-haspopup="true"
+            >
+              Solutions
+              <ChevronDown className="size-4 transition-transform duration-200 group-hover:rotate-180" />
+            </button>
+
+            <div className="pointer-events-none absolute left-0 top-full z-20 w-[320px] translate-y-2 pt-3 opacity-0 transition duration-200 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+              <div className="rounded-xl border border-border bg-surface-default p-s2 shadow-xl">
+                <div className="px-s3 pb-s2 pt-s1">
+                  <p className="text-caption font-semibold uppercase tracking-wide text-text-muted">
+                    Solutions
+                  </p>
+                  <p className="text-caption text-text-muted">
+                    Pick your shop type
+                  </p>
+                </div>
+
+                <div className="grid gap-s2 px-s1 pb-s1 pt-s1">
+                  <Link
+                    href="/solutions/garage-management-software-for-tire-shops"
+                    className="block rounded-lg px-s3 py-s2 transition-colors hover:bg-surface-hover"
+                  >
+                    <p className="text-small font-medium text-text-primary">
+                      Tire Shops
+                    </p>
+                    <p className="mt-1 text-caption text-text-muted">
+                      Fast work orders, tire inventory, and simple invoicing.
+                    </p>
+                  </Link>
+
+                  <Link
+                    href="/solutions/garage-management-software-for-auto-body-shops"
+                    className="block rounded-lg px-s3 py-s2 transition-colors hover:bg-surface-hover"
+                  >
+                    <p className="text-small font-medium text-text-primary">
+                      Auto Body Shops
+                    </p>
+                    <p className="mt-1 text-caption text-text-muted">
+                      Repair workflows, parts tracking, and clean invoices.
+                    </p>
+                  </Link>
+
+                  <Link
+                    href="/solutions/garage-management-software-for-mobile-mechanics"
+                    className="block rounded-lg px-s3 py-s2 transition-colors hover:bg-surface-hover"
+                  >
+                    <p className="text-small font-medium text-text-primary">
+                      Mobile Mechanics
+                    </p>
+                    <p className="mt-1 text-caption text-text-muted">
+                      On-the-go work orders, parts, and fast invoicing.
+                    </p>
+                  </Link>
+
+                  <Link
+                    href="/solutions/garage-management-software-for-dealerships"
+                    className="block rounded-lg px-s3 py-s2 transition-colors hover:bg-surface-hover"
+                  >
+                    <p className="text-small font-medium text-text-primary">
+                      Dealerships
+                    </p>
+                    <p className="mt-1 text-caption text-text-muted">
+                      Service work orders, parts usage, and faster billing.
+                    </p>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <Link
             href="/features"
             className="text-small text-text-secondary hover:text-text-primary"
@@ -96,6 +170,43 @@ export function LandingHeader(): JSX.Element {
             className="mx-auto w-full max-w-[1200px] space-y-s2 px-s4 py-s4"
             aria-label="Mobile Primary"
           >
+            <Link
+              href="/solutions/garage-management-software-for-tire-shops"
+              className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+              onClick={closeMobileMenu}
+            >
+              Solutions
+            </Link>
+            <div className="space-y-s1 pl-s2">
+              <Link
+                href="/solutions/garage-management-software-for-tire-shops"
+                className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                onClick={closeMobileMenu}
+              >
+                Tire Shops
+              </Link>
+              <Link
+                href="/solutions/garage-management-software-for-auto-body-shops"
+                className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                onClick={closeMobileMenu}
+              >
+                Auto Body Shops
+              </Link>
+              <Link
+                href="/solutions/garage-management-software-for-mobile-mechanics"
+                className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                onClick={closeMobileMenu}
+              >
+                Mobile Mechanics
+              </Link>
+              <Link
+                href="/solutions/garage-management-software-for-dealerships"
+                className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                onClick={closeMobileMenu}
+              >
+                Dealerships
+              </Link>
+            </div>
             <Link
               href="/features"
               className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"

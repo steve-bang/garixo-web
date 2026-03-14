@@ -86,6 +86,30 @@ export async function GET(): Promise<Response> {
       lastmod: '2026-03-01T00:00:00Z',
       changefreq: 'weekly',
       priority: '0.8'
+    },
+    {
+      path: '/solutions/garage-management-software-for-tire-shops',
+      lastmod: '2026-03-14T20:06:00Z',
+      changefreq: 'weekly',
+      priority: '0.8'
+    },
+    {
+      path: '/solutions/garage-management-software-for-auto-body-shops',
+      lastmod: '2026-03-14T20:07:00Z',
+      changefreq: 'weekly',
+      priority: '0.8'
+    },
+    {
+      path: '/solutions/garage-management-software-for-mobile-mechanics',
+      lastmod: '2026-03-14T20:09:00Z',
+      changefreq: 'weekly',
+      priority: '0.8'
+    },
+    {
+      path: '/solutions/garage-management-software-for-dealerships',
+      lastmod: '2026-03-14T20:08:00Z',
+      changefreq: 'weekly',
+      priority: '0.8'
     }
   ];
 
