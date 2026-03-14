@@ -55,11 +55,34 @@ export default function CaseStudiesPage(): JSX.Element {
       'Garage management software for independent auto repair shop owners in the United States.'
   };
 
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://www.garixo.com/'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Case Studies',
+        item: 'https://www.garixo.com/case-studies'
+      }
+    ]
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
       <LandingHeader />

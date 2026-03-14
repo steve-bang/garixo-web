@@ -18,5 +18,32 @@ export default async function AuthLoginPage(): Promise<JSX.Element> {
     redirect('/dashboard');
   }
 
-  return <LoginForm />;
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://www.garixo.com/'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Login',
+        item: 'https://www.garixo.com/auth/login'
+      }
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <LoginForm />
+    </>
+  );
 }
