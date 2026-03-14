@@ -306,6 +306,24 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 - Customer: `totalVisits`, `totalSpent`, `lastVisit`.
 - Vehicle: `totalVisits`, `totalSpent`, `lastServiceDate`.
 
+## [0.1.7] - 2026-03-14
+
+### Added
+
+- Solutions landing pages:
+- `/solutions/garage-management-software-for-tire-shops`
+- `/solutions/garage-management-software-for-auto-body-shops`
+- `/solutions/garage-management-software-for-mobile-mechanics`
+- `/solutions/garage-management-software-for-dealerships`
+- Solutions menu in public header (desktop hover + mobile submenu) and footer column with solution links.
+
+### Changed
+
+- Auto body, mobile mechanics, and dealership solutions content now differentiated to avoid near-duplicate SEO content.
+- Added testimonial section to the tire shops solution page.
+- Added testimonial section to the auto body shops solution page.
+- Updated static sitemap to include solution routes.
+
 ## [0.1.5] - 2026-02-24
 
 ### Changed
