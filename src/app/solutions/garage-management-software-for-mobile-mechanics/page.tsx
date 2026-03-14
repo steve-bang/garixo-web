@@ -12,12 +12,17 @@ const faqItems = [
   {
     question: 'What is garage management software for mobile mechanics?',
     answer:
-      'It is a simple system to manage work orders, customers, vehicles, parts, and invoices while you work on the go.'
+      'It is a mobile-friendly system that keeps work orders, parts, customer history, and invoices in one place while you work on site.'
   },
   {
     question: 'Does Garixo work on phones and tablets?',
     answer:
       'Yes. Garixo is web-based and works smoothly on phones and tablets for mobile jobs.'
+  },
+  {
+    question: 'Can I capture customer approval before starting work?',
+    answer:
+      'Yes. You can record estimates and notes on the spot so expectations are clear before you start.'
   },
   {
     question: 'Can I create invoices on-site?',
@@ -49,19 +54,19 @@ const featureHighlights = [
     benefit: 'Stay focused on the job, not paperwork.'
   },
   {
+    title: 'On-Site Estimates',
+    description: 'Capture scope, notes, and pricing on location.',
+    benefit: 'Align expectations before you start.'
+  },
+  {
+    title: 'Route-Friendly Scheduling',
+    description: 'Keep mobile jobs organized across the day.',
+    benefit: 'Reduce drive-time waste and missed appointments.'
+  },
+  {
     title: 'Customer & Vehicle History',
     description: 'Keep service history organized for repeat visits.',
     benefit: 'Offer better follow-ups and build trust.'
-  },
-  {
-    title: 'Parts and Service Tracking',
-    description: 'Log parts and labor used on each job.',
-    benefit: 'Know true job cost and margin.'
-  },
-  {
-    title: 'Simple Job Status',
-    description: 'Track what is pending, in progress, and completed.',
-    benefit: 'Stay organized across multiple calls.'
   },
   {
     title: 'Professional Invoices',
@@ -69,9 +74,9 @@ const featureHighlights = [
     benefit: 'Get paid faster with less admin work.'
   },
   {
-    title: 'Cloud Access',
-    description: 'Everything stays in one system, accessible anywhere.',
-    benefit: 'No lost notes or paper tickets.'
+    title: 'Parts and Service Tracking',
+    description: 'Log parts and labor used on each job.',
+    benefit: 'Know true job cost and margin.'
   }
 ] as const;
 
@@ -172,9 +177,9 @@ export default function MobileMechanicsSolutionsPage(): JSX.Element {
               Garage Management Software for Mobile Mechanics
             </h1>
             <p className="mx-auto mt-s3 max-w-[820px] text-body text-text-secondary">
-              Run mobile repair jobs with fast work orders, parts tracking, and
-              clean invoices. Garixo keeps your workflow organized while you
-              stay on the move.
+              Run mobile repair jobs with fast work orders, on-site estimates,
+              and clean invoices. Garixo keeps everything organized while you
+              travel between customers.
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
@@ -199,10 +204,10 @@ export default function MobileMechanicsSolutionsPage(): JSX.Element {
                   day. Without a clean system, details get lost.
                 </p>
                 <ul className="space-y-s2 text-small text-text-secondary">
-                  <li>Work order details scattered across messages.</li>
-                  <li>Parts usage is hard to track per job.</li>
-                  <li>Invoices get delayed after the repair.</li>
-                  <li>No clear history for repeat customers.</li>
+                  <li>Estimates and approvals handled over texts and calls.</li>
+                  <li>Job details scattered across notes and messages.</li>
+                  <li>Parts usage tracked after the fact.</li>
+                  <li>Invoices delayed once you leave the site.</li>
                 </ul>
               </div>
               <Card className="space-y-s3 border border-border bg-surface-default p-s4">
@@ -216,6 +221,40 @@ export default function MobileMechanicsSolutionsPage(): JSX.Element {
                 <Button asChild className="h-11">
                   <Link href="/auth/sign-up">Start in minutes</Link>
                 </Button>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-surface-default py-s12">
+          <div className="mx-auto w-full max-w-[1100px] px-s4">
+            <div className="text-center">
+              <h2 className="text-h2 text-text-primary">
+                Built for work on the road
+              </h2>
+              <p className="mx-auto mt-s2 max-w-[760px] text-body text-text-secondary">
+                Keep everything you need on your phone so you can focus on the
+                repair, not paperwork.
+              </p>
+            </div>
+            <div className="mt-s6 grid gap-s4 md:grid-cols-3">
+              <Card className="space-y-s2 p-s4">
+                <h3 className="text-h3 text-text-primary">On-Site Approval</h3>
+                <p className="text-small text-text-secondary">
+                  Capture scope and pricing while the customer is with you.
+                </p>
+              </Card>
+              <Card className="space-y-s2 p-s4">
+                <h3 className="text-h3 text-text-primary">Fast Checkout</h3>
+                <p className="text-small text-text-secondary">
+                  Send the invoice immediately after the job is complete.
+                </p>
+              </Card>
+              <Card className="space-y-s2 p-s4">
+                <h3 className="text-h3 text-text-primary">Repeat Jobs</h3>
+                <p className="text-small text-text-secondary">
+                  Pull up past service history at the next visit.
+                </p>
               </Card>
             </div>
           </div>
@@ -254,9 +293,9 @@ export default function MobileMechanicsSolutionsPage(): JSX.Element {
               <Card className="space-y-s3 p-s4">
                 <h3 className="text-h3 text-text-primary">How it works</h3>
                 <ol className="space-y-s3 text-small text-text-secondary">
-                  <li>1. Create a mobile work order.</li>
-                  <li>2. Add parts and labor used on site.</li>
-                  <li>3. Complete the job and send the invoice.</li>
+                  <li>1. Capture the job and estimate on site.</li>
+                  <li>2. Add parts and labor as you work.</li>
+                  <li>3. Send the invoice before you leave.</li>
                 </ol>
               </Card>
               <div className="space-y-s3">

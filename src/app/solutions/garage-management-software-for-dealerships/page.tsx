@@ -12,7 +12,7 @@ const faqItems = [
   {
     question: 'What is garage management software for dealerships?',
     answer:
-      'It is a simple system that helps dealership service departments manage repair orders, customer history, vehicles, parts, and invoices in one place.'
+      'It is a system for dealership service departments to manage repair orders, advisor workflows, and service history in one place.'
   },
   {
     question: 'Is Garixo suitable for smaller dealerships?',
@@ -23,6 +23,11 @@ const faqItems = [
     question: 'Can Garixo track service history per vehicle?',
     answer:
       'Yes. Each vehicle keeps a full service timeline so advisors can see past work instantly.'
+  },
+  {
+    question: 'Does Garixo support advisor handoffs and technician assignment?',
+    answer:
+      'Yes. Work orders stay visible across advisors and techs so each handoff is clear.'
   },
   {
     question: 'Does Garixo support parts usage and inventory tracking?',
@@ -49,30 +54,30 @@ const featureHighlights = [
     benefit: 'Keep advisors and techs aligned all day.'
   },
   {
+    title: 'Advisor Handoff Clarity',
+    description: 'Keep service notes and job status visible across the desk.',
+    benefit: 'Reduce dropped details between advisors.'
+  },
+  {
+    title: 'Service Lane Throughput',
+    description: 'Track status from intake to completion in one view.',
+    benefit: 'Move more cars through each day.'
+  },
+  {
     title: 'Vehicle Service History',
     description:
       'Track every visit and repair for each vehicle in one timeline.',
     benefit: 'Improve customer trust and follow-up.'
   },
   {
+    title: 'Warranty & RO Notes',
+    description: 'Keep warranty-related notes attached to each repair order.',
+    benefit: 'Avoid rework and missed details.'
+  },
+  {
     title: 'Parts and Materials Tracking',
     description: 'Log parts usage per job to understand true service cost.',
     benefit: 'Better margin visibility per repair.'
-  },
-  {
-    title: 'Job Status Clarity',
-    description: 'See job status at a glance from intake to completion.',
-    benefit: 'Reduce delays and improve throughput.'
-  },
-  {
-    title: 'Professional Invoices',
-    description: 'Convert completed jobs into clean invoices in minutes.',
-    benefit: 'Speed up billing and reduce errors.'
-  },
-  {
-    title: 'Team Assignment',
-    description: 'Assign jobs to technicians and balance workload.',
-    benefit: 'Keep bays productive and organized.'
   }
 ] as const;
 
@@ -173,9 +178,9 @@ export default function DealershipSolutionsPage(): JSX.Element {
               Garage Management Software for Dealerships
             </h1>
             <p className="mx-auto mt-s3 max-w-[820px] text-body text-text-secondary">
-              Keep dealership service work orders, parts, and invoices in one
-              clean workflow. Garixo helps advisors move faster and keeps bays
-              organized.
+              Keep dealership service work orders, advisor handoffs, and vehicle
+              history in one clean workflow. Garixo helps service lanes move
+              faster and keeps bays organized.
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
@@ -200,10 +205,12 @@ export default function DealershipSolutionsPage(): JSX.Element {
                   system, work slows down and customers wait longer.
                 </p>
                 <ul className="space-y-s2 text-small text-text-secondary">
-                  <li>Service orders take too long to create.</li>
-                  <li>Parts usage is hard to track accurately.</li>
-                  <li>Job status is unclear across the team.</li>
-                  <li>Invoices take too long after service completion.</li>
+                  <li>Advisor handoffs lose notes and approvals.</li>
+                  <li>Service lane status is hard to see at a glance.</li>
+                  <li>
+                    Parts usage and warranty notes get split across tools.
+                  </li>
+                  <li>Billing slows down at the end of the day.</li>
                 </ul>
               </div>
               <Card className="space-y-s3 border border-border bg-surface-default p-s4">
@@ -217,6 +224,40 @@ export default function DealershipSolutionsPage(): JSX.Element {
                 <Button asChild className="h-11">
                   <Link href="/auth/sign-up">Start in minutes</Link>
                 </Button>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-surface-default py-s12">
+          <div className="mx-auto w-full max-w-[1100px] px-s4">
+            <div className="text-center">
+              <h2 className="text-h2 text-text-primary">
+                Built for busy service lanes
+              </h2>
+              <p className="mx-auto mt-s2 max-w-[760px] text-body text-text-secondary">
+                Keep advisor notes, warranty context, and job status in one
+                place so your service lane stays moving.
+              </p>
+            </div>
+            <div className="mt-s6 grid gap-s4 md:grid-cols-3">
+              <Card className="space-y-s2 p-s4">
+                <h3 className="text-h3 text-text-primary">Advisor Workflow</h3>
+                <p className="text-small text-text-secondary">
+                  Capture intake notes and approvals in the same record.
+                </p>
+              </Card>
+              <Card className="space-y-s2 p-s4">
+                <h3 className="text-h3 text-text-primary">Service Lane View</h3>
+                <p className="text-small text-text-secondary">
+                  See status across open tickets without hunting.
+                </p>
+              </Card>
+              <Card className="space-y-s2 p-s4">
+                <h3 className="text-h3 text-text-primary">Warranty Notes</h3>
+                <p className="text-small text-text-secondary">
+                  Keep warranty context and parts in one place.
+                </p>
               </Card>
             </div>
           </div>
@@ -255,9 +296,9 @@ export default function DealershipSolutionsPage(): JSX.Element {
               <Card className="space-y-s3 p-s4">
                 <h3 className="text-h3 text-text-primary">How it works</h3>
                 <ol className="space-y-s3 text-small text-text-secondary">
-                  <li>1. Create a service work order.</li>
-                  <li>2. Add parts and labor as work progresses.</li>
-                  <li>3. Complete the job and send the invoice.</li>
+                  <li>1. Capture intake details and advisor notes.</li>
+                  <li>2. Track status, parts, and warranty context.</li>
+                  <li>3. Complete the job and finalize billing.</li>
                 </ol>
               </Card>
               <div className="space-y-s3">
@@ -289,17 +330,17 @@ export default function DealershipSolutionsPage(): JSX.Element {
               <Card className="space-y-s2 border border-border bg-surface-default p-s4">
                 <h3 className="text-h3 text-text-primary">Before Garixo</h3>
                 <ul className="space-y-s2 text-small text-text-secondary">
-                  <li>Service orders split across tools and paper.</li>
-                  <li>Parts usage tracked in multiple systems.</li>
-                  <li>Slow invoicing at the service desk.</li>
+                  <li>Advisor notes lost during handoffs.</li>
+                  <li>Service lane status tracked manually.</li>
+                  <li>Warranty context buried in emails.</li>
                 </ul>
               </Card>
               <Card className="space-y-s2 border border-border bg-surface-default p-s4">
                 <h3 className="text-h3 text-text-primary">After Garixo</h3>
                 <ul className="space-y-s2 text-small text-text-secondary">
-                  <li>Clear service workflow from intake to completion.</li>
-                  <li>Parts and labor tracked in each work order.</li>
-                  <li>Clean invoices ready in minutes.</li>
+                  <li>Advisor notes and approvals in one place.</li>
+                  <li>Service lane status visible at a glance.</li>
+                  <li>Faster billing with clean records.</li>
                 </ul>
               </Card>
             </div>

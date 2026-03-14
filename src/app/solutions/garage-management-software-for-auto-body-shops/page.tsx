@@ -12,27 +12,27 @@ const faqItems = [
   {
     question: 'What is garage management software for auto body shops?',
     answer:
-      'It is a simple system that helps auto body shops manage repair orders, customers, vehicles, parts, and invoices in one place without paper tracking.'
+      'It is a simple system that helps body shops manage repair orders, vehicles, photos, parts, and invoices in one place instead of paper and spreadsheets.'
   },
   {
-    question: 'Does Garixo support collision-style repair workflows?',
+    question: 'Can Garixo track multi-stage collision repairs?',
     answer:
-      'Yes. You can track job status, parts used, and technician assignments for each repair from intake to delivery.'
+      'Yes. You can track each stage—teardown, body work, paint, and reassembly—inside a single work order.'
   },
   {
-    question: 'Can I keep photo or notes per repair?',
+    question: 'Can I keep photo documentation and notes per repair?',
     answer:
-      'You can add clear notes and service details to every work order to keep repair context organized.'
+      'Yes. Capture notes and attach documentation to the repair so every tech sees the same context.'
   },
   {
-    question: 'Is Garixo built for small body shops?',
+    question: 'Does Garixo help with supplements and mid-repair changes?',
     answer:
-      'Yes. It is designed for independent shops with lean teams and fast daily workflows.'
+      'Yes. You can add parts and labor updates as repairs evolve so the estimate stays accurate.'
   },
   {
-    question: 'Will this help shorten repair turnaround?',
+    question: 'Will this help reduce cycle time per vehicle?',
     answer:
-      'Yes. Clear job tracking and faster invoicing reduce delays and keep work flowing.'
+      'Yes. Clear stage tracking and faster approvals reduce delays and keep repairs moving.'
   },
   {
     question: 'How is Garixo different from enterprise shop software?',
@@ -43,36 +43,35 @@ const faqItems = [
 
 const featureHighlights = [
   {
-    title: 'Clear Repair Work Orders',
+    title: 'Repair Stage Tracking',
     description:
-      'Create body repair work orders with parts, labor, and notes attached.',
-    benefit: 'Keep repairs organized from intake to delivery.'
+      'Track teardown, body work, paint, and reassembly in one workflow.',
+    benefit: 'Reduce bottlenecks and missed handoffs.'
   },
   {
-    title: 'Job Status Visibility',
+    title: 'Photo Documentation',
     description: 'Track each job stage so your team always knows what is next.',
-    benefit: 'Reduce delays and avoid missed handoffs.'
+    benefit: 'Keep documentation organized for every repair.'
   },
   {
-    title: 'Parts and Materials Tracking',
-    description: 'Log parts and materials used for each repair job.',
-    benefit: 'Know true job cost and avoid reorders.'
+    title: 'OEM vs. Aftermarket Parts',
+    description: 'Log parts choice per repair with clear cost visibility.',
+    benefit: 'Avoid confusion during supplements and approvals.'
   },
   {
-    title: 'Customer and Vehicle History',
-    description: 'See past repairs and customer history in seconds.',
-    benefit: 'Provide better follow-up and repeat service.'
+    title: 'Supplements & Change Orders',
+    description: 'Add parts and labor updates as the repair evolves.',
+    benefit: 'Keep estimates accurate without rework.'
   },
   {
-    title: 'Professional Invoices',
-    description:
-      'Convert completed repairs into clean, accurate invoices quickly.',
-    benefit: 'Faster checkout and fewer billing mistakes.'
+    title: 'Paint & Materials Tracking',
+    description: 'Capture paint and materials cost per job.',
+    benefit: 'Protect margin on every repair.'
   },
   {
-    title: 'Team Assignment',
-    description: 'Assign work to technicians and balance workload.',
-    benefit: 'Keep bays productive during busy weeks.'
+    title: 'Faster Billing',
+    description: 'Turn completed repairs into clean invoices quickly.',
+    benefit: 'Reduce delays at delivery.'
   }
 ] as const;
 
@@ -173,9 +172,9 @@ export default function AutoBodyShopSolutionsPage(): JSX.Element {
               Garage Management Software for Auto Body Shops
             </h1>
             <p className="mx-auto mt-s3 max-w-[820px] text-body text-text-secondary">
-              Keep collision repairs organized with simple work orders, parts
-              tracking, and clean invoices. Garixo helps body shops stay on
-              schedule and deliver repairs faster.
+              Keep collision repairs organized with stage tracking, photo
+              documentation, and clear parts decisions. Garixo helps body shops
+              stay on schedule, manage supplements, and deliver repairs faster.
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
@@ -201,10 +200,22 @@ export default function AutoBodyShopSolutionsPage(): JSX.Element {
                   increase.
                 </p>
                 <ul className="space-y-s2 text-small text-text-secondary">
-                  <li>Repair steps get lost between technicians.</li>
-                  <li>Parts usage is hard to track accurately.</li>
-                  <li>Invoices take too long after the job is done.</li>
-                  <li>Customer history is scattered or missing.</li>
+                  <li>
+                    Teardown, body work, paint, and reassembly fall out of sync
+                    without a clear stage tracker.
+                  </li>
+                  <li>
+                    OEM vs. aftermarket parts decisions get lost across
+                    insurance jobs.
+                  </li>
+                  <li>
+                    Supplemental parts and labor updates are hard to track
+                    mid-repair.
+                  </li>
+                  <li>
+                    Photo documentation is scattered, slowing approvals and
+                    delivery.
+                  </li>
                 </ul>
               </div>
               <Card className="space-y-s3 border border-border bg-surface-default p-s4">
@@ -218,6 +229,48 @@ export default function AutoBodyShopSolutionsPage(): JSX.Element {
                 <Button asChild className="h-11">
                   <Link href="/auth/sign-up">Start in minutes</Link>
                 </Button>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-surface-default py-s12">
+          <div className="mx-auto w-full max-w-[1100px] px-s4">
+            <div className="text-center">
+              <h2 className="text-h2 text-text-primary">
+                Insurance-ready documentation without the chaos
+              </h2>
+              <p className="mx-auto mt-s2 max-w-[760px] text-body text-text-secondary">
+                Keep claim-related details together so approvals and supplements
+                do not slow down delivery.
+              </p>
+            </div>
+            <div className="mt-s6 grid gap-s4 md:grid-cols-3">
+              <Card className="space-y-s2 p-s4">
+                <h3 className="text-h3 text-text-primary">
+                  Photo & Note Timeline
+                </h3>
+                <p className="text-small text-text-secondary">
+                  Store documentation by repair stage so everyone sees the same
+                  evidence.
+                </p>
+              </Card>
+              <Card className="space-y-s2 p-s4">
+                <h3 className="text-h3 text-text-primary">
+                  Supplement Tracking
+                </h3>
+                <p className="text-small text-text-secondary">
+                  Add parts and labor updates mid-repair without losing the
+                  original estimate.
+                </p>
+              </Card>
+              <Card className="space-y-s2 p-s4">
+                <h3 className="text-h3 text-text-primary">
+                  OEM vs. Aftermarket
+                </h3>
+                <p className="text-small text-text-secondary">
+                  Track part decisions clearly for insurers and customers.
+                </p>
               </Card>
             </div>
           </div>
@@ -256,8 +309,12 @@ export default function AutoBodyShopSolutionsPage(): JSX.Element {
               <Card className="space-y-s3 p-s4">
                 <h3 className="text-h3 text-text-primary">How it works</h3>
                 <ol className="space-y-s3 text-small text-text-secondary">
-                  <li>1. Create a repair work order.</li>
-                  <li>2. Add parts and labor as work progresses.</li>
+                  <li>
+                    1. Create the repair order and capture intake details.
+                  </li>
+                  <li>
+                    2. Track stages, parts, and supplements as work progresses.
+                  </li>
                   <li>3. Complete the job and send the invoice.</li>
                 </ol>
               </Card>
@@ -290,19 +347,41 @@ export default function AutoBodyShopSolutionsPage(): JSX.Element {
               <Card className="space-y-s2 border border-border bg-surface-default p-s4">
                 <h3 className="text-h3 text-text-primary">Before Garixo</h3>
                 <ul className="space-y-s2 text-small text-text-secondary">
-                  <li>Paper repair tickets and missing updates.</li>
-                  <li>Parts usage tracked in multiple places.</li>
-                  <li>Slow invoicing after repairs are complete.</li>
+                  <li>Repair stages tracked on paper or whiteboards.</li>
+                  <li>Photo documentation scattered across devices.</li>
+                  <li>Supplements handled outside the job record.</li>
                 </ul>
               </Card>
               <Card className="space-y-s2 border border-border bg-surface-default p-s4">
                 <h3 className="text-h3 text-text-primary">After Garixo</h3>
                 <ul className="space-y-s2 text-small text-text-secondary">
-                  <li>Clear repair workflow from intake to delivery.</li>
-                  <li>Parts and labor tracked in every work order.</li>
-                  <li>Clean invoices sent in minutes.</li>
+                  <li>Stage-by-stage visibility from intake to delivery.</li>
+                  <li>Parts, materials, and supplements in one record.</li>
+                  <li>Faster approvals and cleaner invoicing.</li>
                 </ul>
               </Card>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-background-primary py-s12">
+          <div className="mx-auto w-full max-w-[980px] px-s4 text-center">
+            <h2 className="text-h2 text-text-primary">
+              Improve cycle time per vehicle
+            </h2>
+            <p className="mx-auto mt-s3 max-w-[720px] text-body text-text-secondary">
+              Clear stage tracking, fast supplements, and organized
+              documentation reduce days per repair and keep bays flowing.
+            </p>
+            <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
+              <Button asChild className="h-12">
+                <Link href="/auth/sign-up">Start Free Trial</Link>
+              </Button>
+              <Button asChild variant="secondary" className="h-12">
+                <Link href="/features/customer-management">
+                  Customer Management System
+                </Link>
+              </Button>
             </div>
           </div>
         </section>

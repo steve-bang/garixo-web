@@ -80,7 +80,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
   title: 'Garage Management Software for Tire Shops | Garixo',
   description:
-    'Garixo is a simple garage management software for tire shops. Create fast work orders, track tire inventory, and keep jobs moving with a clean workflow.',
+    'Garixo helps tire shops manage work orders, tire inventory, and invoicing in one simple system. Built for small shops. Free 14-day trial, no credit card required.',
   keywords: [
     'garage management software for tire shops',
     'tire shop management software',
@@ -248,6 +248,27 @@ export default function TireShopSolutionsPage(): JSX.Element {
                 </Card>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="bg-background-primary py-s12">
+          <div className="mx-auto w-full max-w-[980px] px-s4">
+            <Card className="space-y-s4 border border-border bg-surface-default p-s6">
+              <p className="text-caption font-semibold uppercase tracking-wide text-primary-700">
+                Trusted by independent tire shops
+              </p>
+              <p className="text-h3 text-text-primary">
+                “We cut our checkout time in half. Work orders and tire sizes
+                are all in one place, so the front desk isn’t scrambling
+                anymore.”
+              </p>
+              <div className="text-small text-text-secondary">
+                <p className="font-medium text-text-primary">
+                  Miguel R., Owner
+                </p>
+                <p>Three-bay tire shop in Austin, TX</p>
+              </div>
+            </Card>
           </div>
         </section>
 
