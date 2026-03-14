@@ -43,6 +43,17 @@ const faqItems = [
     question: 'How is Garixo different from enterprise DMS systems?',
     answer:
       'Garixo focuses on speed, clarity, and simple setup instead of heavy enterprise modules.'
+  },
+  {
+    question: 'Is Garixo a replacement for a full DMS?',
+    answer:
+      'Garixo is not a full Dealer Management System. It is a focused service workflow tool for independent dealers who need clean work orders, vehicle history, and invoicing — without the cost and complexity of enterprise DMS platforms.'
+  },
+  {
+    question:
+      'How does Garixo compare to Reynolds & Reynolds or CDK for small dealers?',
+    answer:
+      'Enterprise DMS platforms are built for large franchise dealers with complex finance and inventory modules. Garixo focuses on service workflow for independent and growing operations at a significantly lower cost.'
   }
 ] as const;
 
@@ -172,15 +183,16 @@ export default function DealershipSolutionsPage(): JSX.Element {
         <section className="border-b border-border bg-background-primary py-s12">
           <div className="mx-auto w-full max-w-[1000px] px-s4 text-center">
             <p className="inline-flex items-center rounded-full border border-primary-100 bg-primary-50 px-s3 py-s1 text-caption font-semibold text-primary-700">
-              Built for Dealership Service Departments
+              Built for Independent dealers and multi-bay service shops
             </p>
             <h1 className="mt-s4 text-[34px] font-bold leading-tight text-text-primary md:text-[52px]">
-              Garage Management Software for Dealerships
+              Garage Management Software for Dealerships and Multi-Bay Service
+              Shops
             </h1>
             <p className="mx-auto mt-s3 max-w-[820px] text-body text-text-secondary">
-              Keep dealership service work orders, advisor handoffs, and vehicle
-              history in one clean workflow. Garixo helps service lanes move
-              faster and keeps bays organized.
+              Run your service department without a $500/month DMS. Garixo gives
+              independent dealers and growing service shops clean work orders,
+              advisor notes, and vehicle history — at a fraction of the cost.
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">

@@ -43,6 +43,11 @@ const faqItems = [
     question: 'Is Garixo simple enough for solo mechanics?',
     answer:
       'Yes. It is built for independent operators who want speed and clarity without complex setup.'
+  },
+  {
+    question: 'Can I use Garixo entirely from my phone as a mobile mechanic?',
+    answer:
+      'Yes. Garixo is fully web-based and optimized for phones and tablets. You can create work orders, add parts, and send invoices on-site without a laptop or office.'
   }
 ] as const;
 
@@ -174,7 +179,8 @@ export default function MobileMechanicsSolutionsPage(): JSX.Element {
               Built for Mobile Mechanics
             </p>
             <h1 className="mt-s4 text-[34px] font-bold leading-tight text-text-primary md:text-[52px]">
-              Garage Management Software for Mobile Mechanics
+              Create work orders, log parts, and send invoices from your phone —
+              before you leave the driveway. No front desk needed.
             </h1>
             <p className="mx-auto mt-s3 max-w-[820px] text-body text-text-secondary">
               Run mobile repair jobs with fast work orders, on-site estimates,

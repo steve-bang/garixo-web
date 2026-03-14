@@ -25,6 +25,11 @@ const faqItems = [
       'Yes. Capture notes and attach documentation to the repair so every tech sees the same context.'
   },
   {
+    question: 'Can I add detailed notes and context to each repair?',
+    answer:
+      'Yes. You can add notes, service details, and part references to every work order so the full repair context stays in one place for your team.'
+  },
+  {
     question: 'Does Garixo help with supplements and mid-repair changes?',
     answer:
       'Yes. You can add parts and labor updates as repairs evolve so the estimate stays accurate.'
@@ -338,6 +343,27 @@ export default function AutoBodyShopSolutionsPage(): JSX.Element {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="bg-surface-default py-s12">
+          <div className="mx-auto w-full max-w-[980px] px-s4">
+            <Card className="space-y-s4 border border-border bg-surface-default p-s6">
+              <p className="text-caption font-semibold uppercase tracking-wide text-primary-700">
+                Trusted by independent body shops
+              </p>
+              <p className="text-h3 text-text-primary">
+                “We cut our approval delays by keeping photos and supplements
+                inside the repair order. Everyone sees the same stage and we
+                finish jobs faster.”
+              </p>
+              <div className="text-small text-text-secondary">
+                <p className="font-medium text-text-primary">
+                  Danielle M., Owner
+                </p>
+                <p>Collision repair shop in Phoenix, AZ</p>
+              </div>
+            </Card>
           </div>
         </section>
 

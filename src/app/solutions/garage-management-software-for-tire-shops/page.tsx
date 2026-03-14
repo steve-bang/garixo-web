@@ -25,6 +25,11 @@ const faqItems = [
       'Yes. Garixo connects parts and services to work orders so you can see usage and keep stock under control.'
   },
   {
+    question: 'Can Garixo track tire sizes and alert me when stock is low?',
+    answer:
+      'Yes. Garixo tracks parts and tire inventory linked to each work order. You can set low-stock alerts so you always know when a size is running out before a job starts.'
+  },
+  {
     question: 'Will this help me turn cars faster?',
     answer:
       'Yes. Clear job status, quick work orders, and faster invoices help reduce delays and improve daily throughput.'
@@ -174,9 +179,9 @@ export default function TireShopSolutionsPage(): JSX.Element {
               Garage Management Software for Tire Shops
             </h1>
             <p className="mx-auto mt-s3 max-w-[820px] text-body text-text-secondary">
-              Run fast, organized tire operations with simple work orders,
-              inventory tracking, and clean invoices. Garixo keeps your bays
-              moving and your customers coming back.
+              Track every tire job, rotation, and alignment from check-in to
+              invoice — without paper tickets or missed stock. Built for shops
+              doing 10 to 100+ cars a week.
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
@@ -294,7 +299,9 @@ export default function TireShopSolutionsPage(): JSX.Element {
                 </p>
                 <div className="flex flex-col gap-s2 sm:flex-row">
                   <Button asChild className="h-11">
-                    <Link href="/auth/sign-up">Start Free Trial</Link>
+                    <Link href="/auth/sign-up">
+                      See how it works — free demo
+                    </Link>
                   </Button>
                   <Button asChild variant="secondary" className="h-11">
                     <Link href="/features/work-orders-management">
@@ -380,7 +387,9 @@ export default function TireShopSolutionsPage(): JSX.Element {
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
-                <Link href="/auth/sign-up">Start Free Trial</Link>
+                <Link href="/auth/sign-up">
+                  Start free — no credit card needed
+                </Link>
               </Button>
               <Button asChild variant="secondary" className="h-12">
                 <Link href="/features/inventory-management">
