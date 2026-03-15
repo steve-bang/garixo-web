@@ -110,6 +110,18 @@ export async function GET(): Promise<Response> {
       lastmod: '2026-03-14T20:08:00Z',
       changefreq: 'weekly',
       priority: '0.8'
+    },
+    {
+      path: '/tools/auto-repair-labor-rate-calculator',
+      lastmod: '2026-03-15T07:12:00Z',
+      changefreq: 'weekly',
+      priority: '0.8'
+    },
+    {
+      path: '/tools/auto-repair-shop-profit-calculator',
+      lastmod: '2026-03-15T09:20:00Z',
+      changefreq: 'weekly',
+      priority: '0.8'
     }
   ];
 

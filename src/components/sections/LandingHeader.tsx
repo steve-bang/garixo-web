@@ -164,6 +164,46 @@ export function LandingHeader(): JSX.Element {
           >
             Case Studies
           </Link>
+
+          <div className="group relative">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-small text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
+              aria-haspopup="true"
+            >
+              Resources
+              <ChevronDown className="size-4 transition-transform duration-200 group-hover:rotate-180" />
+            </button>
+
+            <div className="pointer-events-none absolute left-0 top-full z-20 w-[280px] translate-y-2 pt-3 opacity-0 transition duration-200 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+              <div className="rounded-xl border border-border bg-surface-default p-s2 shadow-xl">
+                <div className="grid gap-s2 px-s1 pb-s1 pt-s1">
+                  <Link
+                    href="/tools/auto-repair-labor-rate-calculator"
+                    className="block rounded-lg px-s3 py-s2 transition-colors hover:bg-surface-hover"
+                  >
+                    <p className="text-small font-medium text-text-primary">
+                      Labor Rate Calculator
+                    </p>
+                    <p className="mt-1 text-caption text-text-muted">
+                      Find your break-even and recommended hourly rate.
+                    </p>
+                  </Link>
+                  <Link
+                    href="/tools/auto-repair-shop-profit-calculator"
+                    className="block rounded-lg px-s3 py-s2 transition-colors hover:bg-surface-hover"
+                  >
+                    <p className="text-small font-medium text-text-primary">
+                      Shop Profit Calculator
+                    </p>
+                    <p className="mt-1 text-caption text-text-muted">
+                      Estimate monthly profit and margin in minutes.
+                    </p>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
         </nav>
 
         <div className="flex items-center gap-s2">
@@ -270,6 +310,20 @@ export function LandingHeader(): JSX.Element {
               onClick={closeMobileMenu}
             >
               Blog
+            </Link>
+            <Link
+              href="/tools/auto-repair-labor-rate-calculator"
+              className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+              onClick={closeMobileMenu}
+            >
+              Labor Rate Calculator
+            </Link>
+            <Link
+              href="/tools/auto-repair-shop-profit-calculator"
+              className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+              onClick={closeMobileMenu}
+            >
+              Shop Profit Calculator
             </Link>
             <Link
               href="/case-studies"
