@@ -38,6 +38,52 @@ export function LandingHeader(): JSX.Element {
               className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-small text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
               aria-haspopup="true"
             >
+              Product
+              <ChevronDown className="size-4 transition-transform duration-200 group-hover:rotate-180" />
+            </button>
+
+            <div className="pointer-events-none absolute left-0 top-full z-20 w-[220px] translate-y-2 pt-3 opacity-0 transition duration-200 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+              <div className="rounded-xl border border-border bg-surface-default p-s2 shadow-xl">
+                <div className="px-s3 pb-s2 pt-s1">
+                  <p className="text-caption font-semibold uppercase tracking-wide text-text-muted">
+                    Product
+                  </p>
+                </div>
+
+                <div className="grid gap-s2 px-s1 pb-s1 pt-s1">
+                  <Link
+                    href="/features"
+                    className="block rounded-lg px-s3 py-s2 transition-colors hover:bg-surface-hover"
+                  >
+                    <p className="text-small font-medium text-text-primary">
+                      Features
+                    </p>
+                    <p className="mt-1 text-caption text-text-muted">
+                      Explore product capabilities
+                    </p>
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className="block rounded-lg px-s3 py-s2 transition-colors hover:bg-surface-hover"
+                  >
+                    <p className="text-small font-medium text-text-primary">
+                      Pricing
+                    </p>
+                    <p className="mt-1 text-caption text-text-muted">
+                      See plans and trials
+                    </p>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="group relative">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-small text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
+              aria-haspopup="true"
+            >
               Solutions
               <ChevronDown className="size-4 transition-transform duration-200 group-hover:rotate-180" />
             </button>
@@ -107,12 +153,6 @@ export function LandingHeader(): JSX.Element {
           </div>
 
           <Link
-            href="/features"
-            className="text-small text-text-secondary hover:text-text-primary"
-          >
-            Features
-          </Link>
-          <Link
             href="/blog"
             className="text-small text-text-secondary hover:text-text-primary"
           >
@@ -123,12 +163,6 @@ export function LandingHeader(): JSX.Element {
             className="text-small text-text-secondary hover:text-text-primary"
           >
             Case Studies
-          </Link>
-          <Link
-            href="/pricing"
-            className="text-small text-text-secondary hover:text-text-primary"
-          >
-            Pricing
           </Link>
         </nav>
 
@@ -212,8 +246,24 @@ export function LandingHeader(): JSX.Element {
               className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
               onClick={closeMobileMenu}
             >
-              Features
+              Product
             </Link>
+            <div className="space-y-s1 pl-s2">
+              <Link
+                href="/features"
+                className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                onClick={closeMobileMenu}
+              >
+                Features
+              </Link>
+              <Link
+                href="/pricing"
+                className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                onClick={closeMobileMenu}
+              >
+                Pricing
+              </Link>
+            </div>
             <Link
               href="/blog"
               className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
@@ -227,13 +277,6 @@ export function LandingHeader(): JSX.Element {
               onClick={closeMobileMenu}
             >
               Case Studies
-            </Link>
-            <Link
-              href="/pricing"
-              className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-              onClick={closeMobileMenu}
-            >
-              Pricing
             </Link>
             <div className="grid grid-cols-2 gap-s2 pt-s2">
               <Button asChild variant="ghost" className="h-10">
