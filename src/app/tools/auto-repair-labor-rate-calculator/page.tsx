@@ -307,6 +307,15 @@ export default function LaborRateCalculatorPage(): JSX.Element {
                   </Link>
                 </Button>
               </div>
+              <p className="mt-s4 text-small text-text-muted">
+                Also useful:{' '}
+                <Link
+                  href="/tools/auto-repair-shop-profit-calculator"
+                  className="font-medium text-primary-700 underline-offset-2 hover:underline"
+                >
+                  Auto Repair Shop Profit Calculator →
+                </Link>
+              </p>
             </div>
           </div>
         </section>
