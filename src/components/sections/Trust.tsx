@@ -41,11 +41,7 @@ export function Trust(): JSX.Element {
           </Card>
         </div>
 
-        <Card
-          className="space-y-s3 border border-border p-s6 shadow-sm"
-          itemScope
-          itemType="https://schema.org/Review"
-        >
+        <Card className="space-y-s3 border border-border p-s6 shadow-sm">
           <blockquote
             className="text-body text-text-primary"
             itemProp="reviewBody"
