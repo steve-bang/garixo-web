@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
   title: 'Auto Repair Labor Rate Calculator | Garixo',
   description:
-    'Free calculator to find the correct labor rate for your auto repair shop. Calculate expenses, technician hours, and profit in seconds.',
+    'Free calculator for auto repair shop owners. Enter your expenses, tech count, and profit goal to find your exact break-even and recommended hourly labor rate in 60 seconds.',
   keywords: [
     'auto repair labor rate calculator',
     'mechanic hourly rate calculator',
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Auto Repair Labor Rate Calculator | Garixo',
     description:
-      'Calculate the right hourly labor rate for your shop in under 60 seconds.',
+      'Free calculator for auto repair shop owners. Enter your expenses, tech count, and profit goal to find your exact break-even and recommended hourly labor rate in 60 seconds.',
     type: 'website',
     url: 'https://www.garixo.com/tools/auto-repair-labor-rate-calculator'
   },
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Auto Repair Labor Rate Calculator | Garixo',
     description:
-      'Use a simple calculator to set the right labor rate and hit your profit goals.'
+      'Free calculator for auto repair shop owners. Enter your expenses, tech count, and profit goal to find your exact break-even and recommended hourly labor rate in 60 seconds.'
   }
 };
 
@@ -136,6 +136,62 @@ export default function LaborRateCalculatorPage(): JSX.Element {
     }
   };
 
+  const webAppSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Auto Repair Labor Rate Calculator',
+    url: 'https://www.garixo.com/tools/auto-repair-labor-rate-calculator',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    description:
+      'Free calculator for independent auto repair shop owners to find their break-even and recommended hourly labor rate in 60 seconds.',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD'
+    },
+    provider: {
+      '@type': 'Organization',
+      name: 'Garixo',
+      url: 'https://www.garixo.com'
+    }
+  };
+
+  const howToSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to Calculate Auto Repair Labor Rate',
+    description:
+      'Step-by-step guide to calculating the correct hourly labor rate for your auto repair shop.',
+    step: [
+      {
+        '@type': 'HowToStep',
+        name: 'Gather Your Monthly Expenses',
+        text: "Collect all your shop's monthly expenses, including rent, utilities, salaries, parts, and other overhead costs."
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Determine Billable Hours',
+        text: 'Calculate the total number of billable hours your mechanics work in a month. This is typically the number of mechanics multiplied by their working hours minus any non-billable time.'
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Calculate Break-Even Rate',
+        text: 'Divide your total monthly expenses by the total billable hours to find your break-even labor rate.'
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Set Your Profit Goal',
+        text: 'Decide on a profit margin you want to achieve and add that to your break-even rate to determine your final labor rate.'
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Use the Calculator',
+        text: 'Enter your expenses, billable hours, and profit goal into the Auto Repair Labor Rate Calculator to get instant results.'
+      }
+    ]
+  };
+
   return (
     <>
       <script
@@ -149,6 +205,16 @@ export default function LaborRateCalculatorPage(): JSX.Element {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
 
       <LandingHeader />
@@ -181,6 +247,26 @@ export default function LaborRateCalculatorPage(): JSX.Element {
           </div>
         </section>
 
+        <section className="bg-background-secondary py-s10">
+          <div className="mx-auto w-full max-w-[1000px] px-s4">
+            <div className="space-y-s3 text-left">
+              <h2 className="text-h2 text-text-primary">
+                What is a labor rate and why it matters
+              </h2>
+              <p className="text-body text-text-secondary">
+                Your labor rate is the hourly price you charge for technician
+                time. It’s the foundation of your profit. If the rate is too
+                low, every job quietly loses money. If it’s too high, you risk
+                pushback from customers. This calculator is designed for
+                independent shops that want a clear, realistic number based on
+                real expenses, team capacity, and profit goals — not guesswork.
+                Use it when pricing services, reviewing margins, or deciding
+                whether it’s time for a rate adjustment.
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section className="bg-background-primary py-s12" id="calculator">
           <div className="mx-auto w-full max-w-[1200px] px-s4">
             <div className="mb-s8 space-y-s2 text-center">
@@ -193,6 +279,102 @@ export default function LaborRateCalculatorPage(): JSX.Element {
               </p>
             </div>
             <LaborRateCalculator />
+          </div>
+        </section>
+
+        <section className="bg-background-primary pb-s12">
+          <div className="mx-auto w-full max-w-[1100px] px-s4">
+            <div className="rounded-xl border border-border bg-surface-default p-s6 text-center shadow-sm">
+              <h2 className="text-[28px] font-semibold text-text-primary">
+                Now that you know your rate — are you hitting it every day?
+              </h2>
+              <p className="mx-auto mt-s3 max-w-[760px] text-body text-text-secondary">
+                Garixo shows real labor revenue per job, per technician, and per
+                day so you can track whether your labor rate is actually turning
+                into profit.
+              </p>
+              <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
+                <TrackedButtonLink
+                  href="/auth/sign-up"
+                  eventName="labor_rate_calculator_cta_result"
+                  className="h-12"
+                >
+                  Start Free Trial — No Credit Card Needed
+                </TrackedButtonLink>
+                <Button asChild variant="secondary" className="h-12">
+                  <Link href="/features/work-orders-management">
+                    Work Order Management Software
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-background-secondary py-s12">
+          <div className="mx-auto w-full max-w-[1100px] px-s4">
+            <div className="space-y-s6">
+              <div className="space-y-s3">
+                <h2 className="text-h1 text-text-primary">
+                  Average US auto repair labor rate (benchmarks)
+                </h2>
+                <p className="text-body text-text-secondary">
+                  Labor rates vary by state, shop type, and cost of doing
+                  business. Industry reporting shows rates can range from under
+                  $100 per hour to well above $200 per hour depending on the
+                  market. Recent national reporting also indicates that a large
+                  share of independent shops cluster around the $120–$159 per
+                  hour range. Use these benchmarks as context, then calculate
+                  the right rate for your shop using your own expense and
+                  capacity data.
+                </p>
+              </div>
+
+              <div className="space-y-s3">
+                <h2 className="text-h1 text-text-primary">
+                  How location affects labor rates (urban vs. rural)
+                </h2>
+                <p className="text-body text-text-secondary">
+                  Rates rise in higher-cost metro areas because rent, wages, and
+                  utilities are higher. Rural shops often price lower, but still
+                  need to cover overhead and maintain healthy margins. If your
+                  shop competes in a higher-cost market, your labor rate has to
+                  reflect the real cost of running your bays, not just what the
+                  shop down the street is charging.
+                </p>
+              </div>
+
+              <div className="space-y-s3">
+                <h2 className="text-h1 text-text-primary">
+                  Door rate vs. effective rate
+                </h2>
+                <p className="text-body text-text-secondary">
+                  The door rate is the posted hourly price on your counter or
+                  estimate. The effective rate is what you actually collect
+                  after discounts, comebacks, unbilled time, and warranty work.
+                  A shop can advertise $140/hour but only realize $110/hour if
+                  billable hours are leaking. Use this calculator to set a
+                  strong door rate, then track your effective rate with real job
+                  data.
+                </p>
+              </div>
+
+              <div className="space-y-s3">
+                <h2 className="text-h1 text-text-primary">
+                  How to use the result from this calculator
+                </h2>
+                <p className="text-body text-text-secondary">
+                  Start with the break-even rate — that’s the minimum you need
+                  to charge to keep the shop running. Then focus on the
+                  recommended rate to reach your profit target. If your current
+                  rate is below the recommendation, you can close the gap by
+                  adjusting pricing, improving productivity, or tightening parts
+                  margins. If the recommended rate feels high, revisit your
+                  expenses or your target profit to find a realistic path
+                  forward.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
       </main>

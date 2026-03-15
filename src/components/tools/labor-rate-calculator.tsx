@@ -28,7 +28,7 @@ type LaborRateInputs = {
   daysPerMonth: number;
   productivity: number;
   desiredProfit: number;
-  currentRate: number;
+  currentRate: number | null;
 };
 
 const defaultInputs: LaborRateInputs = {
@@ -43,7 +43,7 @@ const defaultInputs: LaborRateInputs = {
   daysPerMonth: 22,
   productivity: 75,
   desiredProfit: 2000,
-  currentRate: 70
+  currentRate: null
 };
 
 function safeNumber(value: string): number {
@@ -80,7 +80,8 @@ export function LaborRateCalculator(): JSX.Element {
         ? (totalExpenses + inputs.desiredProfit) / billableHours
         : 0;
     const targetRevenue = billableHours * recommendedRate;
-    const currentRevenue = billableHours * inputs.currentRate;
+    const currentRevenue =
+      inputs.currentRate !== null ? billableHours * inputs.currentRate : 0;
     const revenueGap = Math.max(0, targetRevenue - currentRevenue);
 
     return {
@@ -337,7 +338,7 @@ export function LaborRateCalculator(): JSX.Element {
         </Card>
       </div>
 
-      <div className="space-y-s4">
+      <div className="space-y-s4 lg:sticky lg:top-24 lg:self-start">
         <Card className="space-y-s3 border border-border bg-surface-default p-s4 shadow-sm">
           <p className="text-caption font-semibold uppercase text-primary-700">
             Results
@@ -351,7 +352,7 @@ export function LaborRateCalculator(): JSX.Element {
                 {currencyFormatter.format(totals.breakEvenRate)} / hr
               </p>
             </div>
-            <div className="rounded-md border border-border bg-background-primary p-s3">
+            <div className="rounded-md border border-primary-200 bg-primary-50/40 p-s3">
               <p className="text-caption text-text-muted">
                 Recommended labor rate
               </p>
@@ -368,6 +369,10 @@ export function LaborRateCalculator(): JSX.Element {
               </p>
             </div>
           </div>
+          <p className="text-small text-text-secondary">
+            Use the recommended rate as your pricing target, then track real
+            labor revenue per job to confirm you’re hitting it.
+          </p>
         </Card>
 
         <Card className="space-y-s3 border border-border bg-surface-default p-s4 shadow-sm">
@@ -419,22 +424,29 @@ export function LaborRateCalculator(): JSX.Element {
             <Input
               type="number"
               min={0}
-              value={inputs.currentRate}
+              value={inputs.currentRate ?? ''}
               onChange={(event) =>
                 handleNumberChange('currentRate', event.target.value)
               }
             />
-            <p className="text-small text-text-secondary">
-              If you charge{' '}
-              <span className="font-semibold text-text-primary">
-                {currencyFormatter.format(inputs.currentRate)} / hr
-              </span>{' '}
-              you may miss about{' '}
-              <span className="font-semibold text-text-primary">
-                {currencyFormatter.format(totals.revenueGap)}
-              </span>{' '}
-              each month compared with the recommended rate.
-            </p>
+            {inputs.currentRate === null ? (
+              <p className="text-small text-text-secondary">
+                Enter your current labor rate above to see how it compares to
+                your recommended rate.
+              </p>
+            ) : (
+              <p className="text-small text-text-secondary">
+                If you charge{' '}
+                <span className="font-semibold text-text-primary">
+                  {currencyFormatter.format(inputs.currentRate)} / hr
+                </span>{' '}
+                you may miss about{' '}
+                <span className="font-semibold text-text-primary">
+                  {currencyFormatter.format(totals.revenueGap)}
+                </span>{' '}
+                each month compared with the recommended rate.
+              </p>
+            )}
           </div>
         </Card>
 
