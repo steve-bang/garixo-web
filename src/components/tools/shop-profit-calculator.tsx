@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
@@ -422,6 +423,15 @@ export function ShopProfitCalculator(): JSX.Element {
               job volume to protect profitability.
             </div>
           ) : null}
+          <p className="text-small text-text-secondary">
+            Want to check if your hourly labor rate supports this profit target?
+            <Link
+              href="/tools/auto-repair-labor-rate-calculator"
+              className="ml-1 font-medium text-primary-700 underline-offset-2 hover:underline"
+            >
+              → Try the Auto Repair Labor Rate Calculator
+            </Link>
+          </p>
         </Card>
 
         <Card className="space-y-s3 border border-border bg-surface-default p-s4 shadow-sm">

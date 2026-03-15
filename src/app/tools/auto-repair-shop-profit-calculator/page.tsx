@@ -133,6 +133,27 @@ export default function ShopProfitCalculatorPage(): JSX.Element {
     }
   };
 
+  const webAppSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Auto Repair Shop Profit Calculator',
+    url: 'https://www.garixo.com/tools/auto-repair-shop-profit-calculator',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    description:
+      'Free calculator for auto repair shop owners to estimate monthly revenue, total costs, net profit, and profit margin in minutes.',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD'
+    },
+    provider: {
+      '@type': 'Organization',
+      name: 'Garixo',
+      url: 'https://www.garixo.com'
+    }
+  };
+
   return (
     <>
       <script
@@ -146,6 +167,11 @@ export default function ShopProfitCalculatorPage(): JSX.Element {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
       />
 
       <LandingHeader />
@@ -183,7 +209,7 @@ export default function ShopProfitCalculatorPage(): JSX.Element {
                 <div className="overflow-hidden rounded-2xl border border-border bg-surface-default shadow-sm ring-1 ring-primary-100/40">
                   <Image
                     src="/images/tools/repair-shop-profit-calculator-hero.webp"
-                    alt="Auto repair shop profit calculator dashboard showing revenue expenses and net profit"
+                    alt="Auto repair shop monthly profit calculator showing revenue, parts cost, labor, overhead, and net margin breakdown for independent garages"
                     width={1040}
                     height={840}
                     className="h-auto w-full object-cover"
@@ -230,8 +256,13 @@ export default function ShopProfitCalculatorPage(): JSX.Element {
                 Average profit margin for repair shops
               </h2>
               <p className="text-body text-text-secondary">
-                Many successful shops operate in the 20–30% profit margin range.
-                Your ideal target should match your expenses and business goals.
+                Most independent auto repair shops target a net profit margin
+                between 20% and 30%. Shops below 15% are typically losing money
+                to labor inefficiency or parts leakage. High-performing shops
+                above 30% usually have strong labor pricing, low overhead per
+                bay, and tight parts cost control. Use the calculator above to
+                see where your shop stands and what margin your current numbers
+                actually produce.
               </p>
             </div>
             <div className="space-y-s3">
