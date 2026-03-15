@@ -306,6 +306,22 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 - Customer: `totalVisits`, `totalSpent`, `lastVisit`.
 - Vehicle: `totalVisits`, `totalSpent`, `lastServiceDate`.
 
+## [0.1.8] - 2026-03-15
+
+### Added
+
+- Tools landing pages:
+- `/tools/auto-repair-labor-rate-calculator`
+- `/tools/auto-repair-shop-profit-calculator`
+- Step-by-step calculator components for labor rate and shop profit tools.
+- Profit tool hero image at `/public/images/tools/repair-shop-profit-calculator-hero.webp`.
+- GA event tracking for tool usage and tool CTAs.
+
+### Changed
+
+- Public header now includes a Tools dropdown and mobile links for the new calculators.
+- Static sitemap now includes tool routes.
+
 ## [0.1.7] - 2026-03-14
 
 ### Added
