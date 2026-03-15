@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { FeaturesStructuredData } from '@/components/SEO/FeaturesStructuredData';
 import { FeatureSection } from '@/components/features/FeatureSection';
 import { FeaturesFaq } from '@/components/features/FeaturesFaq';
 import { FeaturesSubnav } from '@/components/features/FeaturesSubnav';
@@ -16,7 +15,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
   title: 'Garage Management System Features for Auto Repair Shops | Garixo',
   description:
-    'Discover Garixo garage management software features: vehicle workflow tracking, technician management, inventory control, and real-time financial reporting.',
+    'Explore Garixo’s garage management software features for auto repair shops — work orders, customers, inventory, staff, and invoices in one simple dashboard built for small shops.',
   keywords: [
     'garage management system',
     'auto repair shop management system',
@@ -35,7 +34,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Garage Management System Features for Auto Repair Shops | Garixo',
     description:
-      'Everything you need to manage vehicles, technicians, inventory and profit in one simple platform.',
+      'Explore Garixo’s garage management software features for auto repair shops — work orders, customers, inventory, staff, and invoices in one simple dashboard built for small shops.',
     type: 'website',
     url: 'https://www.garixo.com/features'
   }
@@ -44,7 +43,6 @@ export const metadata: Metadata = {
 export default function FeaturesPage(): JSX.Element {
   return (
     <>
-      <FeaturesStructuredData />
       <LandingHeader />
       <FeaturesSubnav />
 
