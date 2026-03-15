@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { FeaturesStructuredData } from '@/components/SEO/FeaturesStructuredData';
 import { FeatureSection } from '@/components/features/FeatureSection';
 import { FeaturesFaq } from '@/components/features/FeaturesFaq';
 import { FeaturesSubnav } from '@/components/features/FeaturesSubnav';
@@ -43,6 +44,7 @@ export const metadata: Metadata = {
 export default function FeaturesPage(): JSX.Element {
   return (
     <>
+      <FeaturesStructuredData />
       <LandingHeader />
       <FeaturesSubnav />
 
