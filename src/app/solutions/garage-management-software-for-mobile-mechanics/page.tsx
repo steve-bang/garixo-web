@@ -87,11 +87,10 @@ const featureHighlights = [
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Garage Management Software for Mobile Mechanics | Garixo',
+  title: 'Mobile Mechanic Software — Work Orders & Invoices On The Go | Garixo',
   description:
-    'Garixo is a simple garage management software for mobile mechanics. Create work orders, track parts, and send invoices on the go.',
+    'Mobile mechanic software to manage work orders, parts, and invoices from your phone. Create jobs on-site and get paid before leaving. Free trial.',
   keywords: [
-    'garage management software for mobile mechanics',
     'mobile mechanic software',
     'mobile mechanic work order system',
     'mobile auto repair management software',
@@ -106,17 +105,19 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Garage Management Software for Mobile Mechanics | Garixo',
+    title:
+      'Mobile Mechanic Software — Work Orders & Invoices On The Go | Garixo',
     description:
-      'Run mobile repair jobs with fast work orders, parts tracking, and clean invoices.',
+      'Mobile mechanic software to manage work orders, parts, and invoices from your phone. Create jobs on-site and get paid before leaving. Free trial.',
     type: 'website',
     url: 'https://www.garixo.com/solutions/garage-management-software-for-mobile-mechanics'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Garage Management Software for Mobile Mechanics | Garixo',
+    title:
+      'Mobile Mechanic Software — Work Orders & Invoices On The Go | Garixo',
     description:
-      'Simple mobile mechanic workflow software for work orders and invoices.'
+      'Mobile mechanic software to manage work orders, parts, and invoices from your phone. Create jobs on-site and get paid before leaving. Free trial.'
   }
 };
 

@@ -94,11 +94,12 @@ const featureHighlights = [
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Garage Management Software for Dealerships | Garixo',
+  title:
+    'Dealership Service Department Software — Simple & Affordable | Garixo',
   description:
-    'Garixo is a simple garage management software for dealership service departments. Track work orders, vehicles, parts, and invoices in one workflow.',
+    'Dealership service department software for faster service lanes. Manage work orders, advisor handoffs, and vehicle history in one workflow. Start free.',
   keywords: [
-    'garage management software for dealerships',
+    'dealership service department software',
     'dealership service management software',
     'dealership work order system',
     'auto dealer service software',
@@ -113,17 +114,19 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Garage Management Software for Dealerships | Garixo',
+    title:
+      'Dealership Service Department Software — Simple & Affordable | Garixo',
     description:
-      'Run dealership service work orders, parts, and invoices with a simple workflow.',
+      'Dealership service department software for faster service lanes. Manage work orders, advisor handoffs, and vehicle history in one workflow. Start free.',
     type: 'website',
     url: 'https://www.garixo.com/solutions/garage-management-software-for-dealerships'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Garage Management Software for Dealerships | Garixo',
+    title:
+      'Dealership Service Department Software — Simple & Affordable | Garixo',
     description:
-      'Simple dealership service workflow software for work orders and invoices.'
+      'Dealership service department software for faster service lanes. Manage work orders, advisor handoffs, and vehicle history in one workflow. Start free.'
   }
 };
 

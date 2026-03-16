@@ -44,9 +44,9 @@ const faqItems = [
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Auto Repair Labor Rate Calculator | Garixo',
+  title: 'Auto Repair Labor Rate Calculator — Free Tool | Garixo',
   description:
-    'Free calculator for auto repair shop owners. Enter your expenses, tech count, and profit goal to find your exact break-even and recommended hourly labor rate in 60 seconds.',
+    'Free auto repair labor rate calculator. Enter your shop costs and profit goal — get your break-even and recommended hourly rate in under 60 seconds.',
   keywords: [
     'auto repair labor rate calculator',
     'mechanic hourly rate calculator',
@@ -62,17 +62,17 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Auto Repair Labor Rate Calculator | Garixo',
+    title: 'Auto Repair Labor Rate Calculator — Free Tool | Garixo',
     description:
-      'Free calculator for auto repair shop owners. Enter your expenses, tech count, and profit goal to find your exact break-even and recommended hourly labor rate in 60 seconds.',
+      'Free auto repair labor rate calculator. Enter your shop costs and profit goal — get your break-even and recommended hourly rate in under 60 seconds.',
     type: 'website',
     url: 'https://www.garixo.com/tools/auto-repair-labor-rate-calculator'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Auto Repair Labor Rate Calculator | Garixo',
+    title: 'Auto Repair Labor Rate Calculator — Free Tool | Garixo',
     description:
-      'Free calculator for auto repair shop owners. Enter your expenses, tech count, and profit goal to find your exact break-even and recommended hourly labor rate in 60 seconds.'
+      'Free auto repair labor rate calculator. Enter your shop costs and profit goal — get your break-even and recommended hourly rate in under 60 seconds.'
   }
 };
 

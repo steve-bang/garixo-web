@@ -17,9 +17,9 @@ export const metadata: Metadata = {
   title:
     'Garage Management System Features — Work Orders, Inventory & Staff | Garixo',
   description:
-    'Explore Garixo’s garage management software features for auto repair shops — work orders, customers, inventory, staff, and invoices in one simple dashboard built for small shops.',
+    'Garage management software for auto repair shops. Track work orders, inventory, staff & customers in one platform. From $79/mo. Free 14-day trial.',
   keywords: [
-    'garage management system',
+    'garage management system features',
     'auto repair shop management system',
     'workshop management software features',
     'automotive repair management tools',
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title:
       'Garage Management System Features — Work Orders, Inventory & Staff | Garixo',
     description:
-      'Explore Garixo’s garage management software features for auto repair shops — work orders, customers, inventory, staff, and invoices in one simple dashboard built for small shops.',
+      'Garage management software for auto repair shops. Track work orders, inventory, staff & customers in one platform. From $79/mo. Free 14-day trial.',
     type: 'website',
     url: 'https://www.garixo.com/features'
   }

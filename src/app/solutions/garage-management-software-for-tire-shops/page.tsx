@@ -83,11 +83,11 @@ const featureHighlights = [
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Garage Management Software for Tire Shops | Garixo',
+  title:
+    'Tire Shop Management Software — Fast Work Orders & Inventory | Garixo',
   description:
-    'Garixo helps tire shops manage work orders, tire inventory, and invoicing in one simple system. Built for small shops. Free 14-day trial, no credit card required.',
+    'Tire shop management software that keeps bays moving. Fast work orders, tire inventory tracking, and clean invoices for small tire shops. Free trial.',
   keywords: [
-    'garage management software for tire shops',
     'tire shop management software',
     'tire shop work order system',
     'auto shop management software',
@@ -103,17 +103,19 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Garage Management Software for Tire Shops | Garixo',
+    title:
+      'Tire Shop Management Software — Fast Work Orders & Inventory | Garixo',
     description:
-      'Create fast tire work orders, track inventory, and invoice quickly with Garixo.',
+      'Tire shop management software that keeps bays moving. Fast work orders, tire inventory tracking, and clean invoices for small tire shops. Free trial.',
     type: 'website',
     url: 'https://www.garixo.com/solutions/garage-management-software-for-tire-shops'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Garage Management Software for Tire Shops | Garixo',
+    title:
+      'Tire Shop Management Software — Fast Work Orders & Inventory | Garixo',
     description:
-      'Simple tire shop workflow software for work orders, inventory, and invoices.'
+      'Tire shop management software that keeps bays moving. Fast work orders, tire inventory tracking, and clean invoices for small tire shops. Free trial.'
   }
 };
 

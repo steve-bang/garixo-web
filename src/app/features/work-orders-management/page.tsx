@@ -103,11 +103,11 @@ const coreFeatures = [
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Auto Repair Work Order Software for Small Garages | Garixo',
+  title: 'Work Order Management Software for Auto Repair Shops | Garixo',
   description:
-    'Create, track, and complete repair jobs faster with simple auto repair work order software built for independent garages in the USA.',
+    'Work order management software for auto repair shops. Create, assign, and close repair jobs from check-in to invoice. Simple and fast digital workflow.',
   keywords: [
-    'auto repair work order software',
+    'work order management software auto repair',
     'garage work order management system',
     'auto shop work order software',
     'mechanic work order app',
@@ -127,17 +127,17 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Auto Repair Work Order Software for Small Garages | Garixo',
+    title: 'Work Order Management Software for Auto Repair Shops | Garixo',
     description:
-      'Simple work order management for independent auto shops. Track jobs, parts, and progress in one clear workflow.',
+      'Work order management software for auto repair shops. Create, assign, and close repair jobs from check-in to invoice. Simple and fast digital workflow.',
     type: 'website',
     url: 'https://www.garixo.com/features/work-orders-management'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Auto Repair Work Order Software | Garixo',
+    title: 'Work Order Management Software for Auto Repair Shops | Garixo',
     description:
-      'Track repair jobs, assign mechanics, and improve profit per job with a simple work order system.'
+      'Work order management software for auto repair shops. Create, assign, and close repair jobs from check-in to invoice. Simple and fast digital workflow.'
   }
 };
 

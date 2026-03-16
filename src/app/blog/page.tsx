@@ -14,18 +14,26 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
   title: 'Garage Management Blog for Auto Repair Shops | Garixo',
   description:
-    'SEO guides and practical tips for independent auto repair shop owners to improve operations, team productivity, and daily revenue.',
+    'Practical guides for independent auto repair shop owners. Learn to cut profit leaks, improve daily workflow, and grow revenue. Free articles weekly.',
   alternates: {
     canonical: '/blog'
   },
+  keywords: [
+    'auto repair shop management blog',
+    'auto repair shop blog',
+    'garage owner resources',
+    'auto shop business tips',
+    'automotive repair guides',
+    'car repair shop articles'
+  ],
   robots: {
     index: true,
     follow: true
   },
   openGraph: {
-    title: 'Garage Management Blog | Garixo',
+    title: 'Garage Management Blog for Auto Repair Shops | Garixo',
     description:
-      'Actionable guides for independent garage owners on work orders, customers, inventory, and staff operations.',
+      'Practical guides for independent auto repair shop owners. Learn to cut profit leaks, improve daily workflow, and grow revenue. Free articles weekly.',
     type: 'website',
     url: 'https://www.garixo.com/blog'
   }

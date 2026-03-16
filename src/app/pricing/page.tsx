@@ -112,9 +112,9 @@ export const revalidate = false;
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Simple Garage Software Pricing for Auto Repair Shops | Garixo',
+  title: 'Garage Management Software Pricing — From $79/mo | Garixo',
   description:
-    'Clear pricing for independent auto repair shops. Start a free trial, manage work orders faster, and run your garage with less stress.',
+    'Garage management software pricing starts at $79/mo. Work orders, inventory, customers & staff included. 14-day free trial. No credit card needed.',
   keywords: ['garage management software pricing', 'auto repair software cost'],
   alternates: {
     canonical: '/pricing'
@@ -124,17 +124,17 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Simple Garage Software Pricing for Auto Repair Shops | Garixo',
+    title: 'Garage Management Software Pricing — From $79/mo | Garixo',
     description:
-      'Choose a simple plan built for independent garage owners. Free trial available. No complex setup.',
+      'Garage management software pricing starts at $79/mo. Work orders, inventory, customers & staff included. 14-day free trial. No credit card needed.',
     type: 'website',
     url: 'https://www.garixo.com/pricing'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Garixo Pricing',
+    title: 'Garage Management Software Pricing — From $79/mo | Garixo',
     description:
-      'Simple monthly and annual plans for non-technical garage owners.'
+      'Garage management software pricing starts at $79/mo. Work orders, inventory, customers & staff included. 14-day free trial. No credit card needed.'
   }
 };
 

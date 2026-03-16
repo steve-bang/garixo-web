@@ -82,11 +82,11 @@ const featureHighlights = [
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Garage Management Software for Auto Body Shops | Garixo',
+  title:
+    'Auto Body Shop Management Software — Repair Workflow & Parts | Garixo',
   description:
-    'Garixo is a simple garage management software for auto body shops. Track repair work orders, parts, and invoices in one clean workflow.',
+    'Auto body shop management software for collision repair teams. Organize work orders, track parts, invoice faster. Simple setup, no enterprise complexity.',
   keywords: [
-    'garage management software for auto body shops',
     'auto body shop management software',
     'collision repair shop software',
     'auto body work order system',
@@ -101,17 +101,19 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Garage Management Software for Auto Body Shops | Garixo',
+    title:
+      'Auto Body Shop Management Software — Repair Workflow & Parts | Garixo',
     description:
-      'Track repair jobs, parts, and invoices with a simple workflow made for auto body shops.',
+      'Auto body shop management software for collision repair teams. Organize work orders, track parts, invoice faster. Simple setup, no enterprise complexity.',
     type: 'website',
     url: 'https://www.garixo.com/solutions/garage-management-software-for-auto-body-shops'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Garage Management Software for Auto Body Shops | Garixo',
+    title:
+      'Auto Body Shop Management Software — Repair Workflow & Parts | Garixo',
     description:
-      'Simple auto body shop workflow software for work orders and invoices.'
+      'Auto body shop management software for collision repair teams. Organize work orders, track parts, invoice faster. Simple setup, no enterprise complexity.'
   }
 };
 

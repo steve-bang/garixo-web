@@ -94,11 +94,11 @@ const coreFeatures = [
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Garage Inventory Management Software for Auto Repair Shops',
+  title: 'Auto Parts Inventory Management Software — Track Stock | Garixo',
   description:
-    'Track parts in real time, prevent stockouts, and improve profit per job with simple garage inventory management software for independent auto shops.',
+    'Auto parts inventory management software for repair shops. Real-time stock tracking, low-stock alerts, and auto-deduct parts on every work order.',
   keywords: [
-    'garage inventory management software',
+    'auto parts inventory management software',
     'auto repair inventory software',
     'auto shop parts inventory system',
     'mechanic inventory management',
@@ -116,17 +116,17 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Garage Inventory Management Software for Auto Repair Shops',
+    title: 'Auto Parts Inventory Management Software — Track Stock | Garixo',
     description:
-      'Simple inventory tracking for independent garages. Reduce parts waste, avoid stockouts, and protect profit on every job.',
+      'Auto parts inventory management software for repair shops. Real-time stock tracking, low-stock alerts, and auto-deduct parts on every work order.',
     type: 'website',
     url: 'https://www.garixo.com/features/inventory-management'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Garage Inventory Management Software | Garixo',
+    title: 'Auto Parts Inventory Management Software — Track Stock | Garixo',
     description:
-      'Track parts, prevent stockouts, and improve margin with simple inventory software for independent auto shops.'
+      'Auto parts inventory management software for repair shops. Real-time stock tracking, low-stock alerts, and auto-deduct parts on every work order.'
   }
 };
 

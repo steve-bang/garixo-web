@@ -41,9 +41,10 @@ const faqItems = [
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Auto Repair Shop Profit Calculator | Free Tool for Garage Owners',
+  title:
+    'Auto Repair Shop Profit Calculator — Free Tool for Garage Owners | Garixo',
   description:
-    'Calculate the real profit of your auto repair shop in seconds. Use this free repair shop profit calculator to understand revenue, costs, and profit margin.',
+    'Free auto repair shop profit calculator. Enter revenue, labor, parts, and overhead — see your real monthly net profit in minutes. No signup needed.',
   keywords: [
     'auto repair shop profit calculator',
     'repair shop profit calculator',
@@ -59,17 +60,19 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Auto Repair Shop Profit Calculator | Free Tool for Garage Owners',
+    title:
+      'Auto Repair Shop Profit Calculator — Free Tool for Garage Owners | Garixo',
     description:
-      'Find your real auto repair shop profit and margin in minutes with this free calculator.',
+      'Free auto repair shop profit calculator. Enter revenue, labor, parts, and overhead — see your real monthly net profit in minutes. No signup needed.',
     type: 'website',
     url: 'https://www.garixo.com/tools/auto-repair-shop-profit-calculator'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Auto Repair Shop Profit Calculator | Garixo',
+    title:
+      'Auto Repair Shop Profit Calculator — Free Tool for Garage Owners | Garixo',
     description:
-      'Calculate revenue, costs, and profit margin for your auto repair shop.'
+      'Free auto repair shop profit calculator. Enter revenue, labor, parts, and overhead — see your real monthly net profit in minutes. No signup needed.'
   }
 };
 
@@ -120,7 +123,7 @@ export default function ShopProfitCalculatorPage(): JSX.Element {
     operatingSystem: 'Web',
     url: 'https://www.garixo.com/tools/auto-repair-shop-profit-calculator',
     description:
-      'Free calculator to estimate auto repair shop revenue, costs, and profit margin.',
+      'Free auto repair shop profit calculator. Enter revenue, labor, parts, and overhead — see your real monthly net profit in minutes. No signup needed.',
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -141,7 +144,7 @@ export default function ShopProfitCalculatorPage(): JSX.Element {
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     description:
-      'Free calculator for auto repair shop owners to estimate monthly revenue, total costs, net profit, and profit margin in minutes.',
+      'Free auto repair shop profit calculator. Enter revenue, labor, parts, and overhead — see your real monthly net profit in minutes. No signup needed.',
     offers: {
       '@type': 'Offer',
       price: '0',

@@ -98,11 +98,12 @@ const coreFeatures = [
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Auto Repair Staff Management Software | Garixo',
+  title:
+    'Mechanic Staff Management Software — Assign Jobs & Track Workload | Garixo',
   description:
-    'Assign mechanics, track workload, and improve team productivity with simple staff management software for independent auto repair shops.',
+    'Mechanic staff management software for small garages. Assign jobs clearly, track who is free or overloaded, and keep your whole team productive daily.',
   keywords: [
-    'auto repair staff management software',
+    'mechanic staff management software',
     'garage employee management system',
     'mechanic staff tracking software',
     'auto shop employee management software',
@@ -121,17 +122,19 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Auto Repair Staff Management Software | Garixo',
+    title:
+      'Mechanic Staff Management Software — Assign Jobs & Track Workload | Garixo',
     description:
-      'Simple staff management for independent garages. Assign jobs clearly, track productivity, and improve daily team output.',
+      'Mechanic staff management software for small garages. Assign jobs clearly, track who is free or overloaded, and keep your whole team productive daily.',
     type: 'website',
     url: 'https://www.garixo.com/features/staff-management'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Garage Staff Management Software | Garixo',
+    title:
+      'Mechanic Staff Management Software — Assign Jobs & Track Workload | Garixo',
     description:
-      'Track mechanic workload, improve team efficiency, and reduce job delays with simple staff management tools.'
+      'Mechanic staff management software for small garages. Assign jobs clearly, track who is free or overloaded, and keep your whole team productive daily.'
   }
 };
 

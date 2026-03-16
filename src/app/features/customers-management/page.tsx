@@ -101,9 +101,9 @@ const coreFeatures = [
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Auto Repair Customer Management Software | Garixo',
+  title: 'Auto Repair Customer Management Software — Service History | Garixo',
   description:
-    'Track customer profiles, vehicles, and service history in one simple garage customer management system built for independent auto shops.',
+    'Auto repair customer management software with full service history. Search by name, plate, or phone. Keep customer and vehicle records in one place.',
   keywords: [
     'auto repair customer management software',
     'garage customer management system',
@@ -124,17 +124,19 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Auto Repair Customer Management Software | Garixo',
+    title:
+      'Auto Repair Customer Management Software — Service History | Garixo',
     description:
-      'A simple customer management system for independent garages to track history, improve retention, and increase repeat revenue.',
+      'Auto repair customer management software with full service history. Search by name, plate, or phone. Keep customer and vehicle records in one place.',
     type: 'website',
     url: 'https://www.garixo.com/features/customers-management'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Garage Customer Management System | Garixo',
+    title:
+      'Auto Repair Customer Management Software — Service History | Garixo',
     description:
-      'Track customer history, linked vehicles, and repeat visits with simple auto shop CRM software.'
+      'Auto repair customer management software with full service history. Search by name, plate, or phone. Keep customer and vehicle records in one place.'
   }
 };
 
