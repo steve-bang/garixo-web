@@ -139,7 +139,7 @@ export default async function BlogDetailPage({
 
       <LandingHeader />
       <main className="bg-background-primary">
-        <article className="mx-auto w-full max-w-[820px] space-y-s4 px-s4 py-s10">
+        <article className="mx-auto w-full max-w-[1000px] space-y-s4 px-s4 py-s10">
           <header className="space-y-s2">
             <p className="text-caption text-text-muted">
               {post.category} · {post.readingTime} min read ·{' '}
