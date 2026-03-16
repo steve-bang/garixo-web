@@ -222,6 +222,18 @@ export default function StaffManagementFeaturePage(): JSX.Element {
               Without clear staff visibility, good technicians lose time and
               jobs slow down.
             </p>
+            <p className="mt-s2 text-small text-text-secondary">
+              Industry context:{' '}
+              <a
+                href="https://www.ratchetandwrench.com"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="font-medium text-primary-700 hover:text-primary-800"
+              >
+                average auto repair shop productivity rate is 70–85%
+              </a>
+              .
+            </p>
             <div className="mt-s6 grid gap-s3 md:grid-cols-2">
               <Card className="p-s4">
                 <h3 className="text-h3">Operational pain</h3>

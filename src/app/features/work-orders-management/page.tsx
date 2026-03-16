@@ -243,6 +243,19 @@ export default function WorkOrdersManagementFeaturePage(): JSX.Element {
                   <li>Delayed invoices and slower cash collection</li>
                   <li>Undercharging due to poor job visibility</li>
                 </ul>
+                <p className="mt-s3 text-small text-text-secondary">
+                  Industry context:{' '}
+                  <a
+                    href="https://lookupaplate.com/blog/auto-repair-industry-statistics"
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="font-medium text-primary-700 hover:text-primary-800"
+                  >
+                    auto repair shops lose 10–30% revenue from unbilled labor
+                    and parts
+                  </a>
+                  .
+                </p>
               </Card>
             </div>
           </div>
@@ -312,6 +325,18 @@ export default function WorkOrdersManagementFeaturePage(): JSX.Element {
             <h2 className="text-[30px] font-semibold leading-tight text-text-primary md:text-[38px]">
               How It Works in 3 Simple Steps
             </h2>
+            <p className="mt-s2 text-small text-text-secondary">
+              Helpful reference:{' '}
+              <a
+                href="https://www.ftc.gov"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="font-medium text-primary-700 hover:text-primary-800"
+              >
+                what to include in an auto repair invoice
+              </a>
+              .
+            </p>
             <div className="mt-s4 grid gap-s3 md:grid-cols-3">
               <Card className="p-s4">
                 <p className="text-primary text-caption font-semibold">

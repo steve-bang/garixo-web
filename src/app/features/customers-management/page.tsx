@@ -229,6 +229,18 @@ export default function CustomersManagementFeaturePage(): JSX.Element {
               When customer information is scattered, service quality drops and
               repeat revenue gets harder to grow.
             </p>
+            <p className="mt-s2 text-small text-text-secondary">
+              Industry context:{' '}
+              <a
+                href="https://lookupaplate.com/blog/auto-repair-industry-statistics"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="font-medium text-primary-700 hover:text-primary-800"
+              >
+                two-thirds of Americans don&apos;t trust auto repair shops
+              </a>
+              .
+            </p>
             <div className="mt-s6 grid gap-s3 md:grid-cols-2">
               <Card className="p-s4">
                 <h3 className="text-h3">What goes wrong</h3>

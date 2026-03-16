@@ -195,6 +195,19 @@ export default function InventoryManagementFeaturePage(): JSX.Element {
               simple auto repair inventory software workflow that protects
               revenue every day.
             </p>
+            <p className="mt-s2 text-small text-text-secondary">
+              Industry context:{' '}
+              <a
+                href="https://www.ibisworld.com"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="font-medium text-primary-700 hover:text-primary-800"
+              >
+                auto parts industry market size $79.6 billion in the US
+                (IBISWorld 2025)
+              </a>
+              .
+            </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
                 <Link href="/auth/sign-up">Start Free Trial</Link>
