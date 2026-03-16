@@ -2,17 +2,23 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { findBlogBySlug, incrementBlogViews } from '@/app/api/blogs/blogs-db';
+import {
+  findBlogBySlug,
+  incrementBlogViews,
+  listPublishedBlogs
+} from '@/app/api/blogs/blogs-db';
 import { Markdown } from '@/components/markdown/Markdown';
 import { LandingFooter } from '@/components/sections/LandingFooter';
 import { LandingHeader } from '@/components/sections/LandingHeader';
 import { Button } from '@/components/ui/button';
+import { BlogCardCompact } from '@/features/blogs/components/blog-card';
 import {
   resolveEffectiveStatus,
   schemaTypeToSchemaOrgType,
   slugify
 } from '@/features/blogs/utils';
 import { formatDate } from '@/lib/utils/format';
+import { Home } from 'lucide-react';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -123,14 +129,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     metadataBase: new URL('https://www.garixo.com'),
-    title,
+    title: title + ' | Garixo', // Append site name to title
     description,
     alternates: {
       canonical
     },
     robots: {
-      index: post.isIndexed,
-      follow: post.isIndexed
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-snippet': -1,
+        'max-image-preview': 'large',
+        'max-video-preview': -1
+      }
     },
     openGraph: {
       title: post.ogTitle || title,
@@ -164,6 +177,15 @@ export default async function BlogDetailPage({
   }
 
   await incrementBlogViews(post.id);
+
+  const allPosts = await listPublishedBlogs();
+  const sameCategory = allPosts.filter(
+    (item) => item.id !== post.id && item.category === post.category
+  );
+  const otherPosts = allPosts.filter(
+    (item) => item.id !== post.id && item.category !== post.category
+  );
+  const relatedPosts = [...sameCategory, ...otherPosts].slice(0, 3);
 
   const schemaType = schemaTypeToSchemaOrgType(post.schemaType);
 
@@ -240,7 +262,7 @@ export default async function BlogDetailPage({
                     href="/"
                     className="rounded-sm outline-none transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-primary-300"
                   >
-                    Home
+                    <Home className="size-4" />
                   </Link>
                 </li>
                 <li aria-hidden="true">/</li>
@@ -328,6 +350,41 @@ export default async function BlogDetailPage({
                     {post.ctaBlock.ctaLabel}
                   </Link>
                 </Button>
+              </div>
+            </section>
+          ) : null}
+
+          <hr className="!my-14" />
+
+          {relatedPosts.length > 0 ? (
+            <section className="space-y-s8">
+              <div className="rounded-xl border border-border bg-surface-default p-s6 shadow-sm">
+                <div className="flex flex-col gap-s4 md:flex-row md:items-center md:justify-between">
+                  <div className="space-y-s2">
+                    <p className="text-caption font-semibold text-primary-700">
+                      Related resources
+                    </p>
+                    <h2 className="text-h2 text-text-primary">
+                      Keep learning with the latest Garixo guides
+                    </h2>
+                    <p className="text-body text-text-secondary">
+                      Practical tips for running a smoother shop, improving
+                      daily workflow, and growing revenue.
+                    </p>
+                  </div>
+                  <Button asChild className="h-11">
+                    <Link href="/blog">View all blog posts</Link>
+                  </Button>
+                </div>
+              </div>
+              <div className="grid gap-s4 md:grid-cols-2 lg:grid-cols-3">
+                {relatedPosts.map((item) => (
+                  <BlogCardCompact
+                    key={item.id}
+                    post={item}
+                    className="group"
+                  />
+                ))}
               </div>
             </section>
           ) : null}
