@@ -10,74 +10,94 @@ export const revalidate = false;
 
 const faqItems = [
   {
-    question: 'What is garage management software for tire shops?',
+    question: 'What is tire shop management software?',
     answer:
-      'It is a simple system that helps tire shops manage work orders, customers, vehicles, parts, and invoices in one place without spreadsheets or paper.'
+      'Tire shop management software is a digital system that helps tire shops create work orders, track tire inventory by size and SKU, manage customer service history, and invoice faster — all without paper tickets or spreadsheets.'
   },
   {
-    question: 'Does Garixo work for small tire shops with 1–5 mechanics?',
+    question:
+      'Can I track tire inventory by size, such as 205/55R16 or 235/65R17?',
     answer:
-      'Yes. Garixo is built for small independent shops with lean teams and fast daily workflows.'
+      'Yes. Garixo lets you track each tire size and brand as a separate inventory item, set minimum stock levels per size, and receive low-stock alerts before you run out during peak season.'
   },
   {
-    question: 'Can I track tire inventory and parts usage?',
+    question:
+      'Does it track rotation intervals and service history per vehicle?',
     answer:
-      'Yes. Garixo connects parts and services to work orders so you can see usage and keep stock under control.'
+      'Yes. Every vehicle keeps a complete service timeline — rotation dates, balance history, TPMS service records, and tire size per axle. You can pull this up before any job to recommend the next service with accurate context.'
   },
   {
-    question: 'Can Garixo track tire sizes and alert me when stock is low?',
+    question:
+      'Can I see which bays are free and which jobs are waiting right now?',
     answer:
-      'Yes. Garixo tracks parts and tire inventory linked to each work order. You can set low-stock alerts so you always know when a size is running out before a job starts.'
+      'Yes. The work order board shows every open job, every bay status, and every tech assignment in a single live view. You can spot idle bays and reassign work before delays happen.'
   },
   {
-    question: 'Will this help me turn cars faster?',
+    question:
+      'How does Garixo compare to TireMaster for small independent tire shops?',
     answer:
-      'Yes. Clear job status, quick work orders, and faster invoices help reduce delays and improve daily throughput.'
+      'TireMaster is designed for larger multi-location operations and costs significantly more. Garixo is built for independent shops with 1–5 technicians that need speed and simplicity without enterprise complexity. At $79/month, it pays for itself if it helps you capture one extra add-on service per day.'
   },
   {
-    question: 'Is Garixo mobile-friendly for front desk and bay use?',
+    question:
+      'Does Garixo work for a shop that does both tires and general repairs?',
     answer:
-      'Yes. Garixo is web-based and works on tablets and phones, which is ideal for tire bays and quick check-ins.'
+      'Yes. Garixo handles work orders for all service types. You can track tire inventory separately from general parts inventory and manage all job types through the same workflow.'
   },
   {
-    question: 'How is Garixo different from enterprise shop software?',
+    question: 'Is it mobile-friendly for front desk and bay use?',
     answer:
-      'Garixo focuses on simplicity and speed for small shops. It avoids heavy setup, complex menus, and long training.'
+      'Yes. Garixo is fully web-based and works on phones and tablets. Techs can update job status from the bay without walking to a desktop computer.'
+  },
+  {
+    question: 'How long does setup take for a small tire shop?',
+    answer:
+      'Most independent shops are running their first work orders within 30 minutes. There is no complex migration, no installation, and no training sessions required. The 14-day free trial is the fastest way to see if it fits your workflow.'
   }
 ] as const;
 
 const featureHighlights = [
   {
-    title: 'Fast Work Orders',
+    title: 'High-Volume Work Order Flow',
     description:
-      'Create a tire job in seconds with service, parts, and notes attached.',
-    benefit: 'Keep the bay moving without admin slowdown.'
+      'Create a tire work order in under 20 seconds — service type, vehicle, notes, and parts attached in one step.',
+    benefit:
+      'Handle 10–15 jobs daily without the counter creating a bottleneck. Board view shows every bay status in real time.'
   },
   {
-    title: 'Tire Inventory Clarity',
-    description: 'Track tire stock and parts usage with every work order.',
-    benefit: 'Avoid missing sizes and emergency reorders.'
-  },
-  {
-    title: 'Customer & Vehicle History',
-    description: 'See past rotations, balances, and replacements at a glance.',
-    benefit: 'Recommend follow-ups with confidence.'
-  },
-  {
-    title: 'Simple Job Status',
+    title: 'Tire Inventory by Size and SKU',
     description:
-      'Track jobs from check-in to completion with clear status labels.',
-    benefit: 'Reduce confusion across the front desk and bays.'
+      'Track each tire size (e.g. 205/55R16, 235/65R17), brand, and stock level separately.',
+    benefit:
+      'Know exactly what is on hand before a customer asks. Set minimum stock levels per size so you never run short mid-season.'
   },
   {
-    title: 'Clean Invoices',
-    description: 'Turn completed jobs into professional invoices instantly.',
-    benefit: 'Get paid faster and look more professional.'
+    title: 'Rotation & Service History Per Vehicle',
+    description:
+      'See the last rotation date, last balance, last TPMS reset, and tire size per axle — for every vehicle.',
+    benefit:
+      'Recommend the next service with confidence. Customers who feel remembered come back.'
   },
   {
-    title: 'Team Visibility',
-    description: 'Assign work to technicians and see workload distribution.',
-    benefit: 'Keep labor balanced during peak hours.'
+    title: 'Seasonal Reorder Alerts',
+    description:
+      'Set low-stock alerts 6–8 weeks before your peak season so reorders land on time.',
+    benefit:
+      'Stop over-buying slow sizes and stop losing sales on popular sizes during the rush.'
+  },
+  {
+    title: 'Bay Status Board',
+    description:
+      'See every open job, every bay, and every tech assignment in one live view.',
+    benefit:
+      'Spot idle bays in seconds. Reassign work before the slowdown costs you a job slot.'
+  },
+  {
+    title: 'Fast Counter Invoicing',
+    description:
+      'Turn a completed work order into a clean invoice in one click.',
+    benefit:
+      'Get paid at the counter while the next car pulls in. Less waiting, fewer follow-up calls, better cash flow at end of day.'
   }
 ] as const;
 
@@ -178,7 +198,8 @@ export default function TireShopSolutionsPage(): JSX.Element {
               Built for Tire Shops
             </p>
             <h1 className="mt-s4 text-[34px] font-bold leading-tight text-text-primary md:text-[52px]">
-              Garage Management Software for Tire Shops
+              Tire Shop Management Software — Track Every Bay, Every Size, Every
+              Invoice
             </h1>
             <p className="mx-auto mt-s3 max-w-[820px] text-body text-text-secondary">
               Track every tire job, rotation, and alignment from check-in to
@@ -231,15 +252,110 @@ export default function TireShopSolutionsPage(): JSX.Element {
           </div>
         </section>
 
+        <section className="bg-background-secondary py-s12">
+          <div className="mx-auto w-full max-w-[1100px] px-s4">
+            <div className="space-y-s3 text-center">
+              <h2 className="text-h2 text-text-primary">
+                The Problems Every Tire Shop Owner Knows Too Well
+              </h2>
+              <p className="mx-auto max-w-[860px] text-body text-text-secondary">
+                Tire shops move fast — but when inventory, jobs, and invoices
+                run on paper, the pace works against you. Here is what happens
+                every week without a proper system.
+              </p>
+            </div>
+            <div className="mt-s6 grid gap-s4 md:grid-cols-2">
+              <Card className="space-y-s2 border border-border bg-surface-default p-s4">
+                <p className="text-small font-semibold text-text-primary">
+                  A customer calls asking for size 225/65R17.
+                </p>
+                <p className="text-small text-text-secondary">
+                  You walk to the back to check. By the time you confirm, they
+                  have called your competitor.
+                </p>
+              </Card>
+              <Card className="space-y-s2 border border-border bg-surface-default p-s4">
+                <p className="text-small font-semibold text-text-primary">
+                  Your busiest bay is idle at 10am.
+                </p>
+                <p className="text-small text-text-secondary">
+                  The next job is waiting but no one updated the work order
+                  status after the last rotation finished.
+                </p>
+              </Card>
+              <Card className="space-y-s2 border border-border bg-surface-default p-s4">
+                <p className="text-small font-semibold text-text-primary">
+                  End of day — you short-charged a customer.
+                </p>
+                <p className="text-small text-text-secondary">
+                  The tech added a valve stem but it was never captured on the
+                  ticket. Small leaks add up to $300–$800 per month in unbilled
+                  work.
+                </p>
+              </Card>
+              <Card className="space-y-s2 border border-border bg-surface-default p-s4">
+                <p className="text-small font-semibold text-text-primary">
+                  A customer returns after 6 months.
+                </p>
+                <p className="text-small text-text-secondary">
+                  They ask when they last had a rotation and what size was on
+                  the rear. You have no record, and they leave feeling like a
+                  stranger.
+                </p>
+              </Card>
+              <Card className="space-y-s2 border border-border bg-surface-default p-s4 md:col-span-2">
+                <p className="text-small font-semibold text-text-primary">
+                  Winter season arrives.
+                </p>
+                <p className="text-small text-text-secondary">
+                  You over-ordered summer tires last year and under-ordered
+                  215/55R17 winter stock. $2,000 locked in slow inventory,
+                  $4,000 in lost winter sales.
+                </p>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-background-primary py-s12">
+          <div className="mx-auto w-full max-w-[1100px] px-s4">
+            <div className="grid gap-s6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+              <div className="space-y-s3">
+                <h2 className="text-h2 text-text-primary">
+                  A Tire Shop System Built Around Speed — Not Admin
+                </h2>
+                <p className="text-body text-text-secondary">
+                  Garixo gives your team one simple workflow from check-in to
+                  invoice. Create the job in 20 seconds, use parts straight from
+                  inventory, track the bay, finish the job, and invoice — all
+                  from a phone or tablet. Everything stays in one place. No
+                  paper. No guessing.
+                </p>
+              </div>
+              <Card className="space-y-s3 border border-border bg-surface-default p-s4">
+                <h3 className="text-h3 text-text-primary">
+                  What your team sees at a glance
+                </h3>
+                <ul className="space-y-s2 text-small text-text-secondary">
+                  <li>Live bay status with every job stage.</li>
+                  <li>Inventory by tire size and SKU.</li>
+                  <li>Service history tied to every vehicle.</li>
+                  <li>One-click invoicing at checkout.</li>
+                </ul>
+              </Card>
+            </div>
+          </div>
+        </section>
+
         <section className="bg-surface-default py-s12">
           <div className="mx-auto w-full max-w-[1100px] px-s4">
             <div className="text-center">
               <h2 className="text-h2 text-text-primary">
-                Features built for tire shop workflow
+                Features Built for High-Volume Tire Shop Workflow
               </h2>
               <p className="mx-auto mt-s2 max-w-[760px] text-body text-text-secondary">
-                Everything you need to manage tire jobs, parts, and team
-                workload without the complexity of enterprise software.
+                Everything you need to run 10–15 jobs a day without the counter
+                slowing your bays down.
               </p>
             </div>
             <div className="mt-s6 grid gap-s4 md:grid-cols-2 xl:grid-cols-3">
@@ -317,24 +433,140 @@ export default function TireShopSolutionsPage(): JSX.Element {
         </section>
 
         <section className="bg-surface-default py-s12">
+          <div className="mx-auto w-full max-w-[980px] px-s4">
+            <div className="space-y-s3 text-center">
+              <h2 className="text-h2 text-text-primary">
+                What a Full Day at a Busy Tire Shop Looks Like With Garixo
+              </h2>
+            </div>
+            <div className="mt-s6 space-y-s4">
+              <Card className="space-y-s2 border border-border bg-surface-default p-s4">
+                <p className="text-small font-semibold text-text-primary">
+                  7:15am
+                </p>
+                <p className="text-small text-text-secondary">
+                  A customer calls needing two 235/55R17s. You check Garixo on
+                  your phone, confirm four in stock, and book the job before he
+                  hangs up.
+                </p>
+              </Card>
+              <Card className="space-y-s2 border border-border bg-surface-default p-s4">
+                <p className="text-small font-semibold text-text-primary">
+                  8:30am
+                </p>
+                <p className="text-small text-text-secondary">
+                  Bay 2 finishes a rotation. The tech marks the job complete.
+                  The invoice is ready, and the customer pays in 90 seconds. Bay
+                  2 is already taking the next vehicle.
+                </p>
+              </Card>
+              <Card className="space-y-s2 border border-border bg-surface-default p-s4">
+                <p className="text-small font-semibold text-text-primary">
+                  11:00am
+                </p>
+                <p className="text-small text-text-secondary">
+                  A customer asks about her last TPMS service. You search her
+                  plate number, see the service date, sensor IDs replaced, and a
+                  note about a weak rear sensor. She books a follow-up on the
+                  spot.
+                </p>
+              </Card>
+              <Card className="space-y-s2 border border-border bg-surface-default p-s4">
+                <p className="text-small font-semibold text-text-primary">
+                  4:00pm
+                </p>
+                <p className="text-small text-text-secondary">
+                  You check inventory before closing. Size 215/55R17 is down to
+                  3 units. Garixo flagged it as low-stock two days ago, so you
+                  place a reorder in time for the weekend rush.
+                </p>
+              </Card>
+              <Card className="space-y-s2 border border-border bg-surface-default p-s4">
+                <p className="text-small font-semibold text-text-primary">
+                  6:00pm
+                </p>
+                <p className="text-small text-text-secondary">
+                  You close out. 13 jobs completed. Every ticket captured.
+                  Revenue visible. No missing charges. Tomorrow’s first four
+                  jobs are already in the queue.
+                </p>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-surface-default py-s12">
           <div className="mx-auto w-full max-w-[1000px] px-s4">
-            <div className="grid gap-s4 md:grid-cols-2">
-              <Card className="space-y-s2 border border-border bg-surface-default p-s4">
-                <h3 className="text-h3 text-text-primary">Before Garixo</h3>
-                <ul className="space-y-s2 text-small text-text-secondary">
-                  <li>Paper tickets and missing tire sizes.</li>
-                  <li>Slow checkouts and delayed invoices.</li>
-                  <li>Customers asking about past work with no record.</li>
-                </ul>
-              </Card>
-              <Card className="space-y-s2 border border-border bg-surface-default p-s4">
-                <h3 className="text-h3 text-text-primary">After Garixo</h3>
-                <ul className="space-y-s2 text-small text-text-secondary">
-                  <li>Fast work orders with parts and services attached.</li>
-                  <li>Clear inventory visibility for each tire size.</li>
-                  <li>Repeat customers with full service history.</li>
-                </ul>
-              </Card>
+            <div className="text-center">
+              <h2 className="text-h2 text-text-primary">
+                Before Garixo vs. After Garixo
+              </h2>
+            </div>
+            <div className="mt-s6 overflow-hidden rounded-xl border border-border bg-surface-default">
+              <table className="w-full border-collapse text-left">
+                <thead className="bg-surface-hover">
+                  <tr>
+                    <th className="border-b border-border px-s4 py-s3 text-small font-semibold text-text-primary">
+                      ❌ Before Garixo
+                    </th>
+                    <th className="border-b border-border px-s4 py-s3 text-small font-semibold text-text-primary">
+                      ✅ After Garixo
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="text-small text-text-secondary">
+                  <tr>
+                    <td className="border-b border-border px-s4 py-s3">
+                      Walk to the back to check tire sizes for every phone
+                      inquiry.
+                    </td>
+                    <td className="border-b border-border px-s4 py-s3">
+                      Check any tire size on your phone in 10 seconds,
+                      mid-conversation.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border-b border-border px-s4 py-s3">
+                      Miss unbilled valve stems, disposal fees, and small
+                      add-ons daily.
+                    </td>
+                    <td className="border-b border-border px-s4 py-s3">
+                      Parts and services auto-captured on every work order —
+                      nothing slips through.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border-b border-border px-s4 py-s3">
+                      No record of past rotation, balance, or TPMS reset per
+                      vehicle.
+                    </td>
+                    <td className="border-b border-border px-s4 py-s3">
+                      Full service timeline per vehicle — recommend next service
+                      with confidence.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border-b border-border px-s4 py-s3">
+                      Over-order slow sizes, under-order popular sizes every
+                      season.
+                    </td>
+                    <td className="border-b border-border px-s4 py-s3">
+                      Low-stock alerts 6–8 weeks before peak season — right
+                      stock, right time.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-s4 py-s3">
+                      End of day — no clear revenue figure without tallying
+                      paper tickets.
+                    </td>
+                    <td className="px-s4 py-s3">
+                      Real-time revenue visible all day — close with confidence,
+                      not guesswork.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </section>
@@ -398,6 +630,50 @@ export default function TireShopSolutionsPage(): JSX.Element {
                   Inventory Management Software
                 </Link>
               </Button>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-surface-default py-s10">
+          <div className="mx-auto w-full max-w-[980px] px-s4 text-center">
+            <p className="text-small font-medium text-text-secondary">
+              Explore related resources:
+            </p>
+            <div className="mt-s3 flex flex-col items-center justify-center gap-s2 text-small sm:flex-row sm:flex-wrap">
+              <Link
+                href="/features/inventory-management"
+                className="font-medium text-primary-700 underline-offset-2 hover:underline"
+              >
+                inventory management for auto parts
+              </Link>
+              <span className="hidden text-text-muted sm:inline">•</span>
+              <Link
+                href="/features/work-orders-management"
+                className="font-medium text-primary-700 underline-offset-2 hover:underline"
+              >
+                work order management system
+              </Link>
+              <span className="hidden text-text-muted sm:inline">•</span>
+              <Link
+                href="/pricing"
+                className="font-medium text-primary-700 underline-offset-2 hover:underline"
+              >
+                Garixo pricing plans
+              </Link>
+              <span className="hidden text-text-muted sm:inline">•</span>
+              <Link
+                href="/tools/auto-repair-labor-rate-calculator"
+                className="font-medium text-primary-700 underline-offset-2 hover:underline"
+              >
+                auto repair labor rate calculator
+              </Link>
+              <span className="hidden text-text-muted sm:inline">•</span>
+              <Link
+                href="/blog/"
+                className="font-medium text-primary-700 underline-offset-2 hover:underline"
+              >
+                how to manage tire shop inventory
+              </Link>
             </div>
           </div>
         </section>
