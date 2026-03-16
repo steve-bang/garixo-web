@@ -33,6 +33,18 @@ export function Problem(): JSX.Element {
             If you cannot measure daily workshop operations, you cannot improve
             them. This is a common issue in small and mid-sized garages.
           </p>
+          <p className="text-small text-text-secondary">
+            Industry context:{' '}
+            <a
+              href="https://lookupaplate.com/blog/auto-repair-industry-statistics"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              className="font-medium text-primary-700 hover:text-primary-800"
+            >
+              71% of auto repair shops are independently owned
+            </a>
+            .
+          </p>
 
           <div className="space-y-s3">
             {painPoints.map((item) => (
