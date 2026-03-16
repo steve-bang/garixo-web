@@ -43,6 +43,18 @@ export function CTA(): JSX.Element {
             truth for jobs, technicians, inventory, and billing. It removes
             manual tracking and helps teams run faster with fewer mistakes.
           </p>
+          <p className="text-small text-text-secondary">
+            Industry context:{' '}
+            <a
+              href="https://www.ibisworld.com/"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              className="font-medium text-primary-700 hover:text-primary-800"
+            >
+              303,000 auto repair businesses in the US (IBISWorld 2026)
+            </a>
+            .
+          </p>
         </div>
 
         <div className="space-y-s4" aria-labelledby="faq-title">
