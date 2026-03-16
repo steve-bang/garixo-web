@@ -262,6 +262,10 @@
     @apply rounded-lg border border-border shadow-sm;
   }
 
+  .prose-ui p img {
+    @apply rounded-lg border border-border py-2 shadow-sm;
+  }
+
   .prose-ui hr {
     @apply border-border;
   }

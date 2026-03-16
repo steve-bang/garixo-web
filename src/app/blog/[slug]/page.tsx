@@ -9,7 +9,8 @@ import { LandingHeader } from '@/components/sections/LandingHeader';
 import { Button } from '@/components/ui/button';
 import {
   resolveEffectiveStatus,
-  schemaTypeToSchemaOrgType
+  schemaTypeToSchemaOrgType,
+  slugify
 } from '@/features/blogs/utils';
 import { formatDate } from '@/lib/utils/format';
 
@@ -17,7 +18,87 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+type TocItem = {
+  id: string;
+  text: string;
+  level: 2 | 3;
+};
+
 export const revalidate = 3600;
+
+const stripMarkdown = (value: string): string =>
+  value
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+    .replace(/[`*_~#]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+function buildTocFromMarkdown(source: string): TocItem[] {
+  const items: TocItem[] = [];
+  const counts = new Map<string, number>();
+  const headingPattern = /^(#{2,3})\s+(.+)$/gm;
+  let match: RegExpExecArray | null = headingPattern.exec(source);
+
+  while (match) {
+    const level = match[1].length as 2 | 3;
+    const text = stripMarkdown(match[2]);
+    const base = slugify(text);
+    const nextCount = (counts.get(base) ?? 0) + 1;
+    counts.set(base, nextCount);
+    const id = nextCount > 1 ? `${base}-${nextCount}` : base;
+
+    if (id && text) {
+      items.push({ id, text, level });
+    }
+
+    match = headingPattern.exec(source);
+  }
+
+  return items;
+}
+
+function buildTocFromHtml(source: string): TocItem[] {
+  const items: TocItem[] = [];
+  const counts = new Map<string, number>();
+  const headingPattern = /<(h2|h3)([^>]*)>([\s\S]*?)<\/\1>/gi;
+  let match: RegExpExecArray | null = headingPattern.exec(source);
+
+  while (match) {
+    const level = match[1].toLowerCase() === 'h2' ? 2 : 3;
+    const text = stripMarkdown(match[3].replace(/<[^>]+>/g, ''));
+    const base = slugify(text);
+    const nextCount = (counts.get(base) ?? 0) + 1;
+    counts.set(base, nextCount);
+    const id = nextCount > 1 ? `${base}-${nextCount}` : base;
+
+    if (id && text) {
+      items.push({ id, text, level });
+    }
+
+    match = headingPattern.exec(source);
+  }
+
+  return items;
+}
+
+function injectHeadingIds(html: string, toc: TocItem[]): string {
+  if (!toc.length) {
+    return html;
+  }
+
+  let index = 0;
+  return html.replace(/<(h2|h3)([^>]*)>/gi, (match, tag, attrs) => {
+    const item = toc[index];
+    if (!item) {
+      return match;
+    }
+    index += 1;
+    if (attrs && /id=/.test(attrs)) {
+      return `<${tag}${attrs}>`;
+    }
+    return `<${tag}${attrs} id="${item.id}">`;
+  });
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -109,6 +190,14 @@ export default async function BlogDetailPage({
     blogSchema.image = [post.ogImage];
   }
 
+  const tocItems = post.content.markdown?.trim()
+    ? buildTocFromMarkdown(post.content.markdown)
+    : buildTocFromHtml(post.content.html);
+
+  const htmlWithAnchors = !post.content.markdown?.trim()
+    ? injectHeadingIds(post.content.html, tocItems)
+    : post.content.html;
+
   const faqSchema = post.faqItems.length
     ? {
         '@context': 'https://schema.org',
@@ -139,8 +228,36 @@ export default async function BlogDetailPage({
 
       <LandingHeader />
       <main className="bg-background-primary">
-        <article className="mx-auto w-full max-w-[1000px] space-y-s4 px-s4 py-s10">
-          <header className="space-y-s2">
+        <article className="mx-auto w-full space-y-s4 px-s6 py-s10 md:px-s16">
+          <header className="space-y-s6">
+            <nav
+              aria-label="Breadcrumb"
+              className="text-caption text-text-muted"
+            >
+              <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <li>
+                  <Link
+                    href="/"
+                    className="rounded-sm outline-none transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-primary-300"
+                  >
+                    Home
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li>
+                  <Link
+                    href="/blog"
+                    className="rounded-sm outline-none transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-primary-300"
+                  >
+                    Blog
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li className="text-text-secondary">
+                  <span className="line-clamp-1">{post.title}</span>
+                </li>
+              </ol>
+            </nav>
             <p className="text-caption text-text-muted">
               {post.category} · {post.readingTime} min read ·{' '}
               {formatDate(post.publishedAt ?? post.updatedAt, {
@@ -158,14 +275,44 @@ export default async function BlogDetailPage({
             <p className="text-body text-text-secondary">{post.excerpt}</p>
           </header>
 
-          {post.content.markdown?.trim() ? (
-            <Markdown source={post.content.markdown} />
-          ) : (
-            <article
-              className="prose-ui"
-              dangerouslySetInnerHTML={{ __html: post.content.html }}
-            />
-          )}
+          <div className="grid gap-s8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+            <div className="order-2 lg:order-1">
+              {post.content.markdown?.trim() ? (
+                <Markdown source={post.content.markdown} withAnchors />
+              ) : (
+                <article
+                  className="prose-ui"
+                  dangerouslySetInnerHTML={{ __html: htmlWithAnchors }}
+                />
+              )}
+            </div>
+            {tocItems.length > 1 ? (
+              <aside className="order-1 space-y-s3 lg:order-2">
+                <div className="rounded-xl border border-border bg-surface-default p-s4 shadow-sm lg:sticky lg:top-24">
+                  <p className="text-base font-semibold text-text-primary">
+                    Table of Contents
+                  </p>
+                  <ul className="mt-s4 space-y-s3 text-base text-text-secondary">
+                    {tocItems.map((item) => (
+                      <li
+                        key={`${item.id}-${item.level}`}
+                        className={
+                          item.level === 3 ? 'pl-s4 text-small' : undefined
+                        }
+                      >
+                        <a
+                          href={`#${item.id}`}
+                          className="block rounded-sm transition-colors hover:text-primary-700"
+                        >
+                          {item.text}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </aside>
+            ) : null}
+          </div>
 
           {post.ctaBlock ? (
             <section className="rounded-md border border-primary-200 bg-primary-50 p-s4">
