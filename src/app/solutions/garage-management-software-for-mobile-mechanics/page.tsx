@@ -190,10 +190,21 @@ export default function MobileMechanicsSolutionsPage(): JSX.Element {
             <p className="mx-auto mt-s3 max-w-[820px] text-body text-text-secondary">
               Garixo is mobile mechanic software built for independent mechanics
               who work on-site, on the road, and between multiple customer
-              locations every day. Create a work order from your driveway. Log
-              parts as you work. Send a professional invoice before you drive to
-              the next job. Works on any phone or tablet — no laptop, no office,
-              no front desk required. Starts at $79/mo. Free 14-day trial.
+              locations every day. Market trends show{' '}
+              <a
+                href="https://ibisworld.com"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="font-medium text-primary-700 underline-offset-2 hover:underline"
+              >
+                mobile auto repair services growing as consumers seek
+                convenience
+              </a>
+              , which makes fast, on-site workflows a competitive advantage.
+              Create a work order from your driveway. Log parts as you work.
+              Send a professional invoice before you drive to the next job.
+              Works on any phone or tablet — no laptop, no office, no front desk
+              required. Starts at $79/mo. Free 14-day trial.
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">

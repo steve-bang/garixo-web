@@ -263,6 +263,19 @@ export default function TireShopSolutionsPage(): JSX.Element {
                 run on paper, the pace works against you. Here is what happens
                 every week without a proper system.
               </p>
+              <p className="mx-auto max-w-[860px] text-small text-text-muted">
+                The{' '}
+                <a
+                  href="https://ibisworld.com"
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="font-medium text-primary-700 underline-offset-2 hover:underline"
+                >
+                  US tire industry generates over $40 billion annually
+                </a>
+                , which makes lost jobs and slow bays especially expensive for
+                independent shops.
+              </p>
             </div>
             <div className="mt-s6 grid gap-s4 md:grid-cols-2">
               <Card className="space-y-s2 border border-border bg-surface-default p-s4">

@@ -272,6 +272,19 @@ export default function AutoBodyShopSolutionsPage(): JSX.Element {
                 every day for updates. Margin lives or dies on whether every
                 part, every labor hour, and every supplement gets captured.
               </p>
+              <p className="mx-auto max-w-[860px] text-small text-text-muted">
+                The{' '}
+                <a
+                  href="https://ibisworld.com"
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="font-medium text-primary-700 underline-offset-2 hover:underline"
+                >
+                  US car body shop industry revenue reached $73.9 billion in
+                  2025 (IBISWorld)
+                </a>
+                , which means small process leaks add up fast.
+              </p>
             </div>
 
             <div className="mt-s6 grid gap-s4 md:grid-cols-2">

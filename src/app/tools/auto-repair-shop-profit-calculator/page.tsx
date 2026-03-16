@@ -239,6 +239,19 @@ export default function ShopProfitCalculatorPage(): JSX.Element {
               </p>
             </div>
             <ShopProfitCalculator />
+            <p className="mt-s6 text-center text-small text-text-muted">
+              Parts cost can make or break your margin. For a helpful benchmark,
+              see{' '}
+              <a
+                href="https://ratchetandwrench.com"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="font-medium text-primary-700 underline-offset-2 hover:underline"
+              >
+                what is a good profit margin for an auto repair shop
+              </a>
+              .
+            </p>
           </div>
         </section>
 

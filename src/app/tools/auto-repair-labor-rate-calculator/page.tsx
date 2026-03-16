@@ -257,11 +257,22 @@ export default function LaborRateCalculatorPage(): JSX.Element {
                 Your labor rate is the hourly price you charge for technician
                 time. It’s the foundation of your profit. If the rate is too
                 low, every job quietly loses money. If it’s too high, you risk
-                pushback from customers. This calculator is designed for
-                independent shops that want a clear, realistic number based on
-                real expenses, team capacity, and profit goals — not guesswork.
-                Use it when pricing services, reviewing margins, or deciding
-                whether it’s time for a rate adjustment.
+                pushback from customers. Industry benchmarks show the{' '}
+                <a
+                  href="https://lookupaplate.com/blog/auto-repair-industry-statistics"
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="font-medium text-primary-700 underline-offset-2 hover:underline"
+                >
+                  average auto repair labor rate ranges from $45 to $170 per
+                  hour in the US
+                </a>
+                , but the right number still depends on your costs and capacity.
+                This calculator is designed for independent shops that want a
+                clear, realistic number based on real expenses, team capacity,
+                and profit goals — not guesswork. Use it when pricing services,
+                reviewing margins, or deciding whether it’s time for a rate
+                adjustment.
               </p>
             </div>
           </div>

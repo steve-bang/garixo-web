@@ -131,6 +131,16 @@ export function LaborRateCalculator(): JSX.Element {
               </h3>
               <p className="text-small text-text-secondary">
                 Add your recurring costs. Leave anything unknown as 0 for now.
+                Need a reference?{' '}
+                <a
+                  href="https://ratchetandwrench.com"
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="font-medium text-primary-700 underline-offset-2 hover:underline"
+                >
+                  typical auto repair shop overhead expenses breakdown
+                </a>
+                .
               </p>
             </div>
           </div>
