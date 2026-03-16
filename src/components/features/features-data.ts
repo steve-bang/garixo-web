@@ -19,6 +19,10 @@ export type CoreFeature = {
   href: string;
   icon: LucideIcon;
   bullets: string[];
+  externalLink?: {
+    href: string;
+    label: string;
+  };
   imageUrl?: string;
   image?: ImageCoreFeature;
 };
@@ -86,6 +90,10 @@ export const coreFeatures: CoreFeature[] = [
     impact: 'Stop losing money on missing parts.',
     href: '/features/inventory-management',
     icon: Boxes,
+    externalLink: {
+      href: 'https://www.shopownermag.com',
+      label: 'How inventory shrinkage affects auto shop profit margins'
+    },
     bullets: [
       'Auto-deduct parts when jobs complete',
       'Low stock alerts before critical shortages',

@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { Card } from '@/components/ui/card';
 import type { CoreFeature } from '@/components/features/features-data';
+import { ExternalLink } from 'lucide-react';
 
 export function FeatureSection({
   feature,
@@ -55,6 +56,17 @@ export function FeatureSection({
           >
             Learn more
           </Link>
+          <br />
+          {feature.externalLink ? (
+            <a
+              href={feature.externalLink.href}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              className="mt-s2 flex items-center gap-s1 text-small font-medium text-primary-700 underline hover:text-primary-800"
+            >
+              <ExternalLink className="size-3.5" /> {feature.externalLink.label}
+            </a>
+          ) : null}
         </div>
 
         {feature.image ? (
