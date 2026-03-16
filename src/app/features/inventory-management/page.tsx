@@ -186,8 +186,8 @@ export default function InventoryManagementFeaturePage(): JSX.Element {
         <section className="border-b border-border bg-background-primary py-s12">
           <div className="mx-auto w-full max-w-[1000px] px-s4 text-center">
             <h1 className="text-[34px] font-bold leading-tight text-text-primary md:text-[52px]">
-              Garage Inventory Management Software Built for Independent Auto
-              Shops
+              Auto Parts Inventory Management Software — Track Stock, Prevent
+              Shortages
             </h1>
             <p className="mx-auto mt-s3 max-w-[800px] text-body text-text-secondary">
               Track parts in real time, avoid stockouts during repairs, and

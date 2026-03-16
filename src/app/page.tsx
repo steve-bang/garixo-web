@@ -13,7 +13,8 @@ export const revalidate = false;
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Garage Management Software for Auto Repair Shops | Garixo',
+  title:
+    'Garage Management Software for Auto Repair Shops | Simple & Affordable | Garixo',
   description:
     'Garixo is all-in-one garage management software for auto repair shops. Track vehicles, technicians & inventory. See daily profit clearly. Setup in minutes.',
   keywords: [
@@ -48,7 +49,8 @@ export const metadata: Metadata = {
     }
   },
   openGraph: {
-    title: 'Garage Management Software for Auto Repair Shops | Garixo',
+    title:
+      'Garage Management Software for Auto Repair Shops | Simple & Affordable | Garixo',
     description:
       'Garixo is all-in-one garage management software for auto repair shops. Track vehicles, technicians & inventory. See daily profit clearly. Setup in minutes.',
     type: 'website',
@@ -66,7 +68,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Garage Management Software for Auto Repair Shops | Garixo',
+    title:
+      'Garage Management Software for Auto Repair Shops | Simple & Affordable | Garixo',
     description:
       'Garixo is all-in-one garage management software for auto repair shops. Track vehicles, technicians & inventory. See daily profit clearly. Setup in minutes.',
     site: '@garixo',

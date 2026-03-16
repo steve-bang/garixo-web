@@ -194,8 +194,8 @@ export default function CustomersManagementFeaturePage(): JSX.Element {
         <section className="border-b border-border bg-background-primary py-s12">
           <div className="mx-auto w-full max-w-[1000px] px-s4 text-center">
             <h1 className="text-[34px] font-bold leading-tight text-text-primary md:text-[52px]">
-              Auto Repair Customer Management Software Built for Independent
-              Garages
+              Auto Repair Customer Management Software — Full Service History in
+              One Place
             </h1>
             <p className="mx-auto mt-s3 max-w-[820px] text-body text-text-secondary">
               Remember every customer, every vehicle, and every visit in one

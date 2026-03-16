@@ -197,8 +197,8 @@ export default function WorkOrdersManagementFeaturePage(): JSX.Element {
         <section className="border-b border-border bg-background-primary py-s12">
           <div className="mx-auto w-full max-w-[1000px] px-s4 text-center">
             <h1 className="text-[34px] font-bold leading-tight text-text-primary md:text-[52px]">
-              Auto Repair Work Order Software Built for Independent Garage
-              Owners
+              Work Order Management Software for Auto Repair Shops — Track Every
+              Job
             </h1>
             <p className="mx-auto mt-s3 max-w-[820px] text-body text-text-secondary">
               Track every repair job, organize your team, and improve revenue

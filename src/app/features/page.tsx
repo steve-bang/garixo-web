@@ -14,7 +14,8 @@ export const revalidate = false;
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.garixo.com'),
-  title: 'Garage Management System Features for Auto Repair Shops | Garixo',
+  title:
+    'Garage Management System Features — Work Orders, Inventory & Staff | Garixo',
   description:
     'Explore Garixo’s garage management software features for auto repair shops — work orders, customers, inventory, staff, and invoices in one simple dashboard built for small shops.',
   keywords: [
@@ -33,7 +34,8 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Garage Management System Features for Auto Repair Shops | Garixo',
+    title:
+      'Garage Management System Features — Work Orders, Inventory & Staff | Garixo',
     description:
       'Explore Garixo’s garage management software features for auto repair shops — work orders, customers, inventory, staff, and invoices in one simple dashboard built for small shops.',
     type: 'website',
@@ -58,7 +60,8 @@ export default function FeaturesPage(): JSX.Element {
               id="features-page-title"
               className="text-[36px] font-bold leading-tight md:text-[52px]"
             >
-              Powerful Garage Management System Features for Auto Repair Shops
+              Garage Management System Features: Work Orders, Inventory, Staff &
+              Customers
             </h1>
 
             <p className="mx-auto mt-s3 max-w-[820px] text-body text-text-secondary">

@@ -115,13 +115,7 @@ export const metadata: Metadata = {
   title: 'Simple Garage Software Pricing for Auto Repair Shops | Garixo',
   description:
     'Clear pricing for independent auto repair shops. Start a free trial, manage work orders faster, and run your garage with less stress.',
-  keywords: [
-    'garage software pricing',
-    'auto repair shop software pricing',
-    'garage management subscription',
-    'shop management software for small garage',
-    'garage management system price'
-  ],
+  keywords: ['garage management software pricing', 'auto repair software cost'],
   alternates: {
     canonical: '/pricing'
   },
