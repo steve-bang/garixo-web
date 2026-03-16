@@ -38,12 +38,12 @@ const createBlogShape = z.object({
   metaTitle: z
     .string()
     .trim()
-    .max(60, 'Meta title should be 60 characters or fewer.')
+    .max(1000, 'Meta title should be 1000 characters or fewer.')
     .default(''),
   metaDescription: z
     .string()
     .trim()
-    .max(155, 'Meta description should be 155 characters or fewer.')
+    .max(1000, 'Meta description should be 1000 characters or fewer.')
     .default(''),
   focusKeyword: z.string().trim().default(''),
   secondaryKeywords: z.array(z.string().trim()).default([]),

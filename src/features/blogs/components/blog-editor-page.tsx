@@ -705,7 +705,7 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
               <Input
                 value={form.metaTitle}
                 onChange={(event) => onField('metaTitle', event.target.value)}
-                maxLength={60}
+                maxLength={1000}
               />
             </div>
             <div className="space-y-s1">
@@ -718,7 +718,7 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
                   onField('metaDescription', event.target.value)
                 }
                 rows={3}
-                maxLength={155}
+                maxLength={1000}
               />
             </div>
             <div className="space-y-s1">
