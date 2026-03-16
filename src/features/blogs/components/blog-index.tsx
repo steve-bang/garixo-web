@@ -89,16 +89,6 @@ export function BlogIndex({ posts, categories }: BlogIndexProps): JSX.Element {
                 )}
               >
                 {category.name}
-                <span
-                  className={cn(
-                    'rounded-full px-2 py-0.5 text-caption',
-                    isActive
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'bg-surface-hover text-text-muted'
-                  )}
-                >
-                  {category.postCount}
-                </span>
               </button>
             );
           })}
