@@ -13,14 +13,15 @@ type BlogCardProps = {
 export function BlogCard({ post, className }: BlogCardProps): JSX.Element {
   return (
     <article className={className}>
-      <Card className="overflow-hidden rounded-xl border border-border p-s4 shadow-sm transition-all duration-200 hover:border-primary-200 hover:shadow-md lg:max-h-[320px]">
-        <div className="grid gap-s4 md:grid-cols-[260px_1fr] md:items-stretch">
-          <div className="h-[200px] overflow-hidden rounded-lg border border-border bg-surface-hover sm:h-[200px] md:h-[220px] lg:h-[250px]">
+      <Card className="overflow-hidden rounded-xl border border-border p-s4 shadow-sm transition-all duration-200 hover:border-primary-200 hover:shadow-md">
+        <div className="grid gap-s4 md:grid-cols-[280px_1fr]">
+          {/* IMAGE */}
+          <div className="aspect-[16/9] w-full overflow-hidden rounded-lg border border-border bg-surface-hover">
             {post.ogImage ? (
               <img
                 src={post.ogImage}
                 alt={`${post.title} cover image`}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover object-top"
                 loading="lazy"
                 decoding="async"
               />
@@ -33,32 +34,37 @@ export function BlogCard({ post, className }: BlogCardProps): JSX.Element {
             )}
           </div>
 
-          <div className="flex min-h-[170px] flex-col space-y-s3 md:h-[220px] md:overflow-hidden lg:h-[250px]">
+          {/* CONTENT */}
+          <div className="flex flex-col space-y-s3">
+            {/* META */}
             <div className="flex flex-wrap items-center gap-s2">
               <span className="rounded-full bg-primary-50 px-s2 py-1 text-caption font-medium text-primary-700">
                 {post.category}
               </span>
-              <span className="text-caption text-text-muted" aria-hidden="true">
-                •
-              </span>
+
+              <span className="text-caption text-text-muted">•</span>
+
               <span className="text-caption text-text-muted">
                 {post.readingTime} min read
               </span>
             </div>
 
+            {/* TITLE */}
             <h2 className="line-clamp-2 text-h2 leading-tight text-text-primary">
               <Link
                 href={`/blog/${post.slug}`}
-                className="rounded-sm outline-none transition-colors hover:text-primary-700 focus-visible:ring-2 focus-visible:ring-primary-300"
+                className="rounded-sm transition-colors hover:text-primary-700 focus-visible:ring-2 focus-visible:ring-primary-300"
               >
                 {post.title}
               </Link>
             </h2>
 
-            <p className="line-clamp-3 text-small leading-6 text-text-secondary md:line-clamp-2">
+            {/* EXCERPT */}
+            <p className="line-clamp-3 text-small leading-6 text-text-secondary">
               {post.excerpt}
             </p>
 
+            {/* FOOTER */}
             <div className="mt-auto flex items-center justify-between border-t border-border pt-s3">
               <p className="text-caption text-text-muted">
                 {formatDate(post.publishedAt ?? post.updatedAt, {
@@ -70,6 +76,7 @@ export function BlogCard({ post, className }: BlogCardProps): JSX.Element {
                   }
                 })}
               </p>
+
               <Button asChild variant="secondary" size="sm">
                 <Link href={`/blog/${post.slug}`}>Read article</Link>
               </Button>

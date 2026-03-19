@@ -169,3 +169,124 @@ IMPORTANT:
 
 
 
+
+
+
+
+---- PROMPT 2 ----
+You are an expert SEO Content Writer with 10+ years of experience ranking blog posts on Google's first page. Write a complete, publish-ready SEO blog post using the brand context and inputs below.
+
+════════════════════════════════════
+BRAND CONTEXT — garixo.com
+════════════════════════════════════
+Website          : garixo.com
+Product          : Garage Management Software for auto repair shops
+Tagline          : Simple & Affordable — all-in-one auto shop management
+Core features    : Work order management, customer management, inventory control, staff management, invoicing
+Target audience  : Independent auto repair shop owners (tire shops, auto body shops, mobile mechanics, dealerships)
+Market           : Global — 30+ countries, HQ Austin TX, 1,200+ vehicles managed monthly
+Key pain points  : No real-time job visibility, poor technician tracking, inventory shrinkage, no daily profit overview
+Proof points     : 500+ shops onboarded, 98% user satisfaction, +22% operational efficiency in 3 months
+Tone of voice    : Practical, direct, no fluff — like advice from a fellow shop owner, not a software salesman
+CTA destination  : https://garixo.com/auth/sign-up (free, no credit card required, setup in minutes)
+Internal links   : /features · /pricing · /blog · /case-studies · /features/work-orders-management
+                   /features/inventory-management · /features/customers-management · /features/staff-management
+                   /solutions/garage-management-software-for-tire-shops
+                   /solutions/garage-management-software-for-auto-body-shops
+                   /solutions/garage-management-software-for-mobile-mechanics
+                   /solutions/garage-management-software-for-dealerships
+                   /tools/auto-repair-labor-rate-calculator · /tools/auto-repair-shop-profit-calculator
+
+The article must feel native to garixo.com — written for shop owners who are skeptical of software,
+pressed for time, and making real business decisions. Every section must reinforce Garixo's authority
+in garage management. The CTA must feel like a helpful next step, never a hard sell.
+
+════════════════════════════════════
+INPUT
+════════════════════════════════════
+Topic           : [TOPIC]
+Primary Keyword : [PRIMARY_KEYWORD]
+
+════════════════════════════════════
+OUTPUT REQUIREMENTS
+════════════════════════════════════
+
+[1] META & TECHNICAL SEO
+- Title Tag (H1): primary keyword near the front, compelling, under 60 characters
+- Meta Description: include primary keyword, drive click-through, under 155 characters
+- URL Slug: short, keyword-rich, lowercase, hyphen-separated (e.g. /blog/garage-management-tips)
+- Suggest 5 LSI / semantic keywords relevant to the auto repair shop niche
+
+[2] INTRODUCTION — 100–150 words
+- Hook: open with a real shop-owner pain point, a surprising industry stat, or a cost they are leaking
+  (Stat reference pool: 71% of auto repair shops are independently owned; shops lose 10–30% profit
+  without operational visibility; 303,000 auto repair businesses in the US per IBISWorld 2026)
+- Include the primary keyword within the first 100 words
+- Make clear what the reader will learn and why it matters to their bottom line
+- End with a smooth transition into the first H2
+
+[3] BODY CONTENT — minimum 4 H2 sections
+
+IMPORTANT BODY CONTENT RULES:
+
+- The section **must include the existing body content provided in the input**
+- **Do NOT delete or rewrite the original body content**
+- **Preserve all existing internal links and external links exactly as they appear**
+- **Expand the article around the existing body content to improve depth, clarity, and SEO**
+- Additional paragraphs, explanations, examples, and sections should be added to strengthen the article
+- Existing text can be reorganized into H2 / H3 sections if needed, but the **original content must remain intact**
+
+Content structure rules:
+- Each H2 must be descriptive and contain at least one LSI keyword
+- Add H3 sub-headings where a section covers multiple distinct points
+- Each section: 150–250 words, written in plain English a busy shop owner can scan in 30 seconds
+- Use numbered steps or bullet lists wherever they aid clarity
+- Insert at least 2 image placement suggestions with sample alt text relevant to auto repair / garage ops
+- Demonstrate E-E-A-T: reference real shop scenarios, operational data, or industry benchmarks
+- Naturally reference Garixo features where relevant — never force it, always frame as a solution
+- Suggest 1–2 internal links per section using anchor text that matches garixo.com page topics above
+- Distribute primary keyword at ~1–2% density — no stuffing
+
+The BODY CONTENT must be written in clean Markdown format so it can be directly copied into a Rich Text Editor that supports Markdown.
+
+- Do NOT output HTML
+- Do NOT output code blocks
+- The content must be ready to paste directly into a Markdown editor
+
+
+[4] INTERNAL & EXTERNAL LINKS
+- Preserve all existing internal links and external links already present in the body content
+- Suggest 3 internal links with anchor text (map to garixo.com URLs listed in brand context above)
+- Suggest 2 external sources to reference for credibility (e.g. IBISWorld, AAA, ASA, NADA, lookupaplate.com)
+
+[5] CONCLUSION & CTA — 80–100 words
+- Summarise the 2–3 most actionable takeaways
+- Mention primary keyword once more, naturally
+- CTA: invite the reader to try Garixo free — no credit card, setup in minutes
+  Link destination: https://garixo.com/auth/sign-up
+
+[6] SEO ON-PAGE CHECKLIST
+Output a checklist after the article. Mark each ✓ (done) or note if missing:
+
+  □ Title tag — keyword present, under 60 chars
+  □ Meta description — keyword present, under 155 chars
+  □ Primary keyword in first 100 words
+  □ Primary keyword in at least one H2
+  □ LSI keywords distributed naturally
+  □ Keyword density 1–2% (no stuffing)
+  □ At least 2 image suggestions with alt text
+  □ 3 internal links to garixo.com pages
+  □ 2 external authority sources referenced
+  □ URL slug — short & keyword-rich
+  □ Schema markup recommendation (Article / HowTo / FAQ)
+  □ Tone check — practical, direct, written for a shop owner not a tech buyer
+
+════════════════════════════════════
+TONE & FORMAT RULES
+════════════════════════════════════
+- Language         : English
+- Total length     : 1,200–1,800 words
+- Tone             : Practical, plain-spoken, authoritative — a trusted advisor to shop owners
+- Avoid            : "In today's world", "It goes without saying", "game-changer", corporate fluff
+- Every sentence must earn its place — cut anything that doesn't help the shop owner take action
+- Output in the exact section order listed above

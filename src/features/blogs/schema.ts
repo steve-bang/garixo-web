@@ -33,7 +33,7 @@ const createBlogShape = z.object({
     .string()
     .trim()
     .min(20, 'Summary should be at least 20 characters.')
-    .max(220, 'Summary should be 220 characters or fewer.'),
+    .max(1000, 'Summary should be 1000 characters or fewer.'),
   content: blogContentSchema,
   metaTitle: z
     .string()
