@@ -14,25 +14,20 @@ export function Hero(): JSX.Element {
       <div className="mx-auto grid w-full max-w-[1200px] gap-s8 px-s4 py-s16 lg:grid-cols-2 lg:items-center">
         <div className="space-y-s3">
           <p className="inline-flex items-center rounded-full border border-primary-100 bg-primary-50 px-s3 py-s1 text-caption font-semibold text-primary-700">
-            Garage Management Software
+            Built for Independent Garage Owners
           </p>
 
           <h1
             id="hero-title"
             className="text-[38px] font-bold leading-[1.05] text-text-primary md:text-[56px]"
           >
-            The All-in-One Garage Management Software for Auto Repair Shops
+            Run Your Garage. Know Your Money. Skip the Paperwork.
           </h1>
 
-          <p className="max-w-[620px] text-small text-text-secondary">
-            Garixo is a garage management software platform and auto repair shop
-            management software built to run your full auto shop management
-            system in one simple workspace.
-          </p>
-
-          <p className="max-w-[560px] text-caption text-text-secondary">
-            Simple for non-technical owners. Clear job status, faster approvals,
-            better daily cash control.
+          <p className="max-w-[560px] text-body text-text-secondary">
+            Garixo keeps every job, invoice, and part in one place — so you
+            always know what&apos;s happening in your shop and what you made
+            today.
           </p>
 
           <ul
@@ -41,24 +36,24 @@ export function Hero(): JSX.Element {
           >
             <li className="flex items-center gap-s2">
               <CheckCircle2 className="size-4 text-success-700" />
-              Track every vehicle from check-in to pickup
+              See every car&apos;s status from check-in to pickup
             </li>
             <li className="flex items-center gap-s2">
               <CheckCircle2 className="size-4 text-success-700" />
-              See waiting approvals in seconds
+              Know today&apos;s revenue before you close for the night
             </li>
             <li className="flex items-center gap-s2">
               <CheckCircle2 className="size-4 text-success-700" />
-              Know today&apos;s revenue before closing time
+              Send invoices and collect payment in seconds
             </li>
           </ul>
 
           <div className="flex flex-col gap-s2 pt-s1 sm:flex-row">
             <Button asChild className="h-12 min-h-12">
-              <Link href="/auth/sign-up">Get Started</Link>
+              <Link href="/auth/sign-up">Try Free for 14 Days</Link>
             </Button>
             <Button asChild variant="secondary" className="h-12 min-h-12">
-              <Link href="/pricing">View Pricing</Link>
+              <Link href="/pricing">See Pricing</Link>
             </Button>
           </div>
 
@@ -67,10 +62,10 @@ export function Hero(): JSX.Element {
               No credit card required
             </span>
             <span className="rounded-full bg-surface-hover px-s2 py-1">
-              Setup in minutes
+              Set up in 3 minutes
             </span>
             <span className="rounded-full bg-surface-hover px-s2 py-1">
-              500+ shops onboarded
+              500+ shops trust Garixo
             </span>
           </div>
         </div>
