@@ -111,7 +111,7 @@ function MonthlyRevenueBanner({
   const trendColor = isUp ? 'text-success-700' : 'text-state-error';
 
   return (
-    <Card className="px-s5 flex flex-col gap-s1 border-emerald-200 bg-emerald-50 py-s4 sm:flex-row sm:items-center sm:justify-between">
+    <Card className="flex flex-col gap-s1 border-emerald-200 bg-emerald-50 px-s4 py-s4 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p className="text-caption font-semibold uppercase tracking-wide text-emerald-700">
           {monthName} Revenue
