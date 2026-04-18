@@ -97,7 +97,7 @@ export function InvoicesManagementPage(): JSX.Element {
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-s2">
                   <Link href="/dashboard/work-orders">
-                    <Button variant="secondary">Go to Work Orders</Button>
+                    <Button variant="secondary">Go to Jobs</Button>
                   </Link>
                   <Link href="/dashboard/work-orders?status=Completed">
                     <Button>View Completed Jobs</Button>
@@ -113,7 +113,7 @@ export function InvoicesManagementPage(): JSX.Element {
                 <tr>
                   <th className="px-s3 py-s2 font-medium">Invoice</th>
                   <th className="px-s3 py-s2 font-medium">Customer</th>
-                  <th className="px-s3 py-s2 font-medium">Work Order</th>
+                  <th className="px-s3 py-s2 font-medium">Job</th>
                   <th className="px-s3 py-s2 font-medium">Total</th>
                   <th className="px-s3 py-s2 font-medium">Due Date</th>
                   <th className="px-s3 py-s2 text-right font-medium">

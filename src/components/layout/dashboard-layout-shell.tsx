@@ -57,7 +57,7 @@ type SidebarSection = {
 
 const operationsMenuItems: SidebarItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/work-orders', label: 'Work Orders', icon: ClipboardList },
+  { href: '/dashboard/work-orders', label: 'Jobs', icon: ClipboardList },
   { href: '/dashboard/invoices', label: 'Invoices', icon: FileText },
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/vehicles', label: 'Vehicles', icon: Car },
@@ -416,10 +416,10 @@ export function DashboardLayoutShell({
                 size="sm"
                 className="h-9 px-s2 sm:h-10 sm:px-s3"
                 onClick={() => setCreateOpen(true)}
-                aria-label="Create new work order"
+                aria-label="Create new job"
               >
                 <Plus className="size-4" />
-                <span className="hidden sm:inline">New Work Order</span>
+                <span className="hidden sm:inline">New Job</span>
               </Button>
             </div>
           </header>
@@ -462,12 +462,12 @@ export function DashboardLayoutShell({
             organized.
           </p>
           <p>
-            Click New Work Order to create a job, assign a worker, and track
-            progress in one flow.
+            Click New Job to create a job, assign a worker, and track progress
+            in one flow.
           </p>
           <p>
-            If numbers look unusual, check Work Orders and Inventory first to
-            spot delays quickly.
+            If numbers look unusual, check Jobs and Inventory first to spot
+            delays quickly.
           </p>
         </div>
       </Modal>
@@ -475,7 +475,7 @@ export function DashboardLayoutShell({
       <Modal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        title="Create Work Order"
+        title="Create Job"
         width="lg"
         showCloseIcon={!createMutation.isPending}
       >

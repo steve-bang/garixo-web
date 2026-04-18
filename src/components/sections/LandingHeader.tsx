@@ -2,15 +2,37 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronDown, Menu, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
 export function LandingHeader(): JSX.Element {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSections, setMobileSections] = useState({
+    product: false,
+    solutions: true,
+    resources: false
+  });
 
   const closeMobileMenu = () => setMobileOpen(false);
+
+  const toggleMobileSection = (section: keyof typeof mobileSections): void => {
+    setMobileSections((prev) => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileOpen]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface-default/95 backdrop-blur">
@@ -236,115 +258,154 @@ export function LandingHeader(): JSX.Element {
       </div>
 
       {mobileOpen ? (
-        <div
-          id="landing-mobile-nav"
-          className="border-t border-border bg-surface-default md:hidden"
-        >
-          <nav
-            className="mx-auto w-full max-w-[1200px] space-y-s2 px-s4 py-s4"
-            aria-label="Mobile Primary"
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            type="button"
+            aria-label="Close mobile menu backdrop"
+            className="absolute inset-0 bg-black/30"
+            onClick={closeMobileMenu}
+          />
+          <div
+            id="landing-mobile-nav"
+            className="pb-s5 absolute inset-x-0 top-16 max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-border bg-surface-default shadow-xl"
           >
-            <Link
-              href="/solutions/garage-management-software-for-tire-shops"
-              className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-              onClick={closeMobileMenu}
+            <nav
+              className="mx-auto w-full max-w-[1200px] space-y-s2 px-s4 py-s4"
+              aria-label="Mobile Primary"
             >
-              Solutions
-            </Link>
-            <div className="space-y-s1 pl-s2">
+              <button
+                type="button"
+                className="flex w-full items-center justify-between rounded-md px-s3 py-s2 text-left text-small font-medium text-text-primary hover:bg-surface-hover"
+                aria-expanded={mobileSections.product}
+                onClick={() => toggleMobileSection('product')}
+              >
+                Product
+                <ChevronDown
+                  className={`size-4 transition-transform ${mobileSections.product ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {mobileSections.product ? (
+                <div className="space-y-s1 pl-s2">
+                  <Link
+                    href="/features"
+                    className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                    onClick={closeMobileMenu}
+                  >
+                    Features
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                    onClick={closeMobileMenu}
+                  >
+                    Pricing
+                  </Link>
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                className="flex w-full items-center justify-between rounded-md px-s3 py-s2 text-left text-small font-medium text-text-primary hover:bg-surface-hover"
+                aria-expanded={mobileSections.solutions}
+                onClick={() => toggleMobileSection('solutions')}
+              >
+                Solutions
+                <ChevronDown
+                  className={`size-4 transition-transform ${mobileSections.solutions ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {mobileSections.solutions ? (
+                <div className="space-y-s1 pl-s2">
+                  <Link
+                    href="/solutions/garage-management-software-for-tire-shops"
+                    className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                    onClick={closeMobileMenu}
+                  >
+                    Tire Shops
+                  </Link>
+                  <Link
+                    href="/solutions/garage-management-software-for-auto-body-shops"
+                    className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                    onClick={closeMobileMenu}
+                  >
+                    Auto Body Shops
+                  </Link>
+                  <Link
+                    href="/solutions/garage-management-software-for-mobile-mechanics"
+                    className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                    onClick={closeMobileMenu}
+                  >
+                    Mobile Mechanics
+                  </Link>
+                  <Link
+                    href="/solutions/garage-management-software-for-dealerships"
+                    className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                    onClick={closeMobileMenu}
+                  >
+                    Dealerships
+                  </Link>
+                </div>
+              ) : null}
+
               <Link
-                href="/solutions/garage-management-software-for-tire-shops"
+                href="/blog"
                 className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
                 onClick={closeMobileMenu}
               >
-                Tire Shops
+                Blog
               </Link>
               <Link
-                href="/solutions/garage-management-software-for-auto-body-shops"
+                href="/case-studies"
                 className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
                 onClick={closeMobileMenu}
               >
-                Auto Body Shops
+                Case Studies
               </Link>
-              <Link
-                href="/solutions/garage-management-software-for-mobile-mechanics"
-                className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-                onClick={closeMobileMenu}
+
+              <button
+                type="button"
+                className="flex w-full items-center justify-between rounded-md px-s3 py-s2 text-left text-small font-medium text-text-primary hover:bg-surface-hover"
+                aria-expanded={mobileSections.resources}
+                onClick={() => toggleMobileSection('resources')}
               >
-                Mobile Mechanics
-              </Link>
-              <Link
-                href="/solutions/garage-management-software-for-dealerships"
-                className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-                onClick={closeMobileMenu}
-              >
-                Dealerships
-              </Link>
-            </div>
-            <Link
-              href="/features"
-              className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-              onClick={closeMobileMenu}
-            >
-              Product
-            </Link>
-            <div className="space-y-s1 pl-s2">
-              <Link
-                href="/features"
-                className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-                onClick={closeMobileMenu}
-              >
-                Features
-              </Link>
-              <Link
-                href="/pricing"
-                className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-                onClick={closeMobileMenu}
-              >
-                Pricing
-              </Link>
-            </div>
-            <Link
-              href="/blog"
-              className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-              onClick={closeMobileMenu}
-            >
-              Blog
-            </Link>
-            <Link
-              href="/tools/auto-repair-labor-rate-calculator"
-              className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-              onClick={closeMobileMenu}
-            >
-              Labor Rate Calculator
-            </Link>
-            <Link
-              href="/tools/auto-repair-shop-profit-calculator"
-              className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-              onClick={closeMobileMenu}
-            >
-              Shop Profit Calculator
-            </Link>
-            <Link
-              href="/case-studies"
-              className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-              onClick={closeMobileMenu}
-            >
-              Case Studies
-            </Link>
-            <div className="grid grid-cols-2 gap-s2 pt-s2">
-              <Button asChild variant="ghost" className="h-10">
-                <Link href="/auth/login" onClick={closeMobileMenu}>
-                  Sign In
-                </Link>
-              </Button>
-              <Button asChild className="h-10">
-                <Link href="/auth/sign-up" onClick={closeMobileMenu}>
-                  Get Started
-                </Link>
-              </Button>
-            </div>
-          </nav>
+                Resources
+                <ChevronDown
+                  className={`size-4 transition-transform ${mobileSections.resources ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {mobileSections.resources ? (
+                <div className="space-y-s1 pl-s2">
+                  <Link
+                    href="/tools/auto-repair-labor-rate-calculator"
+                    className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                    onClick={closeMobileMenu}
+                  >
+                    Labor Rate Calculator
+                  </Link>
+                  <Link
+                    href="/tools/auto-repair-shop-profit-calculator"
+                    className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                    onClick={closeMobileMenu}
+                  >
+                    Shop Profit Calculator
+                  </Link>
+                </div>
+              ) : null}
+
+              <div className="grid grid-cols-2 gap-s2 pt-s2">
+                <Button asChild variant="ghost" className="h-10">
+                  <Link href="/auth/login" onClick={closeMobileMenu}>
+                    Sign In
+                  </Link>
+                </Button>
+                <Button asChild className="h-10">
+                  <Link href="/auth/sign-up" onClick={closeMobileMenu}>
+                    Get Started
+                  </Link>
+                </Button>
+              </div>
+            </nav>
+          </div>
         </div>
       ) : null}
     </header>

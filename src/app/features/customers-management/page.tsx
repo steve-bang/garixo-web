@@ -71,7 +71,7 @@ const coreFeatures = [
     benefit: 'Recommend better maintenance and increase repeat visits.'
   },
   {
-    title: 'Work Order History Integration',
+    title: 'Job History Integration',
     description: 'Customer records connect directly with repair job history.',
     benefit: 'No time wasted searching across disconnected records.'
   },
@@ -448,9 +448,7 @@ export default function CustomersManagementFeaturePage(): JSX.Element {
                 href="/features/work-orders-management"
                 className="group flex items-center justify-between rounded-md border border-border bg-surface-default px-s3 py-s3 text-small text-text-primary transition-colors hover:border-primary-300 hover:bg-primary-50"
               >
-                <span className="font-medium">
-                  Work Order Management Software
-                </span>
+                <span className="font-medium">Job Management Software</span>
                 <span className="text-primary transition-transform group-hover:translate-x-0.5">
                   →
                 </span>

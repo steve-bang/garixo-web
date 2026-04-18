@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { CircleCheck, CircleX } from 'lucide-react';
 import Link from 'next/link';
 
 import { LandingFooter } from '@/components/sections/LandingFooter';
@@ -53,9 +54,9 @@ const faqItems = [
 
 const featureHighlights = [
   {
-    title: 'Mobile Work Orders That Stay Clean',
+    title: 'Mobile Jobs That Stay Clean',
     description:
-      'Create a work order in seconds from any driveway. Add services, notes, and parts in one screen.',
+      'Create a job in seconds from any driveway. Add services, notes, and parts in one screen.',
     benefit: 'No paperwork and no retyping at the end of the day.'
   },
   {
@@ -413,7 +414,7 @@ export default function MobileMechanicsSolutionsPage(): JSX.Element {
                   </Button>
                   <Button asChild variant="secondary" className="h-11">
                     <Link href="/features/work-orders-management">
-                      Work Order Management Software
+                      Job Management Software
                     </Link>
                   </Button>
                 </div>
@@ -493,10 +494,22 @@ export default function MobileMechanicsSolutionsPage(): JSX.Element {
                 <thead className="bg-surface-hover">
                   <tr>
                     <th className="border-b border-border px-s4 py-s3 text-small font-semibold text-text-primary">
-                      ❌ Before Garixo
+                      <span className="inline-flex items-center gap-s2">
+                        <CircleX
+                          aria-hidden="true"
+                          className="size-4 text-state-error"
+                        />
+                        Before Garixo
+                      </span>
                     </th>
                     <th className="border-b border-border px-s4 py-s3 text-small font-semibold text-text-primary">
-                      ✅ After Garixo
+                      <span className="inline-flex items-center gap-s2">
+                        <CircleCheck
+                          aria-hidden="true"
+                          className="size-4 text-state-success"
+                        />
+                        After Garixo
+                      </span>
                     </th>
                   </tr>
                 </thead>

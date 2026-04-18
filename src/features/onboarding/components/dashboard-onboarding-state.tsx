@@ -211,7 +211,7 @@ export function DashboardOnboardingState({
           </p>
         </div>
         {/* <Button className="h-11" onClick={() => setDrawerOpen(true)}>
-          <Plus className="mr-2 size-4" /> New Work Order
+          <Plus className="mr-2 size-4" /> New Job
         </Button> */}
       </header>
 
@@ -230,7 +230,7 @@ export function DashboardOnboardingState({
           </p>
           <div className="mx-auto max-w-[320px]">
             <Button className="h-12 w-full" onClick={() => setDrawerOpen(true)}>
-              + Create First Work Order
+              + Create First Job
             </Button>
           </div>
         </Card>
@@ -296,8 +296,12 @@ export function DashboardOnboardingState({
                         )
                       }
                     >
-                      <span className="text-small text-text-primary">
-                        ⚠ {metrics.waitingForApproval} Jobs Waiting for Approval
+                      <span className="inline-flex items-center gap-s2 text-small text-text-primary">
+                        <AlertTriangle
+                          aria-hidden="true"
+                          className="size-4 text-warning-700"
+                        />
+                        {metrics.waitingForApproval} Jobs Waiting for Approval
                       </span>
                       <span className="text-primary text-small font-medium">
                         View
@@ -313,8 +317,12 @@ export function DashboardOnboardingState({
                         router.push('/dashboard/work-orders?status=Completed')
                       }
                     >
-                      <span className="text-small text-text-primary">
-                        💰 {metrics.readyForPickup} Jobs Ready for Payment
+                      <span className="inline-flex items-center gap-s2 text-small text-text-primary">
+                        <CircleDollarSign
+                          aria-hidden="true"
+                          className="size-4 text-success-700"
+                        />
+                        {metrics.readyForPickup} Jobs Ready for Payment
                       </span>
                       <span className="text-primary text-small font-medium">
                         View
@@ -330,8 +338,12 @@ export function DashboardOnboardingState({
                         router.push('/dashboard/work-orders?status=InProgress')
                       }
                     >
-                      <span className="text-small text-text-primary">
-                        ⏱ {metrics.stuckInProgress} Jobs In Progress &gt; 3 days
+                      <span className="inline-flex items-center gap-s2 text-small text-text-primary">
+                        <Clock3
+                          aria-hidden="true"
+                          className="size-4 text-primary-700"
+                        />
+                        {metrics.stuckInProgress} Jobs In Progress &gt; 3 days
                       </span>
                       <span className="text-primary text-small font-medium">
                         View
@@ -345,12 +357,12 @@ export function DashboardOnboardingState({
 
           <section className="space-y-s3">
             <div className="flex items-center justify-between">
-              <h2 className="text-h2">Work Orders</h2>
+              <h2 className="text-h2">Jobs</h2>
               <Link
                 href="/dashboard/work-orders"
                 className="text-primary text-small font-medium hover:underline"
               >
-                View All Work Orders →
+                View All Jobs →
               </Link>
             </div>
             <Card className="overflow-hidden p-0">
@@ -496,7 +508,7 @@ export function DashboardOnboardingState({
             <X className="size-4" />
           </button>
           <p className="pr-s4 text-small text-text-secondary">
-            90% of garages start by creating their first work order.
+            90% of garages start by creating their first job.
           </p>
           <div className="mt-s3">
             <Button
@@ -507,7 +519,7 @@ export function DashboardOnboardingState({
                 setDrawerOpen(true);
               }}
             >
-              Create Work Order
+              Create Job
             </Button>
           </div>
         </div>

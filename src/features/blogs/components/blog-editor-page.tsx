@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { Circle, CircleCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
@@ -88,7 +89,7 @@ function emptyForm(): BlogFormState {
     metaDescription: '',
     focusKeyword: '',
     secondaryKeywords: '',
-    category: 'Work Orders',
+    category: 'Jobs',
     tags: '',
     schemaType: 'BlogPosting',
     status: 'draft',
@@ -422,7 +423,7 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
               <Input
                 value={form.title}
                 onChange={(event) => onField('title', event.target.value)}
-                placeholder="How Independent Garages Can Improve Work Order Throughput"
+                placeholder="How Independent Garages Can Improve Job Throughput"
               />
             </div>
 
@@ -844,9 +845,14 @@ export function BlogEditorPage({ blogId }: BlogEditorPageProps): JSX.Element {
               {seoChecks.map((check) => (
                 <p
                   key={check.label}
-                  className={`text-caption ${check.passed ? 'text-success-700' : 'text-text-muted'}`}
+                  className={`inline-flex items-center gap-s2 text-caption ${check.passed ? 'text-success-700' : 'text-text-muted'}`}
                 >
-                  {check.passed ? '✓' : '•'} {check.label}
+                  {check.passed ? (
+                    <CircleCheck aria-hidden="true" className="size-3.5" />
+                  ) : (
+                    <Circle aria-hidden="true" className="size-3.5" />
+                  )}
+                  {check.label}
                 </p>
               ))}
             </div>

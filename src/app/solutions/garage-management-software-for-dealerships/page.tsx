@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { CircleCheck, CircleX } from 'lucide-react';
 import Link from 'next/link';
 
 import { LandingFooter } from '@/components/sections/LandingFooter';
@@ -64,9 +65,9 @@ const featureHighlights = [
       "When a buyer asks 'what has been done to this car,' you open Garixo and show them."
   },
   {
-    title: 'Quick Service Work Orders',
+    title: 'Quick Service Jobs',
     description:
-      'Create a complete work order in under 60 seconds — service type, vehicle, tech assigned, parts used, and labor hours.',
+      'Create a complete job in under 60 seconds — service type, vehicle, tech assigned, parts used, and labor hours.',
     benefit:
       'Works for a quick oil change or a full pre-sale prep with one record from start to finish.'
   },
@@ -197,13 +198,13 @@ export default function DealershipSolutionsPage(): JSX.Element {
               Built for Independent dealers and multi-bay service shops
             </p>
             <h1 className="mt-s4 text-[34px] font-bold leading-tight text-text-primary md:text-[52px]">
-              Independent Dealership Service Software — Simple Work Orders,
-              Vehicle History & Faster Billing
+              Independent Dealership Service Software — Simple Jobs, Vehicle
+              History & Faster Billing
             </h1>
             <p className="mx-auto mt-s3 max-w-[820px] text-body text-text-secondary">
               Run your service department without a $500/month DMS. Garixo gives
-              independent dealers and growing service shops clean work orders,
-              advisor notes, and vehicle history — at a fraction of the cost.
+              independent dealers and growing service shops clean jobs, advisor
+              notes, and vehicle history — at a fraction of the cost.
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
@@ -442,7 +443,7 @@ export default function DealershipSolutionsPage(): JSX.Element {
                   </Button>
                   <Button asChild variant="secondary" className="h-11">
                     <Link href="/features/work-orders-management">
-                      Work Order Management Software
+                      Job Management Software
                     </Link>
                   </Button>
                 </div>
@@ -526,10 +527,22 @@ export default function DealershipSolutionsPage(): JSX.Element {
                 <thead className="bg-surface-hover">
                   <tr>
                     <th className="border-b border-border px-s4 py-s3 text-small font-semibold text-text-primary">
-                      ❌ Before Garixo
+                      <span className="inline-flex items-center gap-s2">
+                        <CircleX
+                          aria-hidden="true"
+                          className="size-4 text-state-error"
+                        />
+                        Before Garixo
+                      </span>
                     </th>
                     <th className="border-b border-border px-s4 py-s3 text-small font-semibold text-text-primary">
-                      ✅ After Garixo
+                      <span className="inline-flex items-center gap-s2">
+                        <CircleCheck
+                          aria-hidden="true"
+                          className="size-4 text-state-success"
+                        />
+                        After Garixo
+                      </span>
                     </th>
                   </tr>
                 </thead>

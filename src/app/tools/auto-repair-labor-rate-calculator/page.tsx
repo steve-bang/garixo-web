@@ -314,7 +314,7 @@ export default function LaborRateCalculatorPage(): JSX.Element {
                 </TrackedButtonLink>
                 <Button asChild variant="secondary" className="h-12">
                   <Link href="/features/work-orders-management">
-                    Work Order Management Software
+                    Job Management Software
                   </Link>
                 </Button>
               </div>

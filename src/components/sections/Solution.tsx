@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 
 const solutionBlocks = [
   {
-    title: 'Work Order Management',
+    title: 'Job Management',
     description:
       'Create, assign, and track every repair job with clear status from check-in to completion.',
     icon: ClipboardList,

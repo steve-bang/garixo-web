@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Minus, Plus, Trash2 } from 'lucide-react';
+import { Check, Circle, CircleCheck, Minus, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
@@ -531,7 +531,7 @@ export function FirstWorkOrderDrawer({
       <Drawer
         open={open}
         onClose={onClose}
-        title="Create First Work Order"
+        title="Create First Job"
         description="You can add more details later."
         width="xl"
         disableClose={isSubmitting}
@@ -1150,11 +1150,47 @@ export function FirstWorkOrderDrawer({
               Before you start
             </p>
             <ul className="mt-s2 space-y-1 text-small text-text-primary">
-              <li>{selectedCustomer ? '✓' : '•'} Customer selected</li>
-              <li>{hasVehicle ? '✓' : '•'} Vehicle selected</li>
-              <li>
-                {selectedServices.length > 0 ? '✓' : '•'} At least one service
-                added
+              <li className="inline-flex items-center gap-s2">
+                {selectedCustomer ? (
+                  <CircleCheck
+                    aria-hidden="true"
+                    className="size-3.5 text-success-700"
+                  />
+                ) : (
+                  <Circle
+                    aria-hidden="true"
+                    className="size-3.5 text-text-muted"
+                  />
+                )}
+                <span>Customer selected</span>
+              </li>
+              <li className="inline-flex items-center gap-s2">
+                {hasVehicle ? (
+                  <CircleCheck
+                    aria-hidden="true"
+                    className="size-3.5 text-success-700"
+                  />
+                ) : (
+                  <Circle
+                    aria-hidden="true"
+                    className="size-3.5 text-text-muted"
+                  />
+                )}
+                <span>Vehicle selected</span>
+              </li>
+              <li className="inline-flex items-center gap-s2">
+                {selectedServices.length > 0 ? (
+                  <CircleCheck
+                    aria-hidden="true"
+                    className="size-3.5 text-success-700"
+                  />
+                ) : (
+                  <Circle
+                    aria-hidden="true"
+                    className="size-3.5 text-text-muted"
+                  />
+                )}
+                <span>At least one service added</span>
               </li>
             </ul>
             {!canStartWork ? (

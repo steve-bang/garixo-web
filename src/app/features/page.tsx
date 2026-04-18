@@ -60,7 +60,7 @@ export default function FeaturesPage(): JSX.Element {
               id="features-page-title"
               className="text-[36px] font-bold leading-tight md:text-[52px]"
             >
-              Garage Management System Features: Work Orders, Inventory, Staff &
+              Garage Management System Features: Jobs, Inventory, Staff &
               Customers
             </h1>
 

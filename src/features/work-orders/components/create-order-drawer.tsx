@@ -24,7 +24,7 @@ export function CreateOrderDrawer({
     <Drawer
       open={open}
       onClose={onClose}
-      title="Create Work Order"
+      title="Create Job"
       description="Create and assign a new workshop job."
       width="lg"
     >

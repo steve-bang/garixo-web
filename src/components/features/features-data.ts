@@ -35,15 +35,15 @@ export type FeatureFaq = {
 export const coreFeatures: CoreFeature[] = [
   {
     id: 'work-order',
-    title: 'Work Order Management from Check-In to Delivery',
-    badge: 'Feature 01 · Work Order Management',
+    title: 'Job Management from Check-In to Delivery',
+    badge: 'Feature 01 · Job Management',
     description:
       'Create, assign, and track every repair job with real-time status updates from draft to paid.',
     impact: 'Know exactly what every job needs and what to do next.',
     href: '/features/work-orders-management',
     icon: ClipboardList,
     bullets: [
-      'Create work orders with customer and vehicle context in minutes',
+      'Create jobs with customer and vehicle context in minutes',
       'Live status flow: Draft, In Progress, Waiting Parts, Completed, Paid',
       'Board and table views for faster daily dispatch',
       'Assign workers clearly and reduce missed handoffs'

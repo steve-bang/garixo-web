@@ -33,7 +33,7 @@ export function LandingFooter(): JSX.Element {
                   href="/features/work-orders-management"
                   className="hover:text-white"
                 >
-                  Work Orders
+                  Jobs
                 </Link>
               </p>
               <p>

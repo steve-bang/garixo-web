@@ -1,5 +1,6 @@
 'use client';
 
+import { AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -418,9 +419,15 @@ export function ShopProfitCalculator(): JSX.Element {
             profit margin.
           </div>
           {isBelowHealthyMargin ? (
-            <div className="rounded-md border border-amber-200 bg-amber-50 p-s3 text-small text-amber-700">
-              ⚠ Your margin is below 20%. Review labor cost, parts pricing, or
-              job volume to protect profitability.
+            <div className="inline-flex items-start gap-s2 rounded-md border border-amber-200 bg-amber-50 p-s3 text-small text-amber-700">
+              <AlertTriangle
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0"
+              />
+              <span>
+                Your margin is below 20%. Review labor cost, parts pricing, or
+                job volume to protect profitability.
+              </span>
             </div>
           ) : null}
           <p className="text-small text-text-secondary">

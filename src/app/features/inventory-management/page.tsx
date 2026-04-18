@@ -81,7 +81,7 @@ const coreFeatures = [
     benefit: 'Make smarter pricing decisions with confidence.'
   },
   {
-    title: 'Work Order Integration',
+    title: 'Job Integration',
     description: 'Inventory is directly connected to your repair workflow.',
     benefit: 'One smooth flow from job creation to billing.'
   },
@@ -370,9 +370,7 @@ export default function InventoryManagementFeaturePage(): JSX.Element {
                 href="/features/work-orders-management"
                 className="group flex items-center justify-between rounded-md border border-border bg-surface-default px-s3 py-s3 text-small text-text-primary transition-colors hover:border-primary-300 hover:bg-primary-50"
               >
-                <span className="font-medium">
-                  Work Order Management Software
-                </span>
+                <span className="font-medium">Job Management Software</span>
                 <span className="text-primary transition-transform group-hover:translate-x-0.5">
                   →
                 </span>

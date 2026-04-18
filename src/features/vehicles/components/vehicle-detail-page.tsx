@@ -564,7 +564,7 @@ export function VehicleDetailPage({ vehicleId }: Props): JSX.Element {
       </Card>
 
       <Card className="p-s4">
-        <h2 className="text-h3">Work Order History</h2>
+        <h2 className="text-h3">Job History</h2>
         {historyQuery.isLoading ? (
           <div className="mt-s3 h-20 animate-pulse rounded-md bg-surface-hover" />
         ) : history.length ? (

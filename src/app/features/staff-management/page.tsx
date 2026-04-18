@@ -64,7 +64,7 @@ const coreFeatures = [
     benefit: 'Reduce access mistakes and improve accountability.'
   },
   {
-    title: 'Assign Mechanics to Work Orders',
+    title: 'Assign Mechanics to Jobs',
     description: 'Assign the right mechanic to each job with clear ownership.',
     benefit: 'Reduce confusion and speed up job start time.'
   },
@@ -411,9 +411,7 @@ export default function StaffManagementFeaturePage(): JSX.Element {
                 href="/features/work-orders-management"
                 className="group flex items-center justify-between rounded-md border border-border bg-surface-default px-s3 py-s3 text-small text-text-primary transition-colors hover:border-primary-300 hover:bg-primary-50"
               >
-                <span className="font-medium">
-                  Work Order Management Software
-                </span>
+                <span className="font-medium">Job Management Software</span>
                 <span className="text-primary transition-transform group-hover:translate-x-0.5">
                   →
                 </span>

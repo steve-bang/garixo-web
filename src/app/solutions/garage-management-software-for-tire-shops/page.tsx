@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { CircleCheck, CircleX } from 'lucide-react';
 import Link from 'next/link';
 
 import { LandingFooter } from '@/components/sections/LandingFooter';
@@ -58,9 +59,9 @@ const faqItems = [
 
 const featureHighlights = [
   {
-    title: 'High-Volume Work Order Flow',
+    title: 'High-Volume Job Flow',
     description:
-      'Create a tire work order in under 20 seconds — service type, vehicle, notes, and parts attached in one step.',
+      'Create a tire job in under 20 seconds — service type, vehicle, notes, and parts attached in one step.',
     benefit:
       'Handle 10–15 jobs daily without the counter creating a bottleneck. Board view shows every bay status in real time.'
   },
@@ -436,7 +437,7 @@ export default function TireShopSolutionsPage(): JSX.Element {
                   </Button>
                   <Button asChild variant="secondary" className="h-11">
                     <Link href="/features/work-orders-management">
-                      Work Order Management Software
+                      Job Management Software
                     </Link>
                   </Button>
                 </div>
@@ -520,10 +521,22 @@ export default function TireShopSolutionsPage(): JSX.Element {
                 <thead className="bg-surface-hover">
                   <tr>
                     <th className="border-b border-border px-s4 py-s3 text-small font-semibold text-text-primary">
-                      ❌ Before Garixo
+                      <span className="inline-flex items-center gap-s2">
+                        <CircleX
+                          aria-hidden="true"
+                          className="size-4 text-state-error"
+                        />
+                        Before Garixo
+                      </span>
                     </th>
                     <th className="border-b border-border px-s4 py-s3 text-small font-semibold text-text-primary">
-                      ✅ After Garixo
+                      <span className="inline-flex items-center gap-s2">
+                        <CircleCheck
+                          aria-hidden="true"
+                          className="size-4 text-state-success"
+                        />
+                        After Garixo
+                      </span>
                     </th>
                   </tr>
                 </thead>

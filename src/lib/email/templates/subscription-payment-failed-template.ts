@@ -65,7 +65,7 @@ export function buildSubscriptionPaymentFailedEmailTemplate(
     '',
     'To avoid any interruption to your account, please update your payment information as soon as possible:',
     '',
-    `👉 ${input.updateBillingLink}`,
+    `Update billing link: ${input.updateBillingLink}`,
     '',
     `We will automatically retry the payment. If the issue is not resolved, your access may be temporarily limited after ${formattedGracePeriodDate}.`,
     '',

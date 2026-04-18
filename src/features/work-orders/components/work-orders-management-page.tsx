@@ -347,7 +347,7 @@ export function WorkOrdersManagementPage(): JSX.Element {
     <div className="space-y-s6 p-s8">
       <header className="flex flex-col items-start justify-between gap-s3 md:flex-row md:items-center">
         <div>
-          <h1 className="text-h1">Work Orders</h1>
+          <h1 className="text-h1">Jobs</h1>
           <p className="text-small text-text-muted">
             Manage and track mechanic tasks.
           </p>

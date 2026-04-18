@@ -354,7 +354,7 @@ export function InvoiceDetailPage({
         </div>
         <div className="flex gap-s2">
           <Link href={`/dashboard/work-orders/${invoice.workOrderId}`}>
-            <Button variant="secondary">Back to Work Order</Button>
+            <Button variant="secondary">Back to Job</Button>
           </Link>
           <Button
             onClick={() => void handleSave()}
