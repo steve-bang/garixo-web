@@ -450,6 +450,16 @@ export function DashboardLayoutShell({
         </div>
       ) : null}
 
+      {/* Mobile FAB — always visible on small screens, hidden on desktop */}
+      <button
+        type="button"
+        aria-label="Create new job"
+        className="bottom-s5 right-s5 bg-primary fixed z-40 flex size-14 items-center justify-center rounded-full shadow-lg transition-transform active:scale-95 md:hidden"
+        onClick={() => setCreateOpen(true)}
+      >
+        <Plus className="size-7 text-white" />
+      </button>
+
       <Modal
         open={helpOpen}
         onClose={() => setHelpOpen(false)}

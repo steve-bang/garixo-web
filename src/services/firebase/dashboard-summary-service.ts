@@ -145,6 +145,25 @@ function toWeekDayKeys(date: Date): string[] {
   });
 }
 
+function toLastWeekDayKeys(date: Date): string[] {
+  const cursor = new Date(date);
+  const day = cursor.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  cursor.setDate(cursor.getDate() + diff - 7);
+  cursor.setHours(0, 0, 0, 0);
+
+  return Array.from({ length: 7 }).map((_, index) => {
+    const value = new Date(cursor);
+    value.setDate(cursor.getDate() + index);
+    return toDayKey(value);
+  });
+}
+
+function toLastMonthKey(date: Date): string {
+  const d = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+  return toMonthKey(d);
+}
+
 function mapWorkOrderDoc(id: string, raw: Partial<WorkOrder>): WorkOrder {
   const now = new Date().toISOString();
   const createdAt = raw.createdAt ?? now;
@@ -579,18 +598,28 @@ export async function getDashboardOverviewSummary(
 export async function getRevenueSummary(garageId: string): Promise<{
   today: RevenueDailyDoc;
   week: RevenueWeekDoc;
+  lastWeek: RevenueWeekDoc;
   month: RevenueMonthlyDoc;
+  lastMonth: RevenueMonthlyDoc;
 }> {
   const now = new Date();
   const dayKey = toDayKey(now);
   const monthKey = toMonthKey(now);
+  const lastMonthKey = toLastMonthKey(now);
   const weekDayKeys = toWeekDayKeys(now);
+  const lastWeekDayKeys = toLastWeekDayKeys(now);
 
-  const [dailySnap, monthlySnap, ...weekSnaps] = await Promise.all([
-    revenueDailyRef(garageId, dayKey).get(),
-    revenueMonthlyRef(garageId, monthKey).get(),
-    ...weekDayKeys.map((key) => revenueDailyRef(garageId, key).get())
-  ]);
+  const [dailySnap, monthlySnap, lastMonthlySnap, ...weekAndLastWeekSnaps] =
+    await Promise.all([
+      revenueDailyRef(garageId, dayKey).get(),
+      revenueMonthlyRef(garageId, monthKey).get(),
+      revenueMonthlyRef(garageId, lastMonthKey).get(),
+      ...weekDayKeys.map((key) => revenueDailyRef(garageId, key).get()),
+      ...lastWeekDayKeys.map((key) => revenueDailyRef(garageId, key).get())
+    ]);
+
+  const weekSnaps = weekAndLastWeekSnaps.slice(0, 7);
+  const lastWeekSnaps = weekAndLastWeekSnaps.slice(7);
 
   const today: RevenueDailyDoc = dailySnap.exists
     ? ({
@@ -613,20 +642,36 @@ export async function getRevenueSummary(garageId: string): Promise<{
       } as RevenueMonthlyDoc)
     : { totalRevenue: 0, paidCount: 0, month: monthKey };
 
-  const week = weekSnaps.reduce<RevenueWeekDoc>(
-    (sum, snapshot) => {
-      if (!snapshot.exists) {
-        return sum;
-      }
+  const lastMonth: RevenueMonthlyDoc = lastMonthlySnap.exists
+    ? ({
+        totalRevenue:
+          (lastMonthlySnap.data() as Partial<RevenueMonthlyDoc>).totalRevenue ??
+          0,
+        paidCount:
+          (lastMonthlySnap.data() as Partial<RevenueMonthlyDoc>).paidCount ?? 0,
+        month:
+          (lastMonthlySnap.data() as Partial<RevenueMonthlyDoc>).month ??
+          lastMonthKey
+      } as RevenueMonthlyDoc)
+    : { totalRevenue: 0, paidCount: 0, month: lastMonthKey };
 
-      const raw = snapshot.data() as Partial<RevenueDailyDoc>;
-      return {
-        totalRevenue: sum.totalRevenue + (raw.totalRevenue ?? 0),
-        paidCount: sum.paidCount + (raw.paidCount ?? 0)
-      };
-    },
-    { totalRevenue: 0, paidCount: 0 }
-  );
+  const sumWeek = (
+    snaps: Array<{ exists: boolean; data: () => unknown }>
+  ): RevenueWeekDoc =>
+    snaps.reduce<RevenueWeekDoc>(
+      (sum, snapshot) => {
+        if (!snapshot.exists) return sum;
+        const raw = snapshot.data() as Partial<RevenueDailyDoc>;
+        return {
+          totalRevenue: sum.totalRevenue + (raw.totalRevenue ?? 0),
+          paidCount: sum.paidCount + (raw.paidCount ?? 0)
+        };
+      },
+      { totalRevenue: 0, paidCount: 0 }
+    );
 
-  return { today, week, month };
+  const week = sumWeek(weekSnaps);
+  const lastWeek = sumWeek(lastWeekSnaps);
+
+  return { today, week, lastWeek, month, lastMonth };
 }

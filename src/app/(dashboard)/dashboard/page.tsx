@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { DashboardOnboardingState } from '@/features/onboarding/components/dashboard-onboarding-state';
+import { WorkOrderStatusEnum } from '@/features/work-orders/types';
 import { auth } from '@/lib/auth';
 import { getRequestGarage } from '@/lib/auth/garage-context';
 import {
@@ -34,6 +35,18 @@ export default async function DashboardPage(): Promise<JSX.Element> {
     listGarageWorkOrders(garage.id),
     getUserDocument(session.user.id)
   ]);
+
+  const readyForPickupValue = workOrders
+    .filter((o) => o.status === WorkOrderStatusEnum.Completed)
+    .reduce((sum, o) => sum + (o.totalAmount ?? 0), 0);
+
+  const overdueJobsCount = workOrders.filter(
+    (o) =>
+      o.isOverdue &&
+      o.status !== WorkOrderStatusEnum.Completed &&
+      o.status !== WorkOrderStatusEnum.Paid &&
+      o.status !== WorkOrderStatusEnum.Cancelled
+  ).length;
 
   const recentWorkOrders = workOrders
     .slice()
@@ -68,10 +81,15 @@ export default async function DashboardPage(): Promise<JSX.Element> {
         carsInShop: overview.carsInShop,
         waitingForApproval: overview.waitingApproval,
         readyForPickup: overview.readyForPickup,
+        readyForPickupValue,
+        overdueJobsCount,
         stuckInProgress: overview.stuckJobs,
         todayRevenue: revenue.today.totalRevenue,
         weekRevenue: revenue.week.totalRevenue,
-        monthRevenue: revenue.month.totalRevenue
+        weekPaidCount: revenue.week.paidCount,
+        lastWeekPaidCount: revenue.lastWeek.paidCount,
+        monthRevenue: revenue.month.totalRevenue,
+        lastMonthRevenue: revenue.lastMonth.totalRevenue
       }}
       recentWorkOrders={recentWorkOrders}
     />
