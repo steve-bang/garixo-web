@@ -249,10 +249,10 @@ export function LandingHeader(): JSX.Element {
             variant="ghost"
             className="hidden h-10 md:inline-flex"
           >
-            <Link href="/auth/login">Sign In</Link>
+            <Link href="https://app.garixo.com/login">Sign In</Link>
           </Button>
           <Button asChild className="h-10">
-            <Link href="/auth/sign-up">Get Started</Link>
+            <Link href="https://app.garixo.com/register">Get Started</Link>
           </Button>
         </div>
       </div>
@@ -394,12 +394,12 @@ export function LandingHeader(): JSX.Element {
 
               <div className="grid grid-cols-2 gap-s2 pt-s2">
                 <Button asChild variant="ghost" className="h-10">
-                  <Link href="/auth/login" onClick={closeMobileMenu}>
+                  <Link href="https://app.garixo.com/login" onClick={closeMobileMenu}>
                     Sign In
                   </Link>
                 </Button>
                 <Button asChild className="h-10">
-                  <Link href="/auth/sign-up" onClick={closeMobileMenu}>
+                  <Link href="https://app.garixo.com/register" onClick={closeMobileMenu}>
                     Get Started
                   </Link>
                 </Button>
