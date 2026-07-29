@@ -67,7 +67,7 @@ export function StructuredData(): JSX.Element {
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',
-      url: 'https://www.garixo.com/auth/sign-up'
+      url: 'https://app.garixo.com/register'
     }
   };
 

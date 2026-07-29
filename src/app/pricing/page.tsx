@@ -154,7 +154,7 @@ export default function PricingPage(): JSX.Element {
       name: `${plan.name} Monthly`,
       price: String(plan.monthlyPrice),
       priceCurrency: 'USD',
-      url: 'https://www.garixo.com/auth/sign-up',
+      url: 'https://app.garixo.com/register',
       availability: 'https://schema.org/InStock'
     }))
   };
@@ -287,7 +287,7 @@ export default function PricingPage(): JSX.Element {
                       {plan.trialDays}-day free trial included
                     </p>
                     <Button asChild className="h-11 w-full">
-                      <Link href="/auth/sign-up">{plan.ctaLabel}</Link>
+                      <Link href="https://app.garixo.com/register">{plan.ctaLabel}</Link>
                     </Button>
                   </div>
                 </Card>

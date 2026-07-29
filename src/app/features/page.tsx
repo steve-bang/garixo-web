@@ -72,7 +72,7 @@ export default function FeaturesPage(): JSX.Element {
 
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
-                <Link href="/auth/sign-up">Book Free Demo</Link>
+                <Link href="https://app.garixo.com/register">Book Free Demo</Link>
               </Button>
               <Button asChild variant="secondary" className="h-12">
                 <Link href="/pricing">View Pricing</Link>
@@ -103,7 +103,7 @@ export default function FeaturesPage(): JSX.Element {
                 asChild
                 className="h-12 bg-surface-default text-primary-800 hover:bg-primary-50"
               >
-                <Link href="/auth/sign-up">Schedule Your Free Demo</Link>
+                <Link href="https://app.garixo.com/register">Schedule Your Free Demo</Link>
               </Button>
               <Button
                 asChild

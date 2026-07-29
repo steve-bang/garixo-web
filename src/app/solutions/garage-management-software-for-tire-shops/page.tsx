@@ -209,7 +209,7 @@ export default function TireShopSolutionsPage(): JSX.Element {
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
-                <Link href="/auth/sign-up">Start Free Trial</Link>
+                <Link href="https://app.garixo.com/register">Start Free Trial</Link>
               </Button>
               <Button asChild variant="secondary" className="h-12">
                 <Link href="/pricing">View Pricing</Link>
@@ -246,7 +246,7 @@ export default function TireShopSolutionsPage(): JSX.Element {
                   place.
                 </p>
                 <Button asChild className="h-11">
-                  <Link href="/auth/sign-up">Start in minutes</Link>
+                  <Link href="https://app.garixo.com/register">Start in minutes</Link>
                 </Button>
               </Card>
             </div>
@@ -431,7 +431,7 @@ export default function TireShopSolutionsPage(): JSX.Element {
                 </p>
                 <div className="flex flex-col gap-s2 sm:flex-row">
                   <Button asChild className="h-11">
-                    <Link href="/auth/sign-up">
+                    <Link href="https://app.garixo.com/register">
                       See how it works — free demo
                     </Link>
                   </Button>
@@ -608,7 +608,7 @@ export default function TireShopSolutionsPage(): JSX.Element {
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
-                <Link href="/auth/sign-up">Start Free Trial</Link>
+                <Link href="https://app.garixo.com/register">Start Free Trial</Link>
               </Button>
               <Button asChild variant="secondary" className="h-12">
                 <Link href="/pricing">Garage Pricing Plans</Link>
@@ -647,7 +647,7 @@ export default function TireShopSolutionsPage(): JSX.Element {
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
-                <Link href="/auth/sign-up">
+                <Link href="https://app.garixo.com/register">
                   Start free — no credit card needed
                 </Link>
               </Button>

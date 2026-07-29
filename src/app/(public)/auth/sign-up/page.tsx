@@ -24,7 +24,7 @@ export default function SignUpPage(): JSX.Element {
         '@type': 'ListItem',
         position: 2,
         name: 'Sign Up',
-        item: 'https://www.garixo.com/auth/sign-up'
+        item: 'https://app.garixo.com/register'
       }
     ]
   };

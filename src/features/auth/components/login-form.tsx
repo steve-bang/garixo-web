@@ -171,7 +171,7 @@ export function LoginForm(): JSX.Element {
             <p className="text-small text-text-secondary">
               Don&apos;t have an account?{' '}
               <Link
-                href="/auth/sign-up"
+                href="https://app.garixo.com/register"
                 className="font-medium text-primary-700 hover:underline"
               >
                 Sign up

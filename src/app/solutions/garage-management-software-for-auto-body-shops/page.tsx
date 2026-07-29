@@ -204,7 +204,7 @@ export default function AutoBodyShopSolutionsPage(): JSX.Element {
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
-                <Link href="/auth/sign-up">Start Free Trial</Link>
+                <Link href="https://app.garixo.com/register">Start Free Trial</Link>
               </Button>
               <Button asChild variant="secondary" className="h-12">
                 <Link href="/pricing">View Pricing</Link>
@@ -253,7 +253,7 @@ export default function AutoBodyShopSolutionsPage(): JSX.Element {
                   simple workflow so your team can stay focused on the repair.
                 </p>
                 <Button asChild className="h-11">
-                  <Link href="/auth/sign-up">Start in minutes</Link>
+                  <Link href="https://app.garixo.com/register">Start in minutes</Link>
                 </Button>
               </Card>
             </div>
@@ -600,7 +600,7 @@ export default function AutoBodyShopSolutionsPage(): JSX.Element {
                 </p>
                 <div className="flex flex-col gap-s2 sm:flex-row">
                   <Button asChild className="h-11">
-                    <Link href="/auth/sign-up">Start Free Trial</Link>
+                    <Link href="https://app.garixo.com/register">Start Free Trial</Link>
                   </Button>
                   <Button asChild variant="secondary" className="h-11">
                     <Link href="/features/work-orders-management">
@@ -719,7 +719,7 @@ export default function AutoBodyShopSolutionsPage(): JSX.Element {
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
-                <Link href="/auth/sign-up">Start Free Trial</Link>
+                <Link href="https://app.garixo.com/register">Start Free Trial</Link>
               </Button>
               <Button asChild variant="secondary" className="h-12">
                 <Link href="/pricing">Garage Pricing Plans</Link>
@@ -757,7 +757,7 @@ export default function AutoBodyShopSolutionsPage(): JSX.Element {
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
-                <Link href="/auth/sign-up">Start Free Trial</Link>
+                <Link href="https://app.garixo.com/register">Start Free Trial</Link>
               </Button>
               <Button asChild variant="secondary" className="h-12">
                 <Link href="/features/inventory-management">

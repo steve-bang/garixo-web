@@ -306,7 +306,7 @@ export default function LaborRateCalculatorPage(): JSX.Element {
               </p>
               <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
                 <TrackedButtonLink
-                  href="/auth/sign-up"
+                  href="https://app.garixo.com/register"
                   eventName="labor_rate_calculator_cta_result"
                   className="h-12"
                 >

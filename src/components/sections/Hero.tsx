@@ -50,7 +50,7 @@ export function Hero(): JSX.Element {
 
           <div className="flex flex-col gap-s2 pt-s1 sm:flex-row">
             <Button asChild className="h-12 min-h-12">
-              <Link href="/auth/sign-up">Try Free for 14 Days</Link>
+              <Link href="https://app.garixo.com/register">Try Free for 14 Days</Link>
             </Button>
             <Button asChild variant="secondary" className="h-12 min-h-12">
               <Link href="/pricing">See Pricing</Link>

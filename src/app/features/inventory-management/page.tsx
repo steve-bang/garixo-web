@@ -210,7 +210,7 @@ export default function InventoryManagementFeaturePage(): JSX.Element {
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
-                <Link href="/auth/sign-up">Start Free Trial</Link>
+                <Link href="https://app.garixo.com/register">Start Free Trial</Link>
               </Button>
               <Button asChild variant="secondary" className="h-12">
                 <Link href="#how-it-works">See How It Works</Link>
@@ -421,7 +421,7 @@ export default function InventoryManagementFeaturePage(): JSX.Element {
                 asChild
                 className="h-12 bg-surface-default text-primary-800 hover:bg-primary-50"
               >
-                <Link href="/auth/sign-up">
+                <Link href="https://app.garixo.com/register">
                   Start Free Trial - No Credit Card Required
                 </Link>
               </Button>

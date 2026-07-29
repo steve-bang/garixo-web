@@ -103,7 +103,7 @@ export default async function BlogIndexPage(): Promise<JSX.Element> {
             </p>
             <div className="flex flex-col justify-center gap-s2 pt-s1 sm:flex-row">
               <Button asChild className="h-11">
-                <Link href="/auth/sign-up">Start Free Trial</Link>
+                <Link href="https://app.garixo.com/register">Start Free Trial</Link>
               </Button>
               <Button asChild variant="secondary" className="h-11">
                 <Link href="/pricing">View Pricing</Link>

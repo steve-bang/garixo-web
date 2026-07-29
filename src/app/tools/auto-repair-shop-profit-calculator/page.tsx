@@ -314,7 +314,7 @@ export default function ShopProfitCalculatorPage(): JSX.Element {
               </p>
               <div className="flex flex-col justify-center gap-s2 sm:flex-row">
                 <TrackedButtonLink
-                  href="/auth/sign-up"
+                  href="https://app.garixo.com/register"
                   eventName="shop_profit_calculator_cta_footer"
                   className="h-12"
                 >
