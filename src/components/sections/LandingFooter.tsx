@@ -93,6 +93,11 @@ export function LandingFooter(): JSX.Element {
             <p className="text-small font-semibold text-white">Company</p>
             <div className="space-y-s1 text-small text-slate-400">
               <p>
+                <Link href="/about" className="hover:text-white">
+                  About
+                </Link>
+              </p>
+              <p>
                 <Link href="/privacy-policy" className="hover:text-white">
                   Privacy Policy
                 </Link>

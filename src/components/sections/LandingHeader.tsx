@@ -186,6 +186,12 @@ export function LandingHeader(): JSX.Element {
           >
             Case Studies
           </Link>
+          <Link
+            href="/about"
+            className="text-small text-text-secondary hover:text-text-primary"
+          >
+            About
+          </Link>
 
           <div className="group relative">
             <button
@@ -360,6 +366,13 @@ export function LandingHeader(): JSX.Element {
                 onClick={closeMobileMenu}
               >
                 Case Studies
+              </Link>
+              <Link
+                href="/about"
+                className="block rounded-md px-s3 py-s2 text-small text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                onClick={closeMobileMenu}
+              >
+                About
               </Link>
 
               <button
