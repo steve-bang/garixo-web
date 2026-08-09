@@ -1,9 +1,10 @@
 import Link from 'next/link';
 
+import { resolveBlogAuthor } from '@/features/blogs/author';
+import { BlogAuthorBadge } from '@/features/blogs/components/blog-author';
 import type { Blog } from '@/features/blogs/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { formatDate } from '@/lib/utils/format';
 
 type BlogCardProps = {
   post: Blog;
@@ -11,6 +12,8 @@ type BlogCardProps = {
 };
 
 export function BlogCard({ post, className }: BlogCardProps): JSX.Element {
+  const author = resolveBlogAuthor(post);
+
   return (
     <article className={className}>
       <Card className="overflow-hidden rounded-xl border border-border p-s4 shadow-sm transition-all duration-200 hover:border-primary-200 hover:shadow-md">
@@ -65,17 +68,13 @@ export function BlogCard({ post, className }: BlogCardProps): JSX.Element {
             </p>
 
             {/* FOOTER */}
-            <div className="mt-auto flex items-center justify-between border-t border-border pt-s3">
-              <p className="text-caption text-text-muted">
-                {formatDate(post.publishedAt ?? post.updatedAt, {
-                  locale: 'en-US',
-                  options: {
-                    month: 'short',
-                    day: '2-digit',
-                    year: 'numeric'
-                  }
-                })}
-              </p>
+            <div className="mt-auto flex items-center justify-between gap-s3 border-t border-border pt-s3">
+              <BlogAuthorBadge
+                author={author}
+                publishedAt={post.publishedAt ?? post.updatedAt}
+                compact
+                className="min-w-0"
+              />
 
               <Button asChild variant="secondary" size="sm">
                 <Link href={`/blog/${post.slug}`}>Read article</Link>
@@ -97,6 +96,8 @@ export function BlogCardCompact({
   post,
   className
 }: BlogCardCompactProps): JSX.Element {
+  const author = resolveBlogAuthor(post);
+
   return (
     <article className={className}>
       <Card className="h-full overflow-hidden rounded-xl border border-border p-s3 shadow-sm transition-all duration-200 hover:border-primary-200 hover:shadow-md">
@@ -138,17 +139,13 @@ export function BlogCardCompact({
             </p>
           </div>
 
-          <div className="flex items-center justify-between border-t border-border pt-s2 text-caption text-text-muted">
-            <span>
-              {formatDate(post.publishedAt ?? post.updatedAt, {
-                locale: 'en-US',
-                options: {
-                  month: 'short',
-                  day: '2-digit',
-                  year: 'numeric'
-                }
-              })}
-            </span>
+          <div className="flex items-center justify-between gap-s3 border-t border-border pt-s2">
+            <BlogAuthorBadge
+              author={author}
+              publishedAt={post.publishedAt ?? post.updatedAt}
+              compact
+              className="min-w-0"
+            />
             <span>{post.readingTime} min read</span>
           </div>
         </div>

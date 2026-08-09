@@ -7,17 +7,18 @@ import {
   incrementBlogViews,
   listPublishedBlogs
 } from '@/app/api/blogs/blogs-db';
+import {
+  DEFAULT_BLOG_AUTHOR,
+  resolveBlogAuthor
+} from '@/features/blogs/author';
+import { BlogAuthorBadge } from '@/features/blogs/components/blog-author';
 import { Markdown } from '@/components/markdown/Markdown';
 import { LandingFooter } from '@/components/sections/LandingFooter';
 import { LandingHeader } from '@/components/sections/LandingHeader';
 import { Button } from '@/components/ui/button';
 import { BlogCardCompact } from '@/features/blogs/components/blog-card';
-import {
-  resolveEffectiveStatus,
-  schemaTypeToSchemaOrgType,
-  slugify
-} from '@/features/blogs/utils';
-import { formatDate } from '@/lib/utils/format';
+import { buildBlogArticleSchema } from '@/features/blogs/seo';
+import { resolveEffectiveStatus, slugify } from '@/features/blogs/utils';
 import { Home } from 'lucide-react';
 
 type Props = {
@@ -126,11 +127,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = post.metaTitle || post.title;
   const description = post.metaDescription || post.excerpt;
   const canonical = post.canonical || `/blog/${post.slug}`;
+  const author = DEFAULT_BLOG_AUTHOR;
 
   return {
     metadataBase: new URL('https://www.garixo.com'),
     title: title + ' | Garixo', // Append site name to title
     description,
+    authors: [
+      {
+        name: author.name,
+        url: author.profileUrl
+      }
+    ],
     alternates: {
       canonical
     },
@@ -187,30 +195,8 @@ export default async function BlogDetailPage({
   );
   const relatedPosts = [...sameCategory, ...otherPosts].slice(0, 3);
 
-  const schemaType = schemaTypeToSchemaOrgType(post.schemaType);
-
-  const blogSchema: Record<string, unknown> = {
-    '@context': 'https://schema.org',
-    '@type': schemaType,
-    headline: post.title,
-    description: post.excerpt,
-    datePublished: post.publishedAt ?? post.updatedAt,
-    dateModified: post.updatedAt,
-    author: {
-      '@type': 'Person',
-      name: post.authorName || 'Garixo Team'
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'Garixo',
-      url: 'https://www.garixo.com'
-    },
-    mainEntityOfPage: `https://www.garixo.com/blog/${post.slug}`
-  };
-
-  if (post.ogImage) {
-    blogSchema.image = [post.ogImage];
-  }
+  const author = resolveBlogAuthor(post);
+  const blogSchema = buildBlogArticleSchema(post);
 
   const tocItems = post.content.markdown?.trim()
     ? buildTocFromMarkdown(post.content.markdown)
@@ -281,19 +267,17 @@ export default async function BlogDetailPage({
               </ol>
             </nav>
             <p className="text-caption text-text-muted">
-              {post.category} · {post.readingTime} min read ·{' '}
-              {formatDate(post.publishedAt ?? post.updatedAt, {
-                locale: 'en-US',
-                options: {
-                  month: 'short',
-                  day: '2-digit',
-                  year: 'numeric'
-                }
-              })}
+              {post.category} · {post.readingTime} min read
             </p>
             <h1 className="text-[34px] font-bold leading-tight text-text-primary md:text-[46px]">
               {post.title}
             </h1>
+            <BlogAuthorBadge
+              author={author}
+              publishedAt={post.publishedAt ?? post.updatedAt}
+              showBio
+              className="max-w-[760px]"
+            />
             <p className="text-body text-text-secondary">{post.excerpt}</p>
           </header>
 
