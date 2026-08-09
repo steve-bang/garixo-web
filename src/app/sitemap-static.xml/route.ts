@@ -46,6 +46,12 @@ export async function GET(): Promise<Response> {
       priority: '0.9'
     },
     {
+      path: '/about',
+      lastmod: '2026-08-09T00:00:00Z',
+      changefreq: 'monthly',
+      priority: '0.9'
+    },
+    {
       path: '/features/customers-management',
       lastmod: '2026-01-10T00:00:00Z',
       changefreq: 'monthly',
