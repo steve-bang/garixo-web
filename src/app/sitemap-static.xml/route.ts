@@ -76,6 +76,12 @@ export async function GET(): Promise<Response> {
       priority: '0.9'
     },
     {
+      path: '/about',
+      lastmod: '2026-08-09T00:00:00Z',
+      changefreq: 'monthly',
+      priority: '0.7'
+    },
+    {
       path: '/case-studies',
       lastmod: '2026-01-25T00:00:00Z',
       changefreq: 'monthly',
