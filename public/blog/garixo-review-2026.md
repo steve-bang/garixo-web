@@ -23,7 +23,7 @@ tags:
   - auto repair shop software
   - software pricing
   - independent auto shop tools
-status: draft
+status: published
 schemaType: BlogPosting
 ogTitle: 'Garixo Review 2026: Is It Right for Your Shop?'
 ogDescription: >-
@@ -67,8 +67,8 @@ ctaBlock:
   ctaHref: 'https://www.garixo.com/pricing'
 readingTime: 6
 createdAt: '2026-08-15T10:00:00.000Z'
-updatedAt: '2026-08-15T10:00:00.000Z'
-publishedAt: null
+updatedAt: '2026-08-15T11:30:00.000Z'
+publishedAt: '2026-08-15T11:30:00.000Z'
 scheduledAt: null
 authorId: steve-bang
 authorName: Steve Bang
