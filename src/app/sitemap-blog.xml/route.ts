@@ -1,5 +1,14 @@
-// This route generates the sitemap XML for blog posts. It queries the database for published blog entries and constructs an XML sitemap that search engines can use to discover and index the blog content.
-import { listPublishedIndexedBlogSitemapEntries } from '@/app/api/blogs/blogs-db';
+// This route generates the sitemap XML for blog posts, plus the blog category
+// and tag taxonomy pages. It queries the database for published blog entries
+// and constructs an XML sitemap that search engines can use to discover and
+// index the blog content.
+import {
+  listBlogCategories,
+  listBlogTags,
+  listPublishedBlogs,
+  listPublishedIndexedBlogSitemapEntries
+} from '@/app/api/blogs/blogs-db';
+import { slugMatches } from '@/features/blogs/utils';
 import {
   toAbsoluteUrl,
   toSitemapIsoDate,
@@ -9,27 +18,87 @@ import {
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-function buildBlogSitemapXml(
-  entries: Array<{ slug: string; lastModified: string }>
-): string {
+type SitemapEntry = {
+  path: string;
+  lastModified: string;
+  priority: string;
+};
+
+function buildBlogSitemapXml(entries: SitemapEntry[]): string {
   const body = entries
     .map(
       (entry) =>
-        `\n  <url>\n    <loc>${xmlEscape(toAbsoluteUrl(`/blog/${entry.slug}`))}</loc>\n    <lastmod>${toSitemapIsoDate(entry.lastModified)}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`
+        `\n  <url>\n    <loc>${xmlEscape(toAbsoluteUrl(entry.path))}</loc>\n    <lastmod>${toSitemapIsoDate(entry.lastModified)}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${entry.priority}</priority>\n  </url>`
     )
     .join('');
 
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${body}\n</urlset>`;
 }
 
+function latestUpdatedAt(posts: Array<{ updatedAt: string }>): string {
+  return posts.reduce(
+    (latest, post) => (post.updatedAt > latest ? post.updatedAt : latest),
+    posts[0].updatedAt
+  );
+}
+
 export async function GET(): Promise<Response> {
   try {
-    const entries = await listPublishedIndexedBlogSitemapEntries({
-      pageSize: 1000,
-      maxUrls: 50000
-    });
+    const [postEntries, categories, tags, publishedPosts] = await Promise.all([
+      listPublishedIndexedBlogSitemapEntries({
+        pageSize: 1000,
+        maxUrls: 50000
+      }),
+      listBlogCategories(),
+      listBlogTags(),
+      listPublishedBlogs()
+    ]);
 
-    const xml = buildBlogSitemapXml(entries);
+    const indexedPosts = publishedPosts.filter((post) => post.isIndexed);
+
+    const postSitemapEntries: SitemapEntry[] = postEntries.map((entry) => ({
+      path: `/blog/${entry.slug}`,
+      lastModified: entry.lastModified,
+      priority: '0.8'
+    }));
+
+    const categorySitemapEntries: SitemapEntry[] = categories
+      .map((category) => {
+        const matchingPosts = indexedPosts.filter((post) =>
+          slugMatches(post.category, category.slug)
+        );
+        if (matchingPosts.length === 0) {
+          return null;
+        }
+        return {
+          path: `/blog/category/${category.slug}`,
+          lastModified: latestUpdatedAt(matchingPosts),
+          priority: '0.6'
+        };
+      })
+      .filter((entry): entry is SitemapEntry => entry !== null);
+
+    const tagSitemapEntries: SitemapEntry[] = tags
+      .map((tag) => {
+        const matchingPosts = indexedPosts.filter((post) =>
+          post.tags.some((postTag) => slugMatches(postTag, tag.slug))
+        );
+        if (matchingPosts.length === 0) {
+          return null;
+        }
+        return {
+          path: `/blog/tag/${tag.slug}`,
+          lastModified: latestUpdatedAt(matchingPosts),
+          priority: '0.5'
+        };
+      })
+      .filter((entry): entry is SitemapEntry => entry !== null);
+
+    const xml = buildBlogSitemapXml([
+      ...postSitemapEntries,
+      ...categorySitemapEntries,
+      ...tagSitemapEntries
+    ]);
 
     return new Response(xml, {
       headers: {

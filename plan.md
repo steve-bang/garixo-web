@@ -165,9 +165,10 @@ Kế hoạch cũ đặt 3 bài/tuần và thất bại hoàn toàn trong việc 
 
 ### 5.3. Cải thiện kiến trúc content (song song, trong Tháng 1–2)
 
-- [ ] Xây `/blog/category/[slug]` — trang category thật, có URL, meta, breadcrumb riêng
-- [ ] Xây `/blog/tag/[slug]` — tận dụng dữ liệu tag đã có sẵn trong Firestore nhưng chưa dùng
-- [ ] Thêm pagination cho `/blog` (server-side, tránh fetch toàn bộ bài)
+- [x] Xây `/blog/category/[slug]` — trang category thật, có URL/meta/canonical/breadcrumb riêng, chip category trên `/blog` giờ là link thật thay vì client-filter (15/08/2026)
+- [x] Xây `/blog/tag/[slug]` — tận dụng dữ liệu tag đã có sẵn trong Firestore; tag giờ hiển thị dạng chip trên mỗi bài blog, link về trang tag tương ứng (15/08/2026)
+- [x] Category/tag pages đã được thêm vào `sitemap-blog.xml` (chỉ include khi có ít nhất 1 bài indexed thuộc category/tag đó) (15/08/2026)
+- [ ] Thêm pagination cho `/blog` (server-side, tránh fetch toàn bộ bài) — chưa cần gấp ở mức 16 bài, để dành khi số bài tăng lên ~40-50+
 - [ ] Cải thiện related-posts: thêm gợi ý link đến `/solutions/*`, `/tools/*` dựa trên category thay vì chỉ match category-to-category
 
 ---

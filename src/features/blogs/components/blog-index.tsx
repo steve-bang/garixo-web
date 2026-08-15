@@ -1,86 +1,45 @@
-'use client';
+import Link from 'next/link';
 
-import { useMemo, useState } from 'react';
 import type { Blog, BlogCategory } from '@/features/blogs/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils/cn';
 import { BlogCard } from '@/features/blogs/components/blog-card';
-import Link from 'next/link';
 
 type BlogIndexProps = {
   posts: Blog[];
   categories: BlogCategory[];
+  activeCategorySlug?: string;
 };
 
-type CategoryOption = {
-  id: string;
-  name: string;
-  slug: string;
-  postCount: number;
-};
-
-const normalizeCategory = (value: string): string =>
-  value.trim().toLowerCase().replace(/\s+/g, '-');
-
-export function BlogIndex({ posts, categories }: BlogIndexProps): JSX.Element {
-  const [activeCategory, setActiveCategory] = useState<string>('all');
-
-  const categoryOptions = useMemo<CategoryOption[]>(
-    () => [
-      {
-        id: 'all',
-        name: 'All',
-        slug: 'all',
-        postCount: posts.length
-      },
-      ...categories.map((category) => ({
-        id: category.id,
-        name: category.name,
-        slug: category.slug,
-        postCount: category.postCount ?? 0
-      }))
-    ],
-    [categories, posts.length]
-  );
-
-  const filteredPosts = useMemo(() => {
-    if (activeCategory === 'all') {
-      return posts;
-    }
-
-    const active = categoryOptions.find(
-      (category) => category.slug === activeCategory
-    );
-
-    if (!active) {
-      return posts;
-    }
-
-    return posts.filter((post) => {
-      const normalizedPost = normalizeCategory(post.category);
-      return (
-        normalizedPost === normalizeCategory(active.slug) ||
-        normalizedPost === normalizeCategory(active.name)
-      );
-    });
-  }, [activeCategory, categoryOptions, posts]);
-
-  const activeLabel =
-    categoryOptions.find((category) => category.slug === activeCategory)
-      ?.name ?? 'All';
+export function BlogIndex({
+  posts,
+  categories,
+  activeCategorySlug
+}: BlogIndexProps): JSX.Element {
+  const isAllActive = !activeCategorySlug;
 
   return (
     <div className="space-y-s6">
       <div className="mx-auto w-full max-w-[980px] space-y-s3 px-s4">
         <div className="flex flex-wrap items-center gap-s2">
-          {categoryOptions.map((category) => {
-            const isActive = category.slug === activeCategory;
+          <Link
+            href="/blog"
+            className={cn(
+              'inline-flex items-center gap-2 rounded-full border px-s3 py-1.5 text-small font-medium transition',
+              isAllActive
+                ? 'border-primary-200 bg-primary-50 text-primary-700'
+                : 'border-border bg-surface-default text-text-secondary hover:border-primary-200 hover:text-text-primary'
+            )}
+          >
+            All
+          </Link>
+          {categories.map((category) => {
+            const isActive = category.slug === activeCategorySlug;
             return (
-              <button
+              <Link
                 key={category.id}
-                type="button"
-                onClick={() => setActiveCategory(category.slug)}
+                href={`/blog/category/${category.slug}`}
                 className={cn(
                   'inline-flex items-center gap-2 rounded-full border px-s3 py-1.5 text-small font-medium transition',
                   isActive
@@ -89,13 +48,13 @@ export function BlogIndex({ posts, categories }: BlogIndexProps): JSX.Element {
                 )}
               >
                 {category.name}
-              </button>
+              </Link>
             );
           })}
         </div>
       </div>
 
-      {filteredPosts.length === 0 ? (
+      {posts.length === 0 ? (
         <div className="mx-auto w-full max-w-[760px] px-s4">
           <Card className="space-y-s3 p-s6 text-center">
             <h2 className="text-h2 text-text-primary">
@@ -117,7 +76,7 @@ export function BlogIndex({ posts, categories }: BlogIndexProps): JSX.Element {
         </div>
       ) : (
         <div className="mx-auto grid w-full max-w-[980px] gap-s4 px-s4">
-          {filteredPosts.map((post) => (
+          {posts.map((post) => (
             <BlogCard key={post.id} post={post} className="group" />
           ))}
         </div>

@@ -300,7 +300,13 @@ export default async function BlogDetailPage({
               </ol>
             </nav>
             <p className="text-caption text-text-muted">
-              {post.category} · {post.readingTime} min read
+              <Link
+                href={`/blog/category/${slugify(post.category)}`}
+                className="rounded-sm outline-none transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-primary-300"
+              >
+                {post.category}
+              </Link>{' '}
+              · {post.readingTime} min read
             </p>
             <h1 className="text-[34px] font-bold leading-tight text-text-primary md:text-[46px]">
               {post.title}
@@ -312,6 +318,20 @@ export default async function BlogDetailPage({
               className="max-w-[760px]"
             />
             <p className="text-body text-text-secondary">{post.excerpt}</p>
+            {post.tags.length > 0 ? (
+              <ul className="flex flex-wrap items-center gap-s2">
+                {post.tags.map((tag) => (
+                  <li key={tag}>
+                    <Link
+                      href={`/blog/tag/${slugify(tag)}`}
+                      className="inline-flex items-center rounded-full border border-border bg-surface-default px-s3 py-1 text-caption font-medium text-text-secondary transition-colors hover:border-primary-200 hover:text-primary-700"
+                    >
+                      #{tag}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </header>
 
           <div className="grid gap-s8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">

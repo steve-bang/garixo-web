@@ -23,6 +23,10 @@ export function slugify(value: string): string {
     .replace(/^-|-$/g, '');
 }
 
+export function slugMatches(value: string, targetSlug: string): boolean {
+  return slugify(value) === targetSlug;
+}
+
 export function sanitizeRichHtml(value: string): string {
   return value
     .replace(DANGEROUS_TAG_PATTERN, '')
