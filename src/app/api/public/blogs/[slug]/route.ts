@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
-import { findBlogBySlug, incrementBlogViews } from '@/app/api/blogs/blogs-db';
-import type { Blog } from '@/features/blogs/types';
+import { findBlogBySlug } from '@/services/blog-content/blog-fs';
+import type { BlogPost } from '@/features/blogs/types';
 import { resolveEffectiveStatus } from '@/features/blogs/utils';
 import type { ApiResponse } from '@/types/api';
 
@@ -19,9 +19,9 @@ function response<T>(
 export async function GET(
   request: Request,
   { params }: Params
-): Promise<NextResponse<ApiResponse<Blog>>> {
+): Promise<NextResponse<ApiResponse<BlogPost>>> {
   const { slug } = await params;
-  const blog = await findBlogBySlug(slug);
+  const blog = findBlogBySlug(slug);
 
   if (!blog) {
     return response({ success: false, error: 'Post not found.' }, 404);
@@ -33,10 +33,6 @@ export async function GET(
   const effectiveStatus = resolveEffectiveStatus(blog.status, blog.scheduledAt);
   if (!isPreview && effectiveStatus !== 'published') {
     return response({ success: false, error: 'Post not found.' }, 404);
-  }
-
-  if (!isPreview) {
-    await incrementBlogViews(blog.id);
   }
 
   return response({

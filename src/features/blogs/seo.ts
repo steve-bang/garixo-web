@@ -1,4 +1,4 @@
-import type { Blog } from '@/features/blogs/types';
+import type { BlogPost } from '@/features/blogs/types';
 import {
   DEFAULT_BLOG_AUTHOR,
   resolveBlogAuthor
@@ -9,7 +9,9 @@ const SITE_URL = 'https://www.garixo.com';
 const SITE_NAME = 'Garixo';
 const SITE_LOGO = `${SITE_URL}/favicon/favicon.svg`;
 
-export function buildBlogArticleSchema(blog: Blog): Record<string, unknown> {
+export function buildBlogArticleSchema(
+  blog: BlogPost
+): Record<string, unknown> {
   const author = resolveBlogAuthor(blog);
   const canonicalPath = blog.canonical?.trim() || `/blog/${blog.slug}`;
   const pageUrl = new URL(canonicalPath, SITE_URL).toString();

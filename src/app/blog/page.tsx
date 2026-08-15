@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {
   listBlogCategories,
   listPublishedBlogs
-} from '@/app/api/blogs/blogs-db';
+} from '@/services/blog-content/blog-fs';
 import { LandingFooter } from '@/components/sections/LandingFooter';
 import { LandingHeader } from '@/components/sections/LandingHeader';
 import { Button } from '@/components/ui/button';

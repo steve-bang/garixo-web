@@ -4,9 +4,8 @@ import { notFound } from 'next/navigation';
 
 import {
   findBlogBySlug,
-  incrementBlogViews,
   listPublishedBlogs
-} from '@/app/api/blogs/blogs-db';
+} from '@/services/blog-content/blog-fs';
 import {
   DEFAULT_BLOG_AUTHOR,
   resolveBlogAuthor
@@ -64,52 +63,9 @@ function buildTocFromMarkdown(source: string): TocItem[] {
   return items;
 }
 
-function buildTocFromHtml(source: string): TocItem[] {
-  const items: TocItem[] = [];
-  const counts = new Map<string, number>();
-  const headingPattern = /<(h2|h3)([^>]*)>([\s\S]*?)<\/\1>/gi;
-  let match: RegExpExecArray | null = headingPattern.exec(source);
-
-  while (match) {
-    const level = match[1].toLowerCase() === 'h2' ? 2 : 3;
-    const text = stripMarkdown(match[3].replace(/<[^>]+>/g, ''));
-    const base = slugify(text);
-    const nextCount = (counts.get(base) ?? 0) + 1;
-    counts.set(base, nextCount);
-    const id = nextCount > 1 ? `${base}-${nextCount}` : base;
-
-    if (id && text) {
-      items.push({ id, text, level });
-    }
-
-    match = headingPattern.exec(source);
-  }
-
-  return items;
-}
-
-function injectHeadingIds(html: string, toc: TocItem[]): string {
-  if (!toc.length) {
-    return html;
-  }
-
-  let index = 0;
-  return html.replace(/<(h2|h3)([^>]*)>/gi, (match, tag, attrs) => {
-    const item = toc[index];
-    if (!item) {
-      return match;
-    }
-    index += 1;
-    if (attrs && /id=/.test(attrs)) {
-      return `<${tag}${attrs}>`;
-    }
-    return `<${tag}${attrs} id="${item.id}">`;
-  });
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = await findBlogBySlug(slug);
+  const post = findBlogBySlug(slug);
 
   if (!post) {
     return {
@@ -178,7 +134,7 @@ export default async function BlogDetailPage({
   params
 }: Props): Promise<JSX.Element> {
   const { slug } = await params;
-  const post = await findBlogBySlug(slug);
+  const post = findBlogBySlug(slug);
 
   if (!post) {
     notFound();
@@ -189,9 +145,7 @@ export default async function BlogDetailPage({
     notFound();
   }
 
-  await incrementBlogViews(post.id);
-
-  const allPosts = await listPublishedBlogs();
+  const allPosts = listPublishedBlogs();
   const sameCategory = allPosts.filter(
     (item) => item.id !== post.id && item.category === post.category
   );
@@ -227,13 +181,7 @@ export default async function BlogDetailPage({
     ]
   };
 
-  const tocItems = post.content.markdown?.trim()
-    ? buildTocFromMarkdown(post.content.markdown)
-    : buildTocFromHtml(post.content.html);
-
-  const htmlWithAnchors = !post.content.markdown?.trim()
-    ? injectHeadingIds(post.content.html, tocItems)
-    : post.content.html;
+  const tocItems = buildTocFromMarkdown(post.content);
 
   const faqSchema = post.faqItems.length
     ? {
@@ -336,14 +284,7 @@ export default async function BlogDetailPage({
 
           <div className="grid gap-s8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
             <div className="order-2 lg:order-1">
-              {post.content.markdown?.trim() ? (
-                <Markdown source={post.content.markdown} withAnchors />
-              ) : (
-                <article
-                  className="prose-ui"
-                  dangerouslySetInnerHTML={{ __html: htmlWithAnchors }}
-                />
-              )}
+              <Markdown source={post.content} withAnchors />
             </div>
             {tocItems.length > 1 ? (
               <aside className="order-1 space-y-s3 lg:order-2">

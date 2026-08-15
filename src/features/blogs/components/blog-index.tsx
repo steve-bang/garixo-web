@@ -1,13 +1,13 @@
 import Link from 'next/link';
 
-import type { Blog, BlogCategory } from '@/features/blogs/types';
+import type { BlogCategory, BlogPost } from '@/features/blogs/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils/cn';
 import { BlogCard } from '@/features/blogs/components/blog-card';
 
 type BlogIndexProps = {
-  posts: Blog[];
+  posts: BlogPost[];
   categories: BlogCategory[];
   activeCategorySlug?: string;
 };

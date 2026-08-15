@@ -2,12 +2,12 @@ import Link from 'next/link';
 
 import { resolveBlogAuthor } from '@/features/blogs/author';
 import { BlogAuthorBadge } from '@/features/blogs/components/blog-author';
-import type { Blog } from '@/features/blogs/types';
+import type { BlogPost } from '@/features/blogs/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 type BlogCardProps = {
-  post: Blog;
+  post: BlogPost;
   className?: string;
 };
 
@@ -88,7 +88,7 @@ export function BlogCard({ post, className }: BlogCardProps): JSX.Element {
 }
 
 type BlogCardCompactProps = {
-  post: Blog;
+  post: BlogPost;
   className?: string;
 };
 

@@ -2,7 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { listBlogTags, listPublishedBlogs } from '@/app/api/blogs/blogs-db';
+import {
+  listBlogTags,
+  listPublishedBlogs
+} from '@/services/blog-content/blog-fs';
 import { LandingFooter } from '@/components/sections/LandingFooter';
 import { LandingHeader } from '@/components/sections/LandingHeader';
 import { Button } from '@/components/ui/button';

@@ -1,12 +1,21 @@
 import { NextResponse } from 'next/server';
 
-import { listPublishedBlogs } from '@/app/api/blogs/blogs-db';
-import type { BlogListItem } from '@/features/blogs/types';
-import { toBlogListItem } from '@/features/blogs/utils';
+import { listPublishedBlogs } from '@/services/blog-content/blog-fs';
 import type { ApiResponse } from '@/types/api';
 
+type PublicBlogListItem = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  category: string;
+  updatedAt: string;
+  publishedAt: string | null;
+  readingTime: number;
+};
+
 type PublicBlogsResponse = {
-  items: BlogListItem[];
+  items: PublicBlogListItem[];
 };
 
 function response<T>(
@@ -19,12 +28,19 @@ function response<T>(
 export async function GET(): Promise<
   NextResponse<ApiResponse<PublicBlogsResponse>>
 > {
-  const items = await listPublishedBlogs();
+  const items = listPublishedBlogs().map((post) => ({
+    id: post.id,
+    title: post.title,
+    slug: post.slug,
+    excerpt: post.excerpt,
+    category: post.category,
+    updatedAt: post.updatedAt,
+    publishedAt: post.publishedAt,
+    readingTime: post.readingTime
+  }));
 
   return response({
     success: true,
-    data: {
-      items: items.map(toBlogListItem)
-    }
+    data: { items }
   });
 }

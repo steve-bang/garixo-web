@@ -7,7 +7,7 @@ import {
   listBlogTags,
   listPublishedBlogs,
   listPublishedIndexedBlogSitemapEntries
-} from '@/app/api/blogs/blogs-db';
+} from '@/services/blog-content/blog-fs';
 import { slugMatches } from '@/features/blogs/utils';
 import {
   toAbsoluteUrl,
@@ -45,10 +45,7 @@ function latestUpdatedAt(posts: Array<{ updatedAt: string }>): string {
 export async function GET(): Promise<Response> {
   try {
     const [postEntries, categories, tags, publishedPosts] = await Promise.all([
-      listPublishedIndexedBlogSitemapEntries({
-        pageSize: 1000,
-        maxUrls: 50000
-      }),
+      listPublishedIndexedBlogSitemapEntries({ maxUrls: 50000 }),
       listBlogCategories(),
       listBlogTags(),
       listPublishedBlogs()
