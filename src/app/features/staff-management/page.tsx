@@ -97,7 +97,6 @@ const coreFeatures = [
 ] as const;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.garixo.com'),
   title:
     'Mechanic Staff Management Software — Assign Jobs & Track Workload | Garixo',
   description:
@@ -204,7 +203,9 @@ export default function StaffManagementFeaturePage(): JSX.Element {
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
-                <Link href="https://app.garixo.com/register">Start Free Trial</Link>
+                <Link href="https://app.garixo.com/register">
+                  Start Free Trial
+                </Link>
               </Button>
               <Button asChild variant="secondary" className="h-12">
                 <Link href="#how-it-works">See How It Works</Link>

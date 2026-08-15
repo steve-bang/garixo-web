@@ -24,22 +24,29 @@ export async function generateMetadata({
 
   if (!study) {
     return {
-      title: 'Case Study Not Found | GARIXO'
+      title: 'Case Study Not Found | Garixo'
     };
   }
 
+  const title = `${study.garageName} Case Study | Garixo`;
+  const description = `See how ${study.garageName} in ${study.city}, ${study.state} improved revenue and shop efficiency using Garixo garage management software.`;
+
   return {
-    metadataBase: new URL('https://www.garixo.com'),
-    title: `${study.garageName} Case Study | GARIXO`,
-    description: `See how ${study.garageName} in ${study.city}, ${study.state} improved revenue and shop efficiency using GARIXO garage management software.`,
+    title,
+    description,
     alternates: {
       canonical: `/case-studies/${study.slug}`
     },
     openGraph: {
-      title: `${study.garageName} Case Study | GARIXO`,
-      description: `See how ${study.garageName} in ${study.city}, ${study.state} improved revenue and shop efficiency using GARIXO garage management software.`,
+      title,
+      description,
       type: 'article',
       url: `https://www.garixo.com/case-studies/${study.slug}`
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description
     }
   };
 }
@@ -59,7 +66,7 @@ export default async function CaseStudyDetailPage({
     '@type': 'Review',
     itemReviewed: {
       '@type': 'SoftwareApplication',
-      name: 'GARIXO'
+      name: 'Garixo'
     },
     reviewBody: study.quote,
     author: {
@@ -75,8 +82,33 @@ export default async function CaseStudyDetailPage({
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'GARIXO',
+    name: 'Garixo',
     url: 'https://www.garixo.com'
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://www.garixo.com/'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Case Studies',
+        item: 'https://www.garixo.com/case-studies'
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: `${study.garageName} Case Study`,
+        item: `https://www.garixo.com/case-studies/${study.slug}`
+      }
+    ]
   };
 
   return (
@@ -88,6 +120,10 @@ export default async function CaseStudyDetailPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
       <LandingHeader />

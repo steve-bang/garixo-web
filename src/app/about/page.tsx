@@ -10,7 +10,6 @@ import { Card } from '@/components/ui/card';
 export const revalidate = false;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.garixo.com'),
   title: 'About Garixo | Our Story',
   description:
     'Meet Steve, the founder of Garixo, and discover why he built a simple shop management platform to help independent auto repair shops spend less time managing their business and more time doing what they do best.',
@@ -88,7 +87,7 @@ export default function AboutPage(): JSX.Element {
       {
         '@type': 'ListItem',
         position: 2,
-        name: 'Case Studies',
+        name: 'About',
         item: 'https://www.garixo.com/about'
       }
     ]

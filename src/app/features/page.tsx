@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button';
 export const revalidate = false;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.garixo.com'),
   title:
     'Garage Management System Features — Work Orders, Inventory & Staff | Garixo',
   description:
@@ -40,6 +39,13 @@ export const metadata: Metadata = {
       'Garage management software for auto repair shops. Track work orders, inventory, staff & customers in one platform. From $79/mo. Free 14-day trial.',
     type: 'website',
     url: 'https://www.garixo.com/features'
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title:
+      'Garage Management System Features — Work Orders, Inventory & Staff | Garixo',
+    description:
+      'Garage management software for auto repair shops. Track work orders, inventory, staff & customers in one platform. From $79/mo. Free 14-day trial.'
   }
 };
 
@@ -72,7 +78,9 @@ export default function FeaturesPage(): JSX.Element {
 
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
-                <Link href="https://app.garixo.com/register">Book Free Demo</Link>
+                <Link href="https://app.garixo.com/register">
+                  Book Free Demo
+                </Link>
               </Button>
               <Button asChild variant="secondary" className="h-12">
                 <Link href="/pricing">View Pricing</Link>
@@ -103,7 +111,9 @@ export default function FeaturesPage(): JSX.Element {
                 asChild
                 className="h-12 bg-surface-default text-primary-800 hover:bg-primary-50"
               >
-                <Link href="https://app.garixo.com/register">Schedule Your Free Demo</Link>
+                <Link href="https://app.garixo.com/register">
+                  Schedule Your Free Demo
+                </Link>
               </Button>
               <Button
                 asChild

@@ -10,11 +10,11 @@ Current scope is scheduled publishing for blog content.
 - Calls Garixo HTTP APIs to execute server-side jobs.
 - Writes operational logs with `firebase-functions/logger`.
 
-## Current Function: `weeklyBlogPublish`
+## Current Function: `dailyBlogPublish`
 
 Source: `/functions/src/index.ts`
 
-`weeklyBlogPublish` is a scheduled function that triggers blog publish automation.
+`dailyBlogPublish` is a scheduled function that triggers blog publish automation.
 
 ### Purpose
 
@@ -23,15 +23,17 @@ Source: `/functions/src/index.ts`
 
 ### Schedule Configuration
 
-- Cron: `40 0 * * 3`
-- Timezone: `Asia/Ho_Chi_Minh`
+- Cron: `40 0 * * *`
+- Timezone: `Etc/UTC`
 - Region: `us-central1`
 
-This means it runs every Wednesday at **00:40 (UTC+7)**.
+This means it runs every day at **00:40 UTC**. The publish cadence (how many posts
+actually go live) is controlled by each post's `scheduledAt` value, not by this
+function's trigger frequency.
 
 ### Runtime Flow
 
-1. Scheduler triggers `weeklyBlogPublish`.
+1. Scheduler triggers `dailyBlogPublish`.
 2. Function writes start log with current timestamp and scheduler time.
 3. Function sends HTTP `GET` request to:
    - `https://www.garixo.com/api/blogs/publish-scheduled`
@@ -114,10 +116,15 @@ firebase deploy --only functions
 ### 4) Verify deployment
 
 - Open Firebase Console -> Functions.
-- Confirm `weeklyBlogPublish` is deployed in `us-central1`.
+- Confirm `dailyBlogPublish` is deployed in `us-central1`.
 - Open Scheduler/Triggers and verify:
-  - cron: `40 0 * * 3`
-  - timezone: `Asia/Ho_Chi_Minh`
+  - cron: `40 0 * * *`
+  - timezone: `Etc/UTC`
+- Delete the old `weeklyBlogPublish` function (renaming the export creates a new
+  function rather than renaming the existing one):
+  ```bash
+  firebase functions:delete weeklyBlogPublish
+  ```
 
 ### 5) Check logs after first run
 

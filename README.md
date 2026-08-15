@@ -121,14 +121,14 @@ Garixo uses Firebase Cloud Functions (Gen 2) for scheduled background jobs.
 
 Current scheduled job:
 
-- `weeklyBlogPublish` in `/functions/src/index.ts`
+- `dailyBlogPublish` in `/functions/src/index.ts`
 - Region: `us-central1`
-- Schedule: `40 0 * * 3` (every Wednesday, `Asia/Ho_Chi_Minh`)
+- Schedule: `40 0 * * *` (daily, `Etc/UTC`)
 - Action: calls `GET https://www.garixo.com/api/blogs/publish-scheduled` to publish due scheduled blog posts.
 
 How scheduled blog publishing works:
 
-1. Scheduler triggers `weeklyBlogPublish`.
+1. Scheduler triggers `dailyBlogPublish`.
 2. Function calls `/api/blogs/publish-scheduled`.
 3. API scans blogs with `status=scheduled` and `scheduledAt <= now`.
 4. API updates each due post to `status=published` and sets timestamps.

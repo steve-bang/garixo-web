@@ -43,7 +43,6 @@ const faqItems = [
 ] as const;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.garixo.com'),
   title: 'Auto Repair Labor Rate Calculator — Free Tool | Garixo',
   description:
     'Free auto repair labor rate calculator. Enter your shop costs and profit goal — get your break-even and recommended hourly rate in under 60 seconds.',

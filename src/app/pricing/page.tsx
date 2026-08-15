@@ -111,7 +111,6 @@ const pricingFaqs = [
 export const revalidate = false;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.garixo.com'),
   title: 'Garage Management Software Pricing — From $79/mo | Garixo',
   description:
     'Garage management software pricing starts at $79/mo. Work orders, inventory, customers & staff included. 14-day free trial. No credit card needed.',
@@ -287,7 +286,9 @@ export default function PricingPage(): JSX.Element {
                       {plan.trialDays}-day free trial included
                     </p>
                     <Button asChild className="h-11 w-full">
-                      <Link href="https://app.garixo.com/register">{plan.ctaLabel}</Link>
+                      <Link href="https://app.garixo.com/register">
+                        {plan.ctaLabel}
+                      </Link>
                     </Button>
                   </div>
                 </Card>

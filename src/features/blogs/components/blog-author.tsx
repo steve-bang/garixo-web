@@ -87,11 +87,11 @@ export function BlogAuthorBadge({
           ) : null}
         </div>
 
-        {/* {showBio ? (
+        {showBio ? (
           <p className="mt-1 max-w-[64ch] text-small leading-6 text-text-secondary">
             {author.bio}
           </p>
-        ) : null} */}
+        ) : null}
 
         {publishedLabel ? (
           <p

@@ -82,12 +82,6 @@ export async function GET(): Promise<Response> {
       priority: '0.9'
     },
     {
-      path: '/about',
-      lastmod: '2026-08-09T00:00:00Z',
-      changefreq: 'monthly',
-      priority: '0.7'
-    },
-    {
       path: '/case-studies',
       lastmod: '2026-01-25T00:00:00Z',
       changefreq: 'monthly',
@@ -134,6 +128,18 @@ export async function GET(): Promise<Response> {
       lastmod: '2026-03-15T09:20:00Z',
       changefreq: 'weekly',
       priority: '0.8'
+    },
+    {
+      path: '/privacy-policy',
+      lastmod: '2026-01-01T00:00:00Z',
+      changefreq: 'yearly',
+      priority: '0.3'
+    },
+    {
+      path: '/term-of-services',
+      lastmod: '2026-01-01T00:00:00Z',
+      changefreq: 'yearly',
+      priority: '0.3'
     }
   ];
 

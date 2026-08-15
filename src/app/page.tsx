@@ -12,7 +12,6 @@ import { Trust } from '@/components/sections/Trust';
 export const revalidate = false;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.garixo.com'),
   title:
     'Garage Management Software for Auto Repair Shops | Simple & Affordable | Garixo',
   description:

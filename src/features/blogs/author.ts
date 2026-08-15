@@ -19,8 +19,8 @@ export const BLOG_AUTHOR_PROFILES = {
     bio: 'Steve Bang is the founder of Garixo and a software engineer with hands-on experience working in auto repair shops. He builds practical technology to help independent repair shops manage their businesses more efficiently.',
     profileHref: '/about',
     profileUrl: 'https://www.garixo.com/about',
-    avatarUrl: null,
-    avatarAlt: 'Default user icon for Steve Bang'
+    avatarUrl: '/images/steve-bang.jpg',
+    avatarAlt: 'Steve Bang, founder of Garixo'
   }
 } as const satisfies Record<string, BlogAuthorProfile>;
 

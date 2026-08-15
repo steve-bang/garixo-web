@@ -4,10 +4,9 @@ import { LandingFooter } from '@/components/sections/LandingFooter';
 import { LandingHeader } from '@/components/sections/LandingHeader';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.garixo.com'),
-  title: 'Privacy Policy | GARIXO',
+  title: 'Privacy Policy | Garixo',
   description:
-    'Read how GARIXO collects, uses, and protects personal data for garage management software users.',
+    'Read how Garixo collects, uses, and protects personal data for garage management software users.',
   alternates: {
     canonical: '/privacy-policy'
   },

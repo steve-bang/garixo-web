@@ -14,7 +14,6 @@ import { BlogIndex } from '@/features/blogs/components/blog-index';
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.garixo.com'),
   title: 'Garage Management Blog for Auto Repair Shops | Garixo',
   description:
     'Practical guides for independent auto repair shop owners. Learn to cut profit leaks, improve daily workflow, and grow revenue. Free articles weekly.',
@@ -103,7 +102,9 @@ export default async function BlogIndexPage(): Promise<JSX.Element> {
             </p>
             <div className="flex flex-col justify-center gap-s2 pt-s1 sm:flex-row">
               <Button asChild className="h-11">
-                <Link href="https://app.garixo.com/register">Start Free Trial</Link>
+                <Link href="https://app.garixo.com/register">
+                  Start Free Trial
+                </Link>
               </Button>
               <Button asChild variant="secondary" className="h-11">
                 <Link href="/pricing">View Pricing</Link>

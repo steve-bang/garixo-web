@@ -100,7 +100,6 @@ const coreFeatures = [
 ] as const;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.garixo.com'),
   title: 'Auto Repair Customer Management Software — Service History | Garixo',
   description:
     'Auto repair customer management software with full service history. Search by name, plate, or phone. Keep customer and vehicle records in one place.',
@@ -211,7 +210,9 @@ export default function CustomersManagementFeaturePage(): JSX.Element {
             </p>
             <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
               <Button asChild className="h-12">
-                <Link href="https://app.garixo.com/register">Start Free Trial</Link>
+                <Link href="https://app.garixo.com/register">
+                  Start Free Trial
+                </Link>
               </Button>
               <Button asChild variant="secondary" className="h-12">
                 <Link href="#how-it-works">See How It Works</Link>

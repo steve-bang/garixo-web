@@ -40,7 +40,6 @@ const faqItems = [
 ] as const;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.garixo.com'),
   title:
     'Auto Repair Shop Profit Calculator — Free Tool for Garage Owners | Garixo',
   description:

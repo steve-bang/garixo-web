@@ -5,13 +5,12 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 function buildSitemapIndexXml(urls: string[]): string {
-  // This is a fixed date for all sitemaps. In a real application, you might want to use the actual last modified date of each sitemap.
-  const date = '2026-03-01T06:45:12.110Z';
-
+  // lastmod is intentionally omitted: it's optional per the sitemap protocol, and
+  // a single fixed date across both child sitemaps would misrepresent freshness
+  // (the blog sitemap changes far more often than the static one).
   const body = urls
     .map(
-      (loc) =>
-        `\n  <sitemap>\n    <loc>${xmlEscape(loc)}</loc>\n    <lastmod>${date}</lastmod>\n  </sitemap>`
+      (loc) => `\n  <sitemap>\n    <loc>${xmlEscape(loc)}</loc>\n  </sitemap>`
     )
     .join('');
 

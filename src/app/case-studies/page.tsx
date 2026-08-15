@@ -12,10 +12,9 @@ export const revalidate = false;
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    metadataBase: new URL('https://www.garixo.com'),
-    title: 'Garage Management Software Case Studies | GARIXO',
+    title: 'Garage Management Software Case Studies | Garixo',
     description:
-      'Real success stories from independent auto repair shops using GARIXO to increase revenue and simplify daily operations.',
+      'Real success stories from independent auto repair shops using Garixo to increase revenue and simplify daily operations.',
     keywords: [
       'garage management software case studies',
       'auto repair shop management software',
@@ -30,17 +29,17 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true
     },
     openGraph: {
-      title: 'Garage Management Software Case Studies | GARIXO',
+      title: 'Garage Management Software Case Studies | Garixo',
       description:
-        'Real success stories from independent auto repair shops using GARIXO to increase revenue and simplify daily operations.',
+        'Real success stories from independent auto repair shops using Garixo to increase revenue and simplify daily operations.',
       type: 'website',
       url: 'https://www.garixo.com/case-studies'
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Garage Management Software Case Studies | GARIXO',
+      title: 'Garage Management Software Case Studies | Garixo',
       description:
-        'Real success stories from independent auto repair shops using GARIXO to increase revenue and simplify daily operations.'
+        'Real success stories from independent auto repair shops using Garixo to increase revenue and simplify daily operations.'
     }
   };
 }
@@ -49,7 +48,7 @@ export default function CaseStudiesPage(): JSX.Element {
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'GARIXO',
+    name: 'Garixo',
     url: 'https://www.garixo.com',
     description:
       'Garage management software for independent auto repair shop owners in the United States.'

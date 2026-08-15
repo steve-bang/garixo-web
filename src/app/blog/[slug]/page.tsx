@@ -130,7 +130,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const author = DEFAULT_BLOG_AUTHOR;
 
   return {
-    metadataBase: new URL('https://www.garixo.com'),
     title: title + ' | Garixo', // Append site name to title
     description,
     authors: [
@@ -165,6 +164,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             }
           ]
         : undefined
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.ogTitle || title,
+      description: post.ogDescription || description,
+      images: post.ogImage ? [post.ogImage] : undefined
     }
   };
 }
@@ -197,6 +202,30 @@ export default async function BlogDetailPage({
 
   const author = resolveBlogAuthor(post);
   const blogSchema = buildBlogArticleSchema(post);
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://www.garixo.com/'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Blog',
+        item: 'https://www.garixo.com/blog'
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: post.title,
+        item: `https://www.garixo.com/blog/${post.slug}`
+      }
+    ]
+  };
 
   const tocItems = post.content.markdown?.trim()
     ? buildTocFromMarkdown(post.content.markdown)
@@ -226,6 +255,10 @@ export default async function BlogDetailPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(blogSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       {faqSchema ? (
         <script

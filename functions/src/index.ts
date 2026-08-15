@@ -15,7 +15,7 @@ setGlobalOptions({
  * Scheduled publisher for blog posts.
  *
  * Responsibilities:
- * 1) Trigger on a fixed weekly schedule.
+ * 1) Trigger on a fixed daily schedule.
  * 2) Call the web application's publish endpoint.
  * 3) Log success/failure details for operations visibility.
  *
@@ -23,7 +23,7 @@ setGlobalOptions({
  * - Business publish logic remains in the Next.js API route.
  * - This function acts as a scheduler/orchestrator only.
  */
-export const weeklyBlogPublish = onSchedule(
+export const dailyBlogPublish = onSchedule(
   {
     // every day at 00:40 UTC (Etc/UTC).
     schedule: '40 0 * * *',
