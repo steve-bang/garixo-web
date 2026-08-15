@@ -115,9 +115,9 @@ SEO traffic không tăng tuyến tính — nó tăng chậm ở đầu (chờ Go
 
 **Nhóm D — Cần hành động thủ công (ngoài code):**
 
-- [ ] Verify Google Search Console (thêm verification tag vào metadata sau khi tạo property trên GSC — cần bạn tạo property trước)
+- [x] Verify Google Search Console + Google Analytics — đã cấu hình xong (15/08/2026)
 - [ ] Kiểm tra GSC Performance report để biết baseline thật (impressions, clicks, avg position hiện tại) trước khi so sánh tiến độ
-- [ ] Quyết định apex (`garixo.com`) vs `www.garixo.com` redirect ở tầng Firebase Hosting (`firebase.json`) — cần kiểm tra DNS/hosting config, không chỉ code
+- [x] Apex (`garixo.com`) vs `www.garixo.com` redirect — đã xác nhận đúng (15/08/2026): site chạy trên **Vercel** (không phải Firebase Hosting), `garixo.com` tự động 307-redirect về `https://www.garixo.com/`, khớp với canonical URL dùng trong code. Không có rủi ro duplicate content. _(Nice-to-have, không gấp: 307 là temporary redirect, 301 permanent sẽ truyền tín hiệu SEO hợp nhất mạnh hơn. Redirect này xảy ra ở tầng Vercel platform \(Project Settings → Domains\), trước khi request chạm tới code Next.js — nên không sửa được qua `next.config.ts`; muốn đổi thành 301 phải kiểm tra trực tiếp trong Vercel dashboard.)_
 
 **Nhóm E — Xử lý cannibalization (nội dung, không phải code):**
 
