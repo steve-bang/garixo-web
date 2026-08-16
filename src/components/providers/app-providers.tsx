@@ -1,6 +1,5 @@
 'use client';
 
-import { SessionProvider } from 'next-auth/react';
 import type { ReactNode } from 'react';
 import { Toaster } from 'sonner';
 
@@ -12,11 +11,9 @@ type AppProvidersProps = {
 
 export function AppProviders({ children }: AppProvidersProps): JSX.Element {
   return (
-    <SessionProvider>
-      <ReactQueryProvider>
-        {children}
-        <Toaster richColors position="top-right" />
-      </ReactQueryProvider>
-    </SessionProvider>
+    <ReactQueryProvider>
+      {children}
+      <Toaster richColors position="top-right" />
+    </ReactQueryProvider>
   );
 }

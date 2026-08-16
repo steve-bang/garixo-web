@@ -4,9 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-Garixo is a multi-tenant garage operations SaaS built on Next.js 16 (App Router) and React 19. It supports garage onboarding, customer and vehicle management, work orders ("Jobs" in the UI), service and inventory catalogues, staff, invoices, subscriptions, support, and a public marketing/blog site.
+Garixo is a marketing and blog site for a garage operations SaaS product, built on Next.js 16 (App Router) and React 19. This repo covers the public site only: landing/marketing pages, feature/solution pages, pricing, calculators, and the blog.
 
-The active product domain is garage management. The untracked `docs/prd-learning-marketplace-mvp-vi.md` describes a possible future Chinese-language teacher/student marketplace; it is a planning document, not the current application model. Do not rename or migrate the existing garage domain because of that PRD without an explicit implementation decision.
+The dashboard/app product (garage onboarding, customer and vehicle management, work orders, invoices, staff, subscriptions, support) has moved to a separate, independently-developed project and is deployed at `app.garixo.com`. That project is not part of this repo — do not attempt to recreate dashboard functionality here. Marketing CTAs (login/signup) link out to `https://app.garixo.com/login` and `https://app.garixo.com/register`.
+
+The untracked `docs/prd-learning-marketplace-mvp-vi.md` describes a possible future Chinese-language teacher/student marketplace; it is a planning document, not the current application model.
 
 ## Commands
 
@@ -26,49 +28,28 @@ Run `npm run typecheck` after TypeScript changes. At last check, typecheck passe
 
 Pre-commit hooks (Husky + lint-staged) run `eslint --fix` and `prettier --write` on staged files automatically.
 
-### Firebase Functions (separate project in `functions/`)
+### Firebase Functions (separate project in `functions/`, currently orphaned)
 
-```bash
-cd functions
-npm install
-npm run build
-npm run serve      # build + firebase emulators:start --only functions
-firebase deploy --only functions
-```
-
-`functions/` has its own Node 24 runtime and dependency manifest, independent of the web app (Node 20+). Current scheduled job: `dailyBlogPublish` (`functions/src/index.ts`, region `us-central1`, cron `40 0 * * *`, Etc/UTC) — calls `GET /api/blogs/publish-scheduled` daily to publish blogs whose `status=scheduled` and `scheduledAt <= now`.
+`functions/` still exists with its scheduled job `dailyBlogPublish` (`functions/src/index.ts`, region `us-central1`, cron `40 0 * * *`, Etc/UTC), which calls `GET /api/blogs/publish-scheduled`. That route no longer exists in this app (the Firestore-backed blog CMS it served was removed along with the dashboard), so the function now hits a 404 daily. This is expected to be manually undeployed outside of this repo/session — do not "fix" it by recreating the removed CMS route.
 
 ## Core architecture
 
-### Authentication, roles, and tenancy
+### Blog content
 
-- Auth uses Firebase email/password verification through NextAuth's credentials provider, with JWT sessions.
-- Roles are `owner`, `admin`, `staff`, `user` (see `src/types/user.ts`). Never introduce a role as a string literal in an isolated feature — update the central type, NextAuth declarations, authorization, and navigation together.
-- The active tenant is a garage. Resolve it server-side with `getRequestGarageId()` or `getRequestGarage()` from `src/lib/auth/garage-context.ts`.
-- Tenant data lives under `garages/{garageId}/...`. Every tenant-scoped API route must authenticate and resolve the garage before reading or writing data.
-- `middleware.ts` protects `/dashboard/*`, but route handlers must still enforce authorization themselves — middleware is not sufficient authorization.
+The blog is a self-contained, file-based system with no backend dependency:
+
+- Posts live as markdown files in `public/blog/*.md` with frontmatter (title, slug, dates, `status`, `scheduledAt`, etc.), parsed via `gray-matter`.
+- `src/services/blog-content/blog-fs.ts` reads these files at request time and computes the effective status (`scheduled` flips to `published` once `scheduledAt` has passed) — no cron job or database involved.
+- `src/features/blogs/` holds the public-facing view model, SEO helpers, and components (`types.ts`, `utils.ts`, `author.ts`, `seo.ts`, `components/blog-*`).
+- New posts are added as new markdown files, not through an admin UI (there isn't one in this repo).
 
 ### Request and data flow
 
-```text
-Page / client component
-  -> feature API client + React Query hook
-  -> src/app/api/<resource>/route.ts
-  -> Zod validation + auth + garage context
-  -> Firebase service / resource database helper
-  -> Firestore
-```
-
-- Shared API envelope: `ApiResponse<T> = { success: boolean; data?: T; error?: string }`.
-- Validate URL params and bodies at the API boundary with Zod.
-- Firestore persistence shapes live in `src/types/firebase-models.ts`; map them to feature-facing UI/domain types where those shapes differ.
-- Store timestamps as ISO-8601 UTC strings unless an existing model specifies otherwise.
-- Keep business logic out of `page.tsx` files: pages compose feature components, route handlers orchestrate validation/auth, services own persistence.
+This repo has no API route handlers and no database — it's a static/server-rendered marketing and blog site. Pages read directly from `blog-fs.ts` (blog) or from static content/config (everything else). There is no auth, no session, and no tenant concept in this codebase.
 
 ### UI
 
-- The root layout installs NextAuth, React Query, toast, and analytics providers.
-- Public pages live in the `(public)` route group; authenticated pages live in `(dashboard)` and render inside `DashboardLayoutShell`.
+- The root layout installs React Query, toast, and analytics providers (`src/components/providers/app-providers.tsx`) — no auth/session provider.
 - Reuse shared primitives in `src/components/ui` and `src/components/common` before creating a feature-local replacement.
 - Use existing design tokens and semantic Tailwind classes from `globals.css` and `src/config/design-tokens.ts` — don't introduce disconnected colour or spacing scales.
 
@@ -76,34 +57,17 @@ Page / client component
 
 ```text
 src/
-  app/          App Router pages, layouts, metadata, and HTTP route handlers
+  app/          App Router pages, layouts, and metadata (marketing + blog only; no api/ routes)
   components/   Reusable cross-feature UI, layout, SEO, analytics, and marketing
-  config/       Environment validation, app/billing configuration, design tokens
-  features/     Domain modules and feature-specific UI
+  config/       Environment validation, design tokens
+  features/     blogs/ — the only feature module (public blog view model, SEO, components)
   hooks/        Shared React hooks
-  lib/          Cross-cutting infrastructure (auth, Firebase, API, query, utils)
-  services/     External/infrastructure services, chiefly Firebase persistence
-  types/        Shared contracts, Firestore shapes, session augmentation, primitives
-functions/      Separate Firebase Functions project for scheduled/background work
+  lib/          Cross-cutting infrastructure (email templates, errors, query, state, utils)
+  services/     blog-content (markdown blog reader), seo/sitemap, email.service.ts
+  types/        Shared contracts (api.ts, primitives.ts) and ambient type declarations
+functions/      Orphaned Firebase Functions project — see note above; not actively maintained
 docs/           Product and engineering documentation
 ```
-
-### `src/features/<feature>` convention
-
-Not every older feature has every file, but use this structure for new work when applicable:
-
-```text
-<feature>/
-  types.ts       Feature domain and view-model types
-  schema.ts      Zod schemas and inferred mutation/query input types
-  service.ts     Typed client-side or server orchestration entry points
-  api.ts         API-client exports and React Query keys
-  hooks.ts       React Query hooks and invalidation logic
-  utils.ts       Pure feature helpers
-  components/    Feature UI only
-```
-
-Place server route handlers under `src/app/api/<feature>/`; put Firestore access in `src/services/firebase/` unless the feature already has an established resource database helper next to its routes (e.g. `work-orders-db.ts`). Follow the established pattern within the module being changed rather than introducing a new one.
 
 ## Coding conventions
 
@@ -114,22 +78,9 @@ Place server route handlers under `src/app/api/<feature>/`; put Firestore access
 - Prefer named exports. Default exports only where Next.js requires them (pages, layouts, config) or where the surrounding module already uses one.
 - Use React Query for remote client state; don't duplicate API data in Zustand or local state without a clear UI-only reason.
 - Use `cn()` from `src/lib/utils/cn.ts` for conditional Tailwind classes, and CVA variants for reusable component styling.
-- Dashboard UI calls work orders "Jobs" — the underlying domain/API stays `work-orders`. Respect this naming split.
-- Preserve backwards compatibility for Firestore documents: add optional fields and defensive defaults when reading existing records. Avoid breaking schema renames without a migration plan.
 
 ## Environment and secrets
 
-`src/config/env.ts` parses required base variables at import time: `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `NEXT_PUBLIC_API_URL`. Firebase, SMTP, analytics, PayPal, and blog-scheduler variables are listed in that file and `.env.example`.
+`src/config/env.ts` parses variables at import time: `NEXT_PUBLIC_API_URL` (required), plus optional `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_APP_SUPPORT_EMAIL`, and `NEXT_PUBLIC_SMTP_*`. `src/lib/email/` and `src/services/email.service.ts` are kept in the codebase for possible future reuse (e.g. a contact form) but currently have no callers.
 
 Server-only credentials must never be exposed through `NEXT_PUBLIC_*` names; only retain existing compatibility names when deliberately modifying legacy code.
-
-## Implementation checklist for a typical tenant feature
-
-1. Define feature types and Zod schema.
-2. Add/update the Firestore model and service methods with tenant scoping.
-3. Implement authenticated API routes with consistent response envelopes.
-4. Add client API functions, React Query keys/hooks, and correct invalidation.
-5. Build feature components from shared UI primitives, with loading/empty/error/success states.
-6. Add navigation and role checks only after confirming intended access.
-7. Run typecheck and relevant lint/build checks; report any baseline issues separately from new ones.
-   </content>
