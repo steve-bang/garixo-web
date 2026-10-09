@@ -16,7 +16,7 @@ import { LandingFooter } from '@/components/sections/LandingFooter';
 import { LandingHeader } from '@/components/sections/LandingHeader';
 import { Button } from '@/components/ui/button';
 import { BlogCardCompact } from '@/features/blogs/components/blog-card';
-import { buildBlogArticleSchema } from '@/features/blogs/seo';
+import { buildBlogArticleSchema, resolveBlogImage } from '@/features/blogs/seo';
 import { resolveEffectiveStatus, slugify } from '@/features/blogs/utils';
 import { Home } from 'lucide-react';
 
@@ -31,6 +31,15 @@ type TocItem = {
 };
 
 export const revalidate = 3600;
+// Posts not returned by generateStaticParams (e.g. scheduled posts whose
+// scheduledAt passes after build) are still rendered on demand, then cached.
+export const dynamicParams = true;
+
+export function generateStaticParams(): Array<{ slug: string }> {
+  // listPublishedBlogs() already filters by resolveEffectiveStatus(), so only
+  // effectively published posts are pre-rendered.
+  return listPublishedBlogs().map((post) => ({ slug: post.slug }));
+}
 
 const stripMarkdown = (value: string): string =>
   value
@@ -113,19 +122,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: post.ogDescription || description,
       type: 'article',
       url: `https://www.garixo.com/blog/${post.slug}`,
-      images: post.ogImage
-        ? [
-            {
-              url: post.ogImage
-            }
-          ]
-        : undefined
+      images: [{ url: resolveBlogImage(post) }]
     },
     twitter: {
       card: 'summary_large_image',
       title: post.ogTitle || title,
       description: post.ogDescription || description,
-      images: post.ogImage ? [post.ogImage] : undefined
+      images: [resolveBlogImage(post)]
     }
   };
 }
@@ -227,9 +230,10 @@ export default async function BlogDetailPage({
                 <li>
                   <Link
                     href="/"
+                    aria-label="Home"
                     className="rounded-sm outline-none transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-primary-300"
                   >
-                    <Home className="size-4" />
+                    <Home className="size-4" aria-hidden="true" />
                   </Link>
                 </li>
                 <li aria-hidden="true">/</li>

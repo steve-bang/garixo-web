@@ -50,7 +50,9 @@ export function Hero(): JSX.Element {
 
           <div className="flex flex-col gap-s2 pt-s1 sm:flex-row">
             <Button asChild className="h-12 min-h-12">
-              <Link href="https://app.garixo.com/register">Try Free for 14 Days</Link>
+              <Link href="https://app.garixo.com/register">
+                Try Free for 14 Days
+              </Link>
             </Button>
             <Button asChild variant="secondary" className="h-12 min-h-12">
               <Link href="/pricing">See Pricing</Link>
@@ -77,6 +79,7 @@ export function Hero(): JSX.Element {
               alt="Global auto repair shop management software overview by Garixo"
               width={1280}
               height={853}
+              fetchPriority="high"
               className="h-auto w-full rounded-lg"
               sizes="(max-width: 1024px) 100vw, 50vw"
               priority

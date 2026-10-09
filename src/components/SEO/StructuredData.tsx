@@ -32,13 +32,6 @@ export function StructuredData(): JSX.Element {
       description: 'Free to get started. No credit card required.',
       url: 'https://www.garixo.com/pricing'
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '98',
-      bestRating: '5',
-      worstRating: '1'
-    },
     featureList: [
       'Vehicle check-in and pickup tracking',
       'Technician job assignment and productivity tracking',

@@ -8,6 +8,12 @@ import { schemaTypeToSchemaOrgType } from '@/features/blogs/utils';
 const SITE_URL = 'https://www.garixo.com';
 const SITE_NAME = 'Garixo';
 const SITE_LOGO = `${SITE_URL}/favicon/web-app-manifest-192x192.png`;
+const DEFAULT_BLOG_IMAGE = `${SITE_URL}/images/og-image.png`;
+
+export function resolveBlogImage(blog: BlogPost): string {
+  const custom = blog.ogImage?.trim();
+  return custom ? new URL(custom, SITE_URL).toString() : DEFAULT_BLOG_IMAGE;
+}
 
 export function buildBlogArticleSchema(
   blog: BlogPost
@@ -39,13 +45,10 @@ export function buildBlogArticleSchema(
         url: SITE_LOGO
       }
     },
+    image: [resolveBlogImage(blog)],
     mainEntityOfPage: pageUrl,
     url: pageUrl
   };
-
-  if (blog.ogImage) {
-    schema.image = [blog.ogImage];
-  }
 
   return schema;
 }
