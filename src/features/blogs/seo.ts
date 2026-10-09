@@ -7,7 +7,7 @@ import { schemaTypeToSchemaOrgType } from '@/features/blogs/utils';
 
 const SITE_URL = 'https://www.garixo.com';
 const SITE_NAME = 'Garixo';
-const SITE_LOGO = `${SITE_URL}/favicon/favicon.svg`;
+const SITE_LOGO = `${SITE_URL}/favicon/web-app-manifest-192x192.png`;
 
 export function buildBlogArticleSchema(
   blog: BlogPost

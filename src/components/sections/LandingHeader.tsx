@@ -40,7 +40,7 @@ export function LandingHeader(): JSX.Element {
         <Link href="/" className="flex items-center" aria-label="Garixo Home">
           <span className="grid size-10 place-items-center overflow-hidden rounded-md">
             <Image
-              src="/favicon/favicon.svg"
+              src="/favicon/logo-64.webp"
               alt="Garixo logo"
               width={30}
               height={30}
