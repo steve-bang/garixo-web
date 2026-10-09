@@ -4,7 +4,6 @@ import { Suspense, type ReactNode } from 'react';
 import { GoogleAnalytics } from '@/components/analytics/google-analytics';
 import { GoogleAnalyticsPageview } from '@/components/analytics/google-analytics-pageview';
 import { appConfig } from '@/config/app';
-import { AppProviders } from '@/components/providers/app-providers';
 import { WebsiteStructuredData } from '@/components/SEO/WebsiteStructuredData';
 
 import './globals.css';
@@ -35,7 +34,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <GoogleAnalyticsPageview />
         </Suspense>
-        <AppProviders>{children}</AppProviders>
+        {children}
       </body>
     </html>
   );
