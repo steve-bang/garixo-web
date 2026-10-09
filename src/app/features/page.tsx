@@ -13,8 +13,7 @@ import { Button } from '@/components/ui/button';
 export const revalidate = false;
 
 export const metadata: Metadata = {
-  title:
-    'Garage Management System Features — Work Orders, Inventory & Staff | Garixo',
+  title: 'Garage Management System Features for Auto Shops | Garixo',
   description:
     'Garage management software for auto repair shops. Track work orders, inventory, staff & customers in one platform. From $79/mo. Free 14-day trial.',
   keywords: [
@@ -33,8 +32,7 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title:
-      'Garage Management System Features — Work Orders, Inventory & Staff | Garixo',
+    title: 'Garage Management System Features for Auto Shops | Garixo',
     description:
       'Garage management software for auto repair shops. Track work orders, inventory, staff & customers in one platform. From $79/mo. Free 14-day trial.',
     type: 'website',
@@ -42,8 +40,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title:
-      'Garage Management System Features — Work Orders, Inventory & Staff | Garixo',
+    title: 'Garage Management System Features for Auto Shops | Garixo',
     description:
       'Garage management software for auto repair shops. Track work orders, inventory, staff & customers in one platform. From $79/mo. Free 14-day trial.'
   }

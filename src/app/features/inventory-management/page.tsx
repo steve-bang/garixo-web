@@ -93,7 +93,7 @@ const coreFeatures = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: 'Auto Parts Inventory Management Software — Track Stock | Garixo',
+  title: 'Auto Parts Inventory Management Software | Garixo',
   description:
     'Auto parts inventory management software for repair shops. Real-time stock tracking, low-stock alerts, and auto-deduct parts on every work order.',
   keywords: [
@@ -115,7 +115,7 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Auto Parts Inventory Management Software — Track Stock | Garixo',
+    title: 'Auto Parts Inventory Management Software | Garixo',
     description:
       'Auto parts inventory management software for repair shops. Real-time stock tracking, low-stock alerts, and auto-deduct parts on every work order.',
     type: 'website',
@@ -123,7 +123,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Auto Parts Inventory Management Software — Track Stock | Garixo',
+    title: 'Auto Parts Inventory Management Software | Garixo',
     description:
       'Auto parts inventory management software for repair shops. Real-time stock tracking, low-stock alerts, and auto-deduct parts on every work order.'
   }

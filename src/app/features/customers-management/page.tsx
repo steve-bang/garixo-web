@@ -100,7 +100,7 @@ const coreFeatures = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: 'Auto Repair Customer Management Software — Service History | Garixo',
+  title: 'Auto Repair Customer Management Software | Garixo',
   description:
     'Auto repair customer management software with full service history. Search by name, plate, or phone. Keep customer and vehicle records in one place.',
   keywords: [
@@ -123,8 +123,7 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title:
-      'Auto Repair Customer Management Software — Service History | Garixo',
+    title: 'Auto Repair Customer Management Software | Garixo',
     description:
       'Auto repair customer management software with full service history. Search by name, plate, or phone. Keep customer and vehicle records in one place.',
     type: 'website',
@@ -132,8 +131,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title:
-      'Auto Repair Customer Management Software — Service History | Garixo',
+    title: 'Auto Repair Customer Management Software | Garixo',
     description:
       'Auto repair customer management software with full service history. Search by name, plate, or phone. Keep customer and vehicle records in one place.'
   }

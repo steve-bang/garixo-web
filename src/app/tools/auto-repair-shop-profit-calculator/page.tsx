@@ -40,8 +40,7 @@ const faqItems = [
 ] as const;
 
 export const metadata: Metadata = {
-  title:
-    'Auto Repair Shop Profit Calculator — Free Tool for Garage Owners | Garixo',
+  title: 'Auto Repair Shop Profit Calculator — Free Tool | Garixo',
   description:
     'Free auto repair shop profit calculator. Enter revenue, labor, parts, and overhead — see your real monthly net profit in minutes. No signup needed.',
   keywords: [
@@ -59,8 +58,7 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title:
-      'Auto Repair Shop Profit Calculator — Free Tool for Garage Owners | Garixo',
+    title: 'Auto Repair Shop Profit Calculator — Free Tool | Garixo',
     description:
       'Free auto repair shop profit calculator. Enter revenue, labor, parts, and overhead — see your real monthly net profit in minutes. No signup needed.',
     type: 'website',
@@ -68,8 +66,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title:
-      'Auto Repair Shop Profit Calculator — Free Tool for Garage Owners | Garixo',
+    title: 'Auto Repair Shop Profit Calculator — Free Tool | Garixo',
     description:
       'Free auto repair shop profit calculator. Enter revenue, labor, parts, and overhead — see your real monthly net profit in minutes. No signup needed.'
   }

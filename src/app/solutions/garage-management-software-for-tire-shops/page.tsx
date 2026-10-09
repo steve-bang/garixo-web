@@ -103,8 +103,7 @@ const featureHighlights = [
 ] as const;
 
 export const metadata: Metadata = {
-  title:
-    'Tire Shop Management Software — Fast Work Orders & Inventory | Garixo',
+  title: 'Tire Shop Management Software — Work Orders | Garixo',
   description:
     'Tire shop management software that keeps bays moving. Fast work orders, tire inventory tracking, and clean invoices for small tire shops. Free trial.',
   keywords: [
@@ -123,8 +122,7 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title:
-      'Tire Shop Management Software — Fast Work Orders & Inventory | Garixo',
+    title: 'Tire Shop Management Software — Work Orders | Garixo',
     description:
       'Tire shop management software that keeps bays moving. Fast work orders, tire inventory tracking, and clean invoices for small tire shops. Free trial.',
     type: 'website',
@@ -132,8 +130,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title:
-      'Tire Shop Management Software — Fast Work Orders & Inventory | Garixo',
+    title: 'Tire Shop Management Software — Work Orders | Garixo',
     description:
       'Tire shop management software that keeps bays moving. Fast work orders, tire inventory tracking, and clean invoices for small tire shops. Free trial.'
   }

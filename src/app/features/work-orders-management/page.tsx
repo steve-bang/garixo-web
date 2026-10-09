@@ -102,7 +102,7 @@ const coreFeatures = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: 'Work Order Management Software for Auto Repair Shops | Garixo',
+  title: 'Work Order Management Software for Auto Shops | Garixo',
   description:
     'Work order management software for auto repair shops. Create, assign, and close repair jobs from check-in to invoice. Simple and fast digital workflow.',
   keywords: [
@@ -126,7 +126,7 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'Work Order Management Software for Auto Repair Shops | Garixo',
+    title: 'Work Order Management Software for Auto Shops | Garixo',
     description:
       'Work order management software for auto repair shops. Create, assign, and close repair jobs from check-in to invoice. Simple and fast digital workflow.',
     type: 'website',
@@ -134,7 +134,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Work Order Management Software for Auto Repair Shops | Garixo',
+    title: 'Work Order Management Software for Auto Shops | Garixo',
     description:
       'Work order management software for auto repair shops. Create, assign, and close repair jobs from check-in to invoice. Simple and fast digital workflow.'
   }

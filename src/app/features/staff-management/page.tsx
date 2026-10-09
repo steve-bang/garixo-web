@@ -97,8 +97,7 @@ const coreFeatures = [
 ] as const;
 
 export const metadata: Metadata = {
-  title:
-    'Mechanic Staff Management Software — Assign Jobs & Track Workload | Garixo',
+  title: 'Mechanic Staff Management Software — Assign Jobs | Garixo',
   description:
     'Mechanic staff management software for small garages. Assign jobs clearly, track who is free or overloaded, and keep your whole team productive daily.',
   keywords: [
@@ -121,8 +120,7 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title:
-      'Mechanic Staff Management Software — Assign Jobs & Track Workload | Garixo',
+    title: 'Mechanic Staff Management Software — Assign Jobs | Garixo',
     description:
       'Mechanic staff management software for small garages. Assign jobs clearly, track who is free or overloaded, and keep your whole team productive daily.',
     type: 'website',
@@ -130,8 +128,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title:
-      'Mechanic Staff Management Software — Assign Jobs & Track Workload | Garixo',
+    title: 'Mechanic Staff Management Software — Assign Jobs | Garixo',
     description:
       'Mechanic staff management software for small garages. Assign jobs clearly, track who is free or overloaded, and keep your whole team productive daily.'
   }

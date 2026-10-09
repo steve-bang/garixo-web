@@ -102,8 +102,7 @@ const featureHighlights = [
 ] as const;
 
 export const metadata: Metadata = {
-  title:
-    'Dealership Service Department Software — Simple & Affordable | Garixo',
+  title: 'Dealership Service Department Software | Garixo',
   description:
     'Dealership service department software for faster service lanes. Manage work orders, advisor handoffs, and vehicle history in one workflow. Start free.',
   keywords: [
@@ -122,8 +121,7 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title:
-      'Dealership Service Department Software — Simple & Affordable | Garixo',
+    title: 'Dealership Service Department Software | Garixo',
     description:
       'Dealership service department software for faster service lanes. Manage work orders, advisor handoffs, and vehicle history in one workflow. Start free.',
     type: 'website',
@@ -131,8 +129,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title:
-      'Dealership Service Department Software — Simple & Affordable | Garixo',
+    title: 'Dealership Service Department Software | Garixo',
     description:
       'Dealership service department software for faster service lanes. Manage work orders, advisor handoffs, and vehicle history in one workflow. Start free.'
   }
