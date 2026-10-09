@@ -31,6 +31,15 @@ type TocItem = {
 };
 
 export const revalidate = 3600;
+// Posts not returned by generateStaticParams (e.g. scheduled posts whose
+// scheduledAt passes after build) are still rendered on demand, then cached.
+export const dynamicParams = true;
+
+export function generateStaticParams(): Array<{ slug: string }> {
+  // listPublishedBlogs() already filters by resolveEffectiveStatus(), so only
+  // effectively published posts are pre-rendered.
+  return listPublishedBlogs().map((post) => ({ slug: post.slug }));
+}
 
 const stripMarkdown = (value: string): string =>
   value
