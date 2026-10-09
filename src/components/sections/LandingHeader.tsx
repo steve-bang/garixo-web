@@ -51,7 +51,7 @@ export function LandingHeader(): JSX.Element {
         </Link>
 
         <nav
-          className="hidden items-center gap-s6 md:flex"
+          className="hidden items-center gap-s6 lg:flex"
           aria-label="Primary"
         >
           <div className="group relative">
@@ -238,7 +238,7 @@ export function LandingHeader(): JSX.Element {
           <Button
             type="button"
             variant="ghost"
-            className="h-12 w-12 p-0 md:hidden"
+            className="h-12 w-12 p-0 lg:hidden"
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileOpen}
             aria-controls="landing-mobile-nav"
@@ -253,18 +253,18 @@ export function LandingHeader(): JSX.Element {
           <Button
             asChild
             variant="ghost"
-            className="hidden h-10 md:inline-flex"
+            className="hidden h-10 shrink-0 whitespace-nowrap lg:inline-flex"
           >
             <Link href="https://app.garixo.com/login">Sign In</Link>
           </Button>
-          <Button asChild className="h-10">
+          <Button asChild className="h-10 shrink-0 whitespace-nowrap">
             <Link href="https://app.garixo.com/register">Get Started</Link>
           </Button>
         </div>
       </div>
 
       {mobileOpen ? (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
             aria-label="Close mobile menu backdrop"
@@ -407,12 +407,18 @@ export function LandingHeader(): JSX.Element {
 
               <div className="grid grid-cols-2 gap-s2 pt-s2">
                 <Button asChild variant="ghost" className="h-10">
-                  <Link href="https://app.garixo.com/login" onClick={closeMobileMenu}>
+                  <Link
+                    href="https://app.garixo.com/login"
+                    onClick={closeMobileMenu}
+                  >
                     Sign In
                   </Link>
                 </Button>
                 <Button asChild className="h-10">
-                  <Link href="https://app.garixo.com/register" onClick={closeMobileMenu}>
+                  <Link
+                    href="https://app.garixo.com/register"
+                    onClick={closeMobileMenu}
+                  >
                     Get Started
                   </Link>
                 </Button>
