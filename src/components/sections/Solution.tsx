@@ -79,14 +79,14 @@ export function Solution(): JSX.Element {
           Read practical guides in our{' '}
           <Link
             href="/blog"
-            className="text-primary-700 hover:text-primary-800"
+            className="text-primary-700 underline underline-offset-2 hover:text-primary-800"
           >
             workshop management blog
           </Link>{' '}
           or compare plans on our{' '}
           <Link
             href="/pricing"
-            className="text-primary-700 hover:text-primary-800"
+            className="text-primary-700 underline underline-offset-2 hover:text-primary-800"
           >
             pricing page
           </Link>

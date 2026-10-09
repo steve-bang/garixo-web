@@ -126,7 +126,7 @@ export function LandingFooter(): JSX.Element {
           </div>
         </div>
 
-        <div className="mt-s8 border-t border-slate-800 pt-s6 text-caption text-slate-500">
+        <div className="mt-s8 border-t border-slate-800 pt-s6 text-caption text-slate-400">
           <p>© 2026 Garixo. All rights reserved.</p>
         </div>
       </div>
