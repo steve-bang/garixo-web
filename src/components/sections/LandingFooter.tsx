@@ -10,7 +10,7 @@ export function LandingFooter(): JSX.Element {
             <div className="flex items-center gap-s2">
               <span className="grid size-10 place-items-center overflow-hidden rounded-md border border-slate-700 bg-white">
                 <Image
-                  src="/favicon/favicon.svg"
+                  src="/favicon/logo-64.webp"
                   alt="Garixo logo"
                   width={30}
                   height={30}

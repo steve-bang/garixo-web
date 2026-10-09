@@ -19,7 +19,7 @@ export function StructuredData(): JSX.Element {
     '@type': 'SoftwareApplication',
     name: 'Garixo',
     url: 'https://www.garixo.com',
-    logo: 'https://www.garixo.com/favicon/favicon.svg',
+    logo: 'https://www.garixo.com/favicon/web-app-manifest-192x192.png',
     applicationCategory: 'BusinessApplication',
     applicationSubCategory: 'Garage Management Software',
     operatingSystem: 'Web, Any modern browser',
@@ -54,7 +54,7 @@ export function StructuredData(): JSX.Element {
     '@type': 'Organization',
     name: 'Garixo',
     url: 'https://www.garixo.com',
-    logo: 'https://www.garixo.com/favicon/favicon.svg',
+    logo: 'https://www.garixo.com/favicon/web-app-manifest-192x192.png',
     description:
       'Garixo provides all-in-one garage management software for auto repair shops worldwide.',
     contactPoint: {
