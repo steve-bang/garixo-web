@@ -146,10 +146,14 @@ export function LaborRateCalculator(): JSX.Element {
           </div>
           <div className="grid gap-s4 sm:grid-cols-2">
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="labor-rate-calc-rent"
+                className="text-small font-medium text-text-secondary"
+              >
                 Rent / mortgage
               </label>
               <Input
+                id="labor-rate-calc-rent"
                 type="number"
                 min={0}
                 value={inputs.rent}
@@ -159,10 +163,14 @@ export function LaborRateCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="labor-rate-calc-utilities"
+                className="text-small font-medium text-text-secondary"
+              >
                 Utilities
               </label>
               <Input
+                id="labor-rate-calc-utilities"
                 type="number"
                 min={0}
                 value={inputs.utilities}
@@ -172,10 +180,14 @@ export function LaborRateCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="labor-rate-calc-insurance"
+                className="text-small font-medium text-text-secondary"
+              >
                 Insurance
               </label>
               <Input
+                id="labor-rate-calc-insurance"
                 type="number"
                 min={0}
                 value={inputs.insurance}
@@ -185,10 +197,14 @@ export function LaborRateCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="labor-rate-calc-adminSalaries"
+                className="text-small font-medium text-text-secondary"
+              >
                 Admin salaries
               </label>
               <Input
+                id="labor-rate-calc-adminSalaries"
                 type="number"
                 min={0}
                 value={inputs.adminSalaries}
@@ -198,10 +214,14 @@ export function LaborRateCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="labor-rate-calc-software"
+                className="text-small font-medium text-text-secondary"
+              >
                 Software & tools
               </label>
               <Input
+                id="labor-rate-calc-software"
                 type="number"
                 min={0}
                 value={inputs.software}
@@ -211,10 +231,14 @@ export function LaborRateCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="labor-rate-calc-otherCosts"
+                className="text-small font-medium text-text-secondary"
+              >
                 Other expenses
               </label>
               <Input
+                id="labor-rate-calc-otherCosts"
                 type="number"
                 min={0}
                 value={inputs.otherCosts}
@@ -245,10 +269,14 @@ export function LaborRateCalculator(): JSX.Element {
             </div>
           </div>
           <div className="max-w-[240px] space-y-s1">
-            <label className="text-small font-medium text-text-secondary">
+            <label
+              htmlFor="labor-rate-calc-technicians"
+              className="text-small font-medium text-text-secondary"
+            >
               Number of technicians
             </label>
             <Input
+              id="labor-rate-calc-technicians"
               type="number"
               min={0}
               value={inputs.technicians}
@@ -273,10 +301,14 @@ export function LaborRateCalculator(): JSX.Element {
           </div>
           <div className="grid gap-s4 sm:grid-cols-2">
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="labor-rate-calc-hoursPerDay"
+                className="text-small font-medium text-text-secondary"
+              >
                 Hours per day
               </label>
               <Input
+                id="labor-rate-calc-hoursPerDay"
                 type="number"
                 min={0}
                 step={0.5}
@@ -287,10 +319,14 @@ export function LaborRateCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="labor-rate-calc-daysPerMonth"
+                className="text-small font-medium text-text-secondary"
+              >
                 Working days / month
               </label>
               <Input
+                id="labor-rate-calc-daysPerMonth"
                 type="number"
                 min={0}
                 value={inputs.daysPerMonth}
@@ -300,10 +336,14 @@ export function LaborRateCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1 sm:col-span-2">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="labor-rate-calc-productivity"
+                className="text-small font-medium text-text-secondary"
+              >
                 Productivity (%)
               </label>
               <Input
+                id="labor-rate-calc-productivity"
                 type="number"
                 min={0}
                 max={100}
@@ -333,10 +373,14 @@ export function LaborRateCalculator(): JSX.Element {
             </div>
           </div>
           <div className="max-w-[240px] space-y-s1">
-            <label className="text-small font-medium text-text-secondary">
+            <label
+              htmlFor="labor-rate-calc-desiredProfit"
+              className="text-small font-medium text-text-secondary"
+            >
               Desired monthly profit
             </label>
             <Input
+              id="labor-rate-calc-desiredProfit"
               type="number"
               min={0}
               value={inputs.desiredProfit}
@@ -428,10 +472,14 @@ export function LaborRateCalculator(): JSX.Element {
             Quick insight
           </p>
           <div className="space-y-s2">
-            <label className="text-small font-medium text-text-secondary">
+            <label
+              htmlFor="labor-rate-calc-currentRate"
+              className="text-small font-medium text-text-secondary"
+            >
               Current labor rate (optional)
             </label>
             <Input
+              id="labor-rate-calc-currentRate"
               type="number"
               min={0}
               value={inputs.currentRate ?? ''}
