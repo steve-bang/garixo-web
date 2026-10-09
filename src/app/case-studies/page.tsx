@@ -85,7 +85,7 @@ export default function CaseStudiesPage(): JSX.Element {
       />
 
       <LandingHeader />
-      <section>
+      <main>
         <CaseStudyHero />
 
         <section
@@ -100,7 +100,7 @@ export default function CaseStudiesPage(): JSX.Element {
             </div>
           </div>
         </section>
-      </section>
+      </main>
       <LandingFooter />
     </>
   );
