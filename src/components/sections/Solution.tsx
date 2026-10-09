@@ -66,9 +66,8 @@ export function Solution(): JSX.Element {
                 <Link
                   href={block.href}
                   className="text-small font-medium text-primary-700 hover:text-primary-800"
-                  aria-label={`Learn more about ${block.title}`}
                 >
-                  Learn more
+                  Learn more about {block.title}
                 </Link>
               </Card>
             );

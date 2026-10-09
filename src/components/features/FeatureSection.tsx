@@ -54,7 +54,7 @@ export function FeatureSection({
             href={feature.href}
             className="mt-s4 inline-block text-small font-semibold text-primary-700 hover:text-primary-800"
           >
-            Learn more
+            Learn more about {feature.title}
           </Link>
           <br />
           {feature.externalLink ? (
