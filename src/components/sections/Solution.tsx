@@ -66,9 +66,8 @@ export function Solution(): JSX.Element {
                 <Link
                   href={block.href}
                   className="text-small font-medium text-primary-700 hover:text-primary-800"
-                  aria-label={`Learn more about ${block.title}`}
                 >
-                  Learn more
+                  Learn more about {block.title}
                 </Link>
               </Card>
             );
@@ -79,14 +78,14 @@ export function Solution(): JSX.Element {
           Read practical guides in our{' '}
           <Link
             href="/blog"
-            className="text-primary-700 hover:text-primary-800"
+            className="text-primary-700 underline underline-offset-2 hover:text-primary-800"
           >
             workshop management blog
           </Link>{' '}
           or compare plans on our{' '}
           <Link
             href="/pricing"
-            className="text-primary-700 hover:text-primary-800"
+            className="text-primary-700 underline underline-offset-2 hover:text-primary-800"
           >
             pricing page
           </Link>

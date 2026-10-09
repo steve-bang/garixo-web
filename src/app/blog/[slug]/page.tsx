@@ -221,9 +221,10 @@ export default async function BlogDetailPage({
                 <li>
                   <Link
                     href="/"
+                    aria-label="Home"
                     className="rounded-sm outline-none transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-primary-300"
                   >
-                    <Home className="size-4" />
+                    <Home className="size-4" aria-hidden="true" />
                   </Link>
                 </li>
                 <li aria-hidden="true">/</li>
