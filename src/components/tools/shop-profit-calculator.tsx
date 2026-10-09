@@ -147,10 +147,14 @@ export function ShopProfitCalculator(): JSX.Element {
           </div>
           <div className="grid gap-s4 sm:grid-cols-2">
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="profit-calc-jobsPerDay"
+                className="text-small font-medium text-text-secondary"
+              >
                 Average jobs per day
               </label>
               <Input
+                id="profit-calc-jobsPerDay"
                 type="number"
                 min={0}
                 value={inputs.jobsPerDay}
@@ -160,10 +164,14 @@ export function ShopProfitCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="profit-calc-averageJobValue"
+                className="text-small font-medium text-text-secondary"
+              >
                 Average job value
               </label>
               <Input
+                id="profit-calc-averageJobValue"
                 type="number"
                 min={0}
                 value={inputs.averageJobValue}
@@ -173,10 +181,14 @@ export function ShopProfitCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1 sm:col-span-2">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="profit-calc-workingDays"
+                className="text-small font-medium text-text-secondary"
+              >
                 Working days per month
               </label>
               <Input
+                id="profit-calc-workingDays"
                 type="number"
                 min={0}
                 value={inputs.workingDays}
@@ -208,10 +220,14 @@ export function ShopProfitCalculator(): JSX.Element {
           </div>
           <div className="grid gap-s4 sm:grid-cols-2">
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="profit-calc-technicians"
+                className="text-small font-medium text-text-secondary"
+              >
                 Number of technicians
               </label>
               <Input
+                id="profit-calc-technicians"
                 type="number"
                 min={0}
                 value={inputs.technicians}
@@ -221,10 +237,14 @@ export function ShopProfitCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="profit-calc-technicianSalary"
+                className="text-small font-medium text-text-secondary"
+              >
                 Avg monthly salary per tech
               </label>
               <Input
+                id="profit-calc-technicianSalary"
                 type="number"
                 min={0}
                 value={inputs.technicianSalary}
@@ -250,10 +270,14 @@ export function ShopProfitCalculator(): JSX.Element {
           </div>
           <div className="grid gap-s4 sm:grid-cols-2">
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="profit-calc-rent"
+                className="text-small font-medium text-text-secondary"
+              >
                 Rent
               </label>
               <Input
+                id="profit-calc-rent"
                 type="number"
                 min={0}
                 value={inputs.rent}
@@ -263,10 +287,14 @@ export function ShopProfitCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="profit-calc-utilities"
+                className="text-small font-medium text-text-secondary"
+              >
                 Utilities
               </label>
               <Input
+                id="profit-calc-utilities"
                 type="number"
                 min={0}
                 value={inputs.utilities}
@@ -276,10 +304,14 @@ export function ShopProfitCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="profit-calc-insurance"
+                className="text-small font-medium text-text-secondary"
+              >
                 Insurance
               </label>
               <Input
+                id="profit-calc-insurance"
                 type="number"
                 min={0}
                 value={inputs.insurance}
@@ -289,10 +321,14 @@ export function ShopProfitCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="profit-calc-adminSalary"
+                className="text-small font-medium text-text-secondary"
+              >
                 Admin salary
               </label>
               <Input
+                id="profit-calc-adminSalary"
                 type="number"
                 min={0}
                 value={inputs.adminSalary}
@@ -302,10 +338,14 @@ export function ShopProfitCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="profit-calc-software"
+                className="text-small font-medium text-text-secondary"
+              >
                 Software
               </label>
               <Input
+                id="profit-calc-software"
                 type="number"
                 min={0}
                 value={inputs.software}
@@ -315,10 +355,14 @@ export function ShopProfitCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="profit-calc-toolsMaintenance"
+                className="text-small font-medium text-text-secondary"
+              >
                 Tools & maintenance
               </label>
               <Input
+                id="profit-calc-toolsMaintenance"
                 type="number"
                 min={0}
                 value={inputs.toolsMaintenance}
@@ -328,10 +372,14 @@ export function ShopProfitCalculator(): JSX.Element {
               />
             </div>
             <div className="space-y-s1 sm:col-span-2">
-              <label className="text-small font-medium text-text-secondary">
+              <label
+                htmlFor="profit-calc-otherExpenses"
+                className="text-small font-medium text-text-secondary"
+              >
                 Other expenses
               </label>
               <Input
+                id="profit-calc-otherExpenses"
                 type="number"
                 min={0}
                 value={inputs.otherExpenses}
@@ -363,10 +411,14 @@ export function ShopProfitCalculator(): JSX.Element {
             </div>
           </div>
           <div className="max-w-[280px] space-y-s1">
-            <label className="text-small font-medium text-text-secondary">
+            <label
+              htmlFor="profit-calc-partsCostPerJob"
+              className="text-small font-medium text-text-secondary"
+            >
               Average parts cost per job
             </label>
             <Input
+              id="profit-calc-partsCostPerJob"
               type="number"
               min={0}
               value={inputs.partsCostPerJob}
