@@ -13,7 +13,6 @@ Paste everything below the line into an AI design/image tool (Claude Artifacts, 
 **Output:** ONE high-fidelity desktop mockup image of the full homepage, 1440px wide, tall single-page scroll, light mode. Real, readable copy (no lorem ipsum, no gibberish text). English, US spelling, US dollars, US phone/address formats where shown.
 
 **Page structure (top to bottom, nothing else):**
-
 1. Header — logo "Garixo", 4 links max (Features, Pricing, Blog, Log in), one primary button "Start Free Trial".
 2. Hero — plain-language headline (max 10 words) about knowing your shop's real profit every day without paperwork; one-sentence subhead; primary CTA "Start Free Trial" + secondary text link "See how it works"; small reassurance line (e.g. "14-day free trial · No credit card · Set up in 15 minutes"). Right side: one clean, realistic product screenshot (work-order board or daily profit summary) with big readable numbers.
 3. Three-benefit strip — 3 icons + 3 short lines in owner language: "Know what each job earns", "Keep every car moving", "Get paid faster".
@@ -26,7 +25,6 @@ Paste everything below the line into an AI design/image tool (Claude Artifacts, 
 10. Footer — minimal: product links, legal links, support email.
 
 **Design rules:**
-
 - Layout: single column rhythm, 12-column grid, max content width 1120px, generous whitespace (96–120px between sections), left-aligned text, one idea per section.
 - Type: one sans-serif family (Inter or similar). Hero headline 56–64px, section titles 36px, body 18px minimum, line height 1.6. High contrast, WCAG AA or better.
 - Color: brand blue (#2563EB range) for primary actions only; slate neutrals for text and surfaces; one warm accent (amber) used sparingly; green only for profit/positive numbers. White and very light gray backgrounds. No gradients, glassmorphism, neon, dark mode, or stock-photo collages.
