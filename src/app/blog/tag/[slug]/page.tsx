@@ -11,7 +11,11 @@ import { LandingHeader } from '@/components/sections/LandingHeader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { BlogCard } from '@/features/blogs/components/blog-card';
-import { slugMatches } from '@/features/blogs/utils';
+import {
+  countPostsByTag,
+  isIndexableTagCount,
+  slugMatches
+} from '@/features/blogs/utils';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -28,6 +32,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  // Thin tag pages stay live (posts link to them) but are kept out of the index.
+  const indexable = isIndexableTagCount(
+    countPostsByTag(await listPublishedBlogs()).get(tag.slug) ?? 0
+  );
+
   const title = `${tag.name} Articles | Garixo Blog`;
   const description = `Articles tagged "${tag.name}" for independent auto repair shop owners, from the Garixo blog.`;
 
@@ -38,7 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       canonical: `/blog/tag/${tag.slug}`
     },
     robots: {
-      index: true,
+      index: indexable,
       follow: true
     },
     openGraph: {
