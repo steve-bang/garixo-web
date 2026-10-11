@@ -243,7 +243,7 @@ export default async function CaseStudyDetailPage({
                 variant="secondary"
                 className="h-12 bg-slate-800 text-white hover:bg-slate-700"
               >
-                <Link href="/book-demo">Book a Demo</Link>
+                <Link href="https://app.garixo.com/register">Get Started</Link>
               </Button>
             </div>
           </div>
