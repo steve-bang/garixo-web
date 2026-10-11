@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card';
 export const revalidate = false;
 
 export const metadata: Metadata = {
-  title: 'About Garixo | Our Story',
+  title: 'About Garixo: Garage Management Software for Auto Shops',
   description:
     'Meet Steve, the founder of Garixo, and discover why he built a simple shop management platform to help independent auto repair shops spend less time managing their business and more time doing what they do best.',
   alternates: {
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title: 'About Garixo | Our Story',
+    title: 'About Garixo: Garage Management Software for Auto Shops',
     description:
       'Why I built Garixo to help independent auto repair shops run their business with less complexity.',
     type: 'website',
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'About Garixo | Our Story',
+    title: 'About Garixo: Garage Management Software for Auto Shops',
     description:
       'Why I built Garixo to help independent auto repair shops run their business with less complexity.',
     images: ['https://www.garixo.com/images/steve-bang.jpg']
@@ -57,7 +57,7 @@ export default function AboutPage(): JSX.Element {
   const aboutPageSchema = {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
-    name: 'About Garixo | Our Story',
+    name: 'About Garixo: Garage Management Software for Auto Shops',
     url: 'https://www.garixo.com/about',
     description:
       'The story behind Garixo, garage management software built from experience in auto repair shops.',
