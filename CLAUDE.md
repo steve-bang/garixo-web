@@ -10,6 +10,8 @@ The dashboard/app product (garage onboarding, customer and vehicle management, w
 
 The untracked `docs/prd-learning-marketplace-mvp-vi.md` describes a possible future Chinese-language teacher/student marketplace; it is a planning document, not the current application model.
 
+The `package.json` name `garixo-garage-management` is a legacy name and is intentionally kept.
+
 ## Commands
 
 ```bash
@@ -41,7 +43,7 @@ The blog is a self-contained, file-based system with no backend dependency:
 - Posts live as markdown files in `public/blog/*.md` with frontmatter (title, slug, dates, `status`, `scheduledAt`, etc.), parsed via `gray-matter`.
 - `src/services/blog-content/blog-fs.ts` reads these files at request time and computes the effective status (`scheduled` flips to `published` once `scheduledAt` has passed) — no cron job or database involved.
 - `src/features/blogs/` holds the public-facing view model, SEO helpers, and components (`types.ts`, `utils.ts`, `author.ts`, `seo.ts`, `components/blog-*`).
-- New posts are added as new markdown files, not through an admin UI (there isn't one in this repo).
+- New posts are added as new markdown files, not through an admin UI (there isn't one in this repo). Use the `blog-writer` skill (`.claude/skills/blog-writer`) to add a post; the SEO sub agent is `.claude/agents/seo-web-developer.md`.
 
 ### Request and data flow
 
@@ -49,7 +51,7 @@ This repo has no API route handlers and no database — it's a static/server-ren
 
 ### UI
 
-- The root layout installs React Query, toast, and analytics providers (`src/components/providers/app-providers.tsx`) — no auth/session provider.
+- The root layout mounts only Google Analytics (`GoogleAnalytics` + `GoogleAnalyticsPageview`) and the website JSON-LD. The React Query + Sonner `AppProviders` wrapper (`src/components/providers/app-providers.tsx`) still exists in code but is not mounted; wrap the relevant subtree in it before using React Query or toasts. There is no auth/session provider.
 - Reuse shared primitives in `src/components/ui` and `src/components/common` before creating a feature-local replacement.
 - Use existing design tokens and semantic Tailwind classes from `globals.css` and `src/config/design-tokens.ts` — don't introduce disconnected colour or spacing scales.
 
@@ -66,7 +68,7 @@ src/
   services/     blog-content (markdown blog reader), seo/sitemap, email.service.ts
   types/        Shared contracts (api.ts, primitives.ts) and ambient type declarations
 functions/      Orphaned Firebase Functions project — see note above; not actively maintained
-docs/           Product and engineering documentation
+docs/           Product and engineering documentation (see note below)
 ```
 
 ## Coding conventions
@@ -76,7 +78,7 @@ docs/           Product and engineering documentation
 - Use `type` imports for type-only dependencies.
 - React components in PascalCase; files in kebab-case; functions/variables in camelCase; UPPER_SNAKE_CASE for immutable constants.
 - Prefer named exports. Default exports only where Next.js requires them (pages, layouts, config) or where the surrounding module already uses one.
-- Use React Query for remote client state; don't duplicate API data in Zustand or local state without a clear UI-only reason.
+- If you add remote client state (requires mounting `AppProviders` first), use React Query; don't duplicate API data in Zustand or local state without a clear UI-only reason.
 - Use `cn()` from `src/lib/utils/cn.ts` for conditional Tailwind classes, and CVA variants for reusable component styling.
 
 ## Environment and secrets
@@ -84,3 +86,7 @@ docs/           Product and engineering documentation
 `src/config/env.ts` parses variables at import time: `NEXT_PUBLIC_API_URL` (required), plus optional `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_APP_SUPPORT_EMAIL`, and `NEXT_PUBLIC_SMTP_*`. `src/lib/email/` and `src/services/email.service.ts` are kept in the codebase for possible future reuse (e.g. a contact form) but currently have no callers.
 
 Server-only credentials must never be exposed through `NEXT_PUBLIC_*` names; only retain existing compatibility names when deliberately modifying legacy code.
+
+## Docs note
+
+Most files in `docs/` (the `*-feature-guide.md` files, `firestore-database-structure.md`, `billing-subscription-flow.md`) describe the removed dashboard and are historical, not current guidance. `docs/prd-learning-marketplace-mvp-vi.md` is a planning document only (see above).
