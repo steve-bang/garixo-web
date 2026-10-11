@@ -16,7 +16,11 @@ import { LandingFooter } from '@/components/sections/LandingFooter';
 import { LandingHeader } from '@/components/sections/LandingHeader';
 import { Button } from '@/components/ui/button';
 import { BlogCardCompact } from '@/features/blogs/components/blog-card';
-import { buildBlogArticleSchema, resolveBlogImage } from '@/features/blogs/seo';
+import {
+  buildBlogArticleSchema,
+  buildBlogTitle,
+  resolveBlogImage
+} from '@/features/blogs/seo';
 import { resolveEffectiveStatus, slugify } from '@/features/blogs/utils';
 import { Home } from 'lucide-react';
 
@@ -95,7 +99,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const author = DEFAULT_BLOG_AUTHOR;
 
   return {
-    title: title + ' | Garixo', // Append site name to title
+    title: buildBlogTitle(title),
     description,
     authors: [
       {

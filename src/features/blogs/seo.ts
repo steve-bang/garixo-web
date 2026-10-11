@@ -10,6 +10,14 @@ const SITE_NAME = 'Garixo';
 const SITE_LOGO = `${SITE_URL}/favicon/web-app-manifest-192x192.png`;
 const DEFAULT_BLOG_IMAGE = `${SITE_URL}/images/og-image.png`;
 
+const MAX_TITLE_LENGTH = 60;
+
+/** Appends the site name only when the full title stays within 60 chars. */
+export function buildBlogTitle(title: string): string {
+  const withSuffix = `${title} | ${SITE_NAME}`;
+  return withSuffix.length <= MAX_TITLE_LENGTH ? withSuffix : title;
+}
+
 export function resolveBlogImage(blog: BlogPost): string {
   const custom = blog.ogImage?.trim();
   return custom ? new URL(custom, SITE_URL).toString() : DEFAULT_BLOG_IMAGE;
