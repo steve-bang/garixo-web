@@ -8,37 +8,29 @@ import {
   listPublishedBlogs,
   listPublishedIndexedBlogSitemapEntries
 } from '@/services/blog-content/blog-fs';
-import { slugMatches } from '@/features/blogs/utils';
 import {
+  countPostsByTag,
+  isIndexableTagCount,
+  slugMatches
+} from '@/features/blogs/utils';
+import {
+  buildUrlsetXml,
+  latestSitemapDate,
   toAbsoluteUrl,
-  toSitemapIsoDate,
-  xmlEscape
+  type SitemapUrl
 } from '@/services/seo/sitemap';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type SitemapEntry = {
-  path: string;
-  lastModified: string;
-  priority: string;
-};
-
-function buildBlogSitemapXml(entries: SitemapEntry[]): string {
-  const body = entries
-    .map(
-      (entry) =>
-        `\n  <url>\n    <loc>${xmlEscape(toAbsoluteUrl(entry.path))}</loc>\n    <lastmod>${toSitemapIsoDate(entry.lastModified)}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${entry.priority}</priority>\n  </url>`
-    )
-    .join('');
-
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${body}\n</urlset>`;
-}
-
-function latestUpdatedAt(posts: Array<{ updatedAt: string }>): string {
-  return posts.reduce(
-    (latest, post) => (post.updatedAt > latest ? post.updatedAt : latest),
-    posts[0].updatedAt
+// lastmod uses each post's own date (updatedAt, falling back to publishedAt);
+// category and tag pages use the latest date among their posts. Tags below
+// MIN_INDEXABLE_TAG_POSTS are noindex on the page and skipped here.
+function latestPostDate(
+  posts: Array<{ updatedAt?: string; publishedAt?: string | null }>
+): string | null {
+  return latestSitemapDate(
+    posts.map((post) => post.updatedAt || post.publishedAt)
   );
 }
 
@@ -52,50 +44,45 @@ export async function GET(): Promise<Response> {
     ]);
 
     const indexedPosts = publishedPosts.filter((post) => post.isIndexed);
+    const tagPostCounts = countPostsByTag(publishedPosts);
 
-    const postSitemapEntries: SitemapEntry[] = postEntries.map((entry) => ({
-      path: `/blog/${entry.slug}`,
-      lastModified: entry.lastModified,
-      priority: '0.8'
+    const postUrls: SitemapUrl[] = postEntries.map((entry) => ({
+      loc: toAbsoluteUrl(`/blog/${entry.slug}`),
+      lastmod: entry.lastModified
     }));
 
-    const categorySitemapEntries: SitemapEntry[] = categories
-      .map((category) => {
-        const matchingPosts = indexedPosts.filter((post) =>
-          slugMatches(post.category, category.slug)
-        );
-        if (matchingPosts.length === 0) {
-          return null;
-        }
-        return {
-          path: `/blog/category/${category.slug}`,
-          lastModified: latestUpdatedAt(matchingPosts),
-          priority: '0.6'
-        };
-      })
-      .filter((entry): entry is SitemapEntry => entry !== null);
+    const categoryUrls: SitemapUrl[] = categories.flatMap((category) => {
+      const matchingPosts = indexedPosts.filter((post) =>
+        slugMatches(post.category, category.slug)
+      );
+      return matchingPosts.length === 0
+        ? []
+        : [
+            {
+              loc: toAbsoluteUrl(`/blog/category/${category.slug}`),
+              lastmod: latestPostDate(matchingPosts)
+            }
+          ];
+    });
 
-    const tagSitemapEntries: SitemapEntry[] = tags
-      .map((tag) => {
-        const matchingPosts = indexedPosts.filter((post) =>
-          post.tags.some((postTag) => slugMatches(postTag, tag.slug))
-        );
-        if (matchingPosts.length === 0) {
-          return null;
-        }
-        return {
-          path: `/blog/tag/${tag.slug}`,
-          lastModified: latestUpdatedAt(matchingPosts),
-          priority: '0.5'
-        };
-      })
-      .filter((entry): entry is SitemapEntry => entry !== null);
+    const tagUrls: SitemapUrl[] = tags.flatMap((tag) => {
+      if (!isIndexableTagCount(tagPostCounts.get(tag.slug) ?? 0)) {
+        return [];
+      }
+      const matchingPosts = indexedPosts.filter((post) =>
+        post.tags.some((postTag) => slugMatches(postTag, tag.slug))
+      );
+      return matchingPosts.length === 0
+        ? []
+        : [
+            {
+              loc: toAbsoluteUrl(`/blog/tag/${tag.slug}`),
+              lastmod: latestPostDate(matchingPosts)
+            }
+          ];
+    });
 
-    const xml = buildBlogSitemapXml([
-      ...postSitemapEntries,
-      ...categorySitemapEntries,
-      ...tagSitemapEntries
-    ]);
+    const xml = buildUrlsetXml([...postUrls, ...categoryUrls, ...tagUrls]);
 
     return new Response(xml, {
       headers: {

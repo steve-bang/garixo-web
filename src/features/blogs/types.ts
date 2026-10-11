@@ -163,5 +163,5 @@ export interface BlogPost {
 
 export type BlogPostSitemapEntry = {
   slug: string;
-  lastModified: string;
+  lastModified?: string;
 };
