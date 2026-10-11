@@ -16,7 +16,7 @@ export function CaseStudyHero(): JSX.Element {
         </p>
         <div className="mt-s6 flex flex-col justify-center gap-s2 sm:flex-row">
           <Button asChild className="h-12">
-            <Link href="/book-demo">Book a Demo</Link>
+            <Link href="https://app.garixo.com/register">Start Free Trial</Link>
           </Button>
           <Button asChild variant="secondary" className="h-12">
             <Link href="/features">Explore Features</Link>
