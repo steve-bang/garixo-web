@@ -4,15 +4,21 @@ import { LandingFooter } from '@/components/sections/LandingFooter';
 import { LandingHeader } from '@/components/sections/LandingHeader';
 
 export const metadata: Metadata = {
-  title: 'Terms of Services | Garixo',
+  title: 'Terms of Service | Garixo',
   description:
-    'Read Garixo Terms of Services for global users, including key terms relevant for the United States market.',
+    'Read Garixo Terms of Service for global users, including key terms relevant for the United States market.',
   alternates: {
     canonical: '/term-of-services'
   },
   robots: {
     index: true,
     follow: true
+  },
+  openGraph: {
+    title: 'Terms of Service | Garixo'
+  },
+  twitter: {
+    title: 'Terms of Service | Garixo'
   }
 };
 
@@ -26,15 +32,15 @@ export default function TermsOfServicesPage(): JSX.Element {
         <section className="border-b border-border bg-background-primary py-s12">
           <div className="mx-auto w-full max-w-[1000px] px-s4">
             <h1 className="text-[34px] font-bold text-text-primary md:text-[46px]">
-              Terms of Services
+              Terms of Service
             </h1>
             <p className="mt-s2 text-small text-text-secondary">
               Last updated: {lastUpdated}
             </p>
             <p className="mt-s4 max-w-[840px] text-body text-text-secondary">
-              These Terms of Services govern your access to and use of GARIXO.
-              By using GARIXO, you agree to these terms. If you do not agree,
-              you should stop using the service.
+              These Terms of Service govern your access to and use of GARIXO. By
+              using GARIXO, you agree to these terms. If you do not agree, you
+              should stop using the service.
             </p>
           </div>
         </section>
@@ -142,7 +148,7 @@ export default function TermsOfServicesPage(): JSX.Element {
           <article className="space-y-s2">
             <h2 className="text-h2">11. Changes to Terms</h2>
             <p className="text-small text-text-secondary">
-              We may update these Terms of Services. If changes are material, we
+              We may update these Terms of Service. If changes are material, we
               will post the updated date and may provide additional notice.
             </p>
           </article>

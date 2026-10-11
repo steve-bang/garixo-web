@@ -13,6 +13,12 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true
+  },
+  openGraph: {
+    title: 'Privacy Policy | Garixo'
+  },
+  twitter: {
+    title: 'Privacy Policy | Garixo'
   }
 };
 
