@@ -23,7 +23,9 @@ export function CTA(): JSX.Element {
               asChild
               className="h-12 w-full bg-surface-default text-primary-800 hover:bg-primary-50"
             >
-              <Link href="https://app.garixo.com/register">Book Your Free Demo</Link>
+              <Link href="https://app.garixo.com/register">
+                Start Free Trial
+              </Link>
             </Button>
             <div className="mt-s2 text-center">
               <Link
