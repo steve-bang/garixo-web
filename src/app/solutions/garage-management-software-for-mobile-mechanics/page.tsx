@@ -91,7 +91,7 @@ const featureHighlights = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: 'Mobile Mechanic Software — Work Orders & Invoices On The Go | Garixo',
+  title: 'Mobile Mechanic Software — Work Orders & Invoices | Garixo',
   description:
     'Mobile mechanic software to manage work orders, parts, and invoices from your phone. Create jobs on-site and get paid before leaving. Free trial.',
   keywords: [
@@ -109,8 +109,7 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title:
-      'Mobile Mechanic Software — Work Orders & Invoices On The Go | Garixo',
+    title: 'Mobile Mechanic Software — Work Orders & Invoices | Garixo',
     description:
       'Mobile mechanic software to manage work orders, parts, and invoices from your phone. Create jobs on-site and get paid before leaving. Free trial.',
     type: 'website',
@@ -118,8 +117,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title:
-      'Mobile Mechanic Software — Work Orders & Invoices On The Go | Garixo',
+    title: 'Mobile Mechanic Software — Work Orders & Invoices | Garixo',
     description:
       'Mobile mechanic software to manage work orders, parts, and invoices from your phone. Create jobs on-site and get paid before leaving. Free trial.'
   }

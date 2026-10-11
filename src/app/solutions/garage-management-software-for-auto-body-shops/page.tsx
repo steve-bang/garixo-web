@@ -99,8 +99,7 @@ const featureHighlights = [
 ] as const;
 
 export const metadata: Metadata = {
-  title:
-    'Auto Body Shop Management Software — Repair Workflow & Parts | Garixo',
+  title: 'Auto Body Shop Management Software for Repair Jobs | Garixo',
   description:
     'Auto body shop management software for collision repair teams. Organize work orders, track parts, invoice faster. Simple setup, no enterprise complexity.',
   keywords: [
@@ -118,8 +117,7 @@ export const metadata: Metadata = {
     follow: true
   },
   openGraph: {
-    title:
-      'Auto Body Shop Management Software — Repair Workflow & Parts | Garixo',
+    title: 'Auto Body Shop Management Software for Repair Jobs | Garixo',
     description:
       'Auto body shop management software for collision repair teams. Organize work orders, track parts, invoice faster. Simple setup, no enterprise complexity.',
     type: 'website',
@@ -127,8 +125,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title:
-      'Auto Body Shop Management Software — Repair Workflow & Parts | Garixo',
+    title: 'Auto Body Shop Management Software for Repair Jobs | Garixo',
     description:
       'Auto body shop management software for collision repair teams. Organize work orders, track parts, invoice faster. Simple setup, no enterprise complexity.'
   }
