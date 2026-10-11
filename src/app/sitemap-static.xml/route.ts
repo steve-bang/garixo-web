@@ -1,163 +1,55 @@
-// This route generates the sitemap XML for static pages and case studies. It defines a list of static paths with their last modified dates, change frequencies, and priorities, and also includes URLs for case studies. The generated XML is returned as a response with appropriate headers for caching and content type.
+// This route generates the sitemap XML for static pages and case studies. Static page
+// dates come from STATIC_PAGE_LASTMOD, /blog from the latest published post, and
+// case studies have no date source so they carry no <lastmod>. changefreq and
+// priority are intentionally not emitted (Google ignores them).
 import { caseStudies } from '@/lib/caseStudies';
+import { listPublishedBlogs } from '@/services/blog-content/blog-fs';
 import {
-  toAbsoluteUrl,
-  toSitemapIsoDate,
-  xmlEscape
+  STATIC_PAGE_LASTMOD,
+  buildUrlsetXml,
+  latestSitemapDate,
+  toAbsoluteUrl
 } from '@/services/seo/sitemap';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-function buildXmlUrlset(
-  urls: Array<{
-    loc: string;
-    lastmod?: string;
-    changefreq?: string;
-    priority?: string;
-  }>
-): string {
-  const body = urls
-    .map(
-      (item) =>
-        `\n  <url>\n    <loc>${xmlEscape(item.loc)}</loc>\n    <lastmod>${toSitemapIsoDate(item.lastmod)}</lastmod>${
-          item.changefreq
-            ? `\n    <changefreq>${item.changefreq}</changefreq>`
-            : ''
-        }${item.priority ? `\n    <priority>${item.priority}</priority>` : ''}\n  </url>`
-    )
-    .join('');
-
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${body}\n</urlset>`;
-}
+const STATIC_PATHS = [
+  '/',
+  '/features',
+  '/about',
+  '/features/customers-management',
+  '/features/staff-management',
+  '/features/inventory-management',
+  '/features/work-orders-management',
+  '/pricing',
+  '/case-studies',
+  '/blog',
+  '/solutions/garage-management-software-for-tire-shops',
+  '/solutions/garage-management-software-for-auto-body-shops',
+  '/solutions/garage-management-software-for-mobile-mechanics',
+  '/solutions/garage-management-software-for-dealerships',
+  '/tools/auto-repair-labor-rate-calculator',
+  '/tools/auto-repair-shop-profit-calculator',
+  '/privacy-policy',
+  '/term-of-services'
+] as const;
 
 export async function GET(): Promise<Response> {
-  const staticPath = [
-    {
-      path: '/',
-      lastmod: '2026-01-01T00:00:00Z',
-      changefreq: 'monthly',
-      priority: '1.0'
-    },
-    {
-      path: '/features',
-      lastmod: '2026-01-10T00:00:00Z',
-      changefreq: 'monthly',
-      priority: '0.9'
-    },
-    {
-      path: '/about',
-      lastmod: '2026-08-09T00:00:00Z',
-      changefreq: 'monthly',
-      priority: '0.9'
-    },
-    {
-      path: '/features/customers-management',
-      lastmod: '2026-01-10T00:00:00Z',
-      changefreq: 'monthly',
-      priority: '0.9'
-    },
-    {
-      path: '/features/staff-management',
-      lastmod: '2026-01-11T00:00:00Z',
-      changefreq: 'monthly',
-      priority: '0.9'
-    },
-    {
-      path: '/features/inventory-management',
-      lastmod: '2026-01-12T00:00:00Z',
-      changefreq: 'monthly',
-      priority: '0.9'
-    },
-    {
-      path: '/features/work-orders-management',
-      lastmod: '2026-01-13T00:00:00Z',
-      changefreq: 'monthly',
-      priority: '0.9'
-    },
-    {
-      path: '/pricing',
-      lastmod: '2026-01-20T00:00:00Z',
-      changefreq: 'monthly',
-      priority: '0.9'
-    },
-    {
-      path: '/case-studies',
-      lastmod: '2026-01-25T00:00:00Z',
-      changefreq: 'monthly',
-      priority: '0.8'
-    },
-    {
-      path: '/blog',
-      lastmod: '2026-03-01T00:00:00Z',
-      changefreq: 'weekly',
-      priority: '0.8'
-    },
-    {
-      path: '/solutions/garage-management-software-for-tire-shops',
-      lastmod: '2026-03-14T20:06:00Z',
-      changefreq: 'weekly',
-      priority: '0.8'
-    },
-    {
-      path: '/solutions/garage-management-software-for-auto-body-shops',
-      lastmod: '2026-03-14T20:07:00Z',
-      changefreq: 'weekly',
-      priority: '0.8'
-    },
-    {
-      path: '/solutions/garage-management-software-for-mobile-mechanics',
-      lastmod: '2026-03-14T20:09:00Z',
-      changefreq: 'weekly',
-      priority: '0.8'
-    },
-    {
-      path: '/solutions/garage-management-software-for-dealerships',
-      lastmod: '2026-03-14T20:08:00Z',
-      changefreq: 'weekly',
-      priority: '0.8'
-    },
-    {
-      path: '/tools/auto-repair-labor-rate-calculator',
-      lastmod: '2026-03-15T07:12:00Z',
-      changefreq: 'weekly',
-      priority: '0.8'
-    },
-    {
-      path: '/tools/auto-repair-shop-profit-calculator',
-      lastmod: '2026-03-15T09:20:00Z',
-      changefreq: 'weekly',
-      priority: '0.8'
-    },
-    {
-      path: '/privacy-policy',
-      lastmod: '2026-01-01T00:00:00Z',
-      changefreq: 'yearly',
-      priority: '0.3'
-    },
-    {
-      path: '/term-of-services',
-      lastmod: '2026-01-01T00:00:00Z',
-      changefreq: 'yearly',
-      priority: '0.3'
-    }
-  ];
+  const blogLastmod = latestSitemapDate(
+    listPublishedBlogs().map((post) => post.updatedAt || post.publishedAt)
+  );
 
-  const staticUrls = staticPath.map((path) => ({
-    loc: toAbsoluteUrl(path.path),
-    lastmod: path.lastmod,
-    changefreq: path.changefreq,
-    priority: path.priority
+  const staticUrls = STATIC_PATHS.map((path) => ({
+    loc: toAbsoluteUrl(path),
+    lastmod: path === '/blog' ? blogLastmod : STATIC_PAGE_LASTMOD[path]
   }));
 
   const caseStudyUrls = caseStudies.map((study) => ({
-    loc: toAbsoluteUrl(`/case-studies/${study.slug}`),
-    lastmod: '2026-02-03T00:00:00Z',
-    changefreq: 'monthly',
-    priority: '0.7'
+    loc: toAbsoluteUrl(`/case-studies/${study.slug}`)
   }));
 
-  const xml = buildXmlUrlset([...staticUrls, ...caseStudyUrls]);
+  const xml = buildUrlsetXml([...staticUrls, ...caseStudyUrls]);
 
   return new Response(xml, {
     headers: {

@@ -27,6 +27,30 @@ export function slugMatches(value: string, targetSlug: string): boolean {
   return slugify(value) === targetSlug;
 }
 
+/**
+ * Tags with fewer published posts than this are thin pages: they stay
+ * reachable (HTTP 200, canonical) but are `noindex` and left out of the sitemap.
+ */
+export const MIN_INDEXABLE_TAG_POSTS = 3;
+
+/** Counts posts per tag slug (one count per post, even if a tag repeats). */
+export function countPostsByTag(
+  posts: ReadonlyArray<{ tags: readonly string[] }>
+): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const post of posts) {
+    const slugs = new Set(post.tags.map(slugify).filter(Boolean));
+    for (const slug of slugs) {
+      counts.set(slug, (counts.get(slug) ?? 0) + 1);
+    }
+  }
+  return counts;
+}
+
+export function isIndexableTagCount(postCount: number): boolean {
+  return postCount >= MIN_INDEXABLE_TAG_POSTS;
+}
+
 export function sanitizeRichHtml(value: string): string {
   return value
     .replace(DANGEROUS_TAG_PATTERN, '')

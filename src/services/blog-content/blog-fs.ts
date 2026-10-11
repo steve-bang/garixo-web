@@ -60,8 +60,8 @@ function parseBlogFile(filePath: string): BlogPost {
   const { data, content } = matter(raw);
   const fm = data as BlogFrontmatter;
   const slug = fm.slug?.trim() || path.basename(filePath, '.md');
-  const now = new Date().toISOString();
-  const createdAt = fm.createdAt ?? now;
+  // No fabricated dates: a missing createdAt stays empty so sitemaps omit lastmod.
+  const createdAt = fm.createdAt ?? '';
 
   return {
     id: slug,
@@ -201,7 +201,10 @@ export function listPublishedIndexedBlogSitemapEntries(options?: {
 }): BlogPostSitemapEntry[] {
   const entries = listPublishedBlogs()
     .filter((post) => post.isIndexed)
-    .map((post) => ({ slug: post.slug, lastModified: post.updatedAt }));
+    .map((post) => ({
+      slug: post.slug,
+      lastModified: post.updatedAt || post.publishedAt || undefined
+    }));
 
   return options?.maxUrls ? entries.slice(0, options.maxUrls) : entries;
 }
