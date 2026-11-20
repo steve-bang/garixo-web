@@ -6,6 +6,10 @@ The format is based on Keep a Changelog and follows semantic versioning principl
 
 ## [Unreleased]
 
+### Changed
+
+- Removed the `NEXT_PUBLIC_` prefix from all env vars: `GA4` (was `NEXT_PUBLIC_GA_MEASUREMENT_ID`), `SITE_URL`, `API_URL`, `APP_SUPPORT_EMAIL`, `SMTP_*`. Rename them in Vercel before deploying.
+
 ### Added
 
 - Scheduled blog publishing API endpoint:
