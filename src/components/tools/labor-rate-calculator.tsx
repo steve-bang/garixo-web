@@ -32,12 +32,12 @@ type LaborRateInputs = {
 };
 
 const defaultInputs: LaborRateInputs = {
-  rent: 4500,
+  rent: 5000,
   utilities: 700,
   insurance: 700,
   adminSalaries: 4000,
   software: 300,
-  otherCosts: 1300,
+  otherCosts: 1700,
   technicians: 2,
   hoursPerDay: 8,
   daysPerMonth: 22,
