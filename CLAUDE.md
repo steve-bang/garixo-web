@@ -89,4 +89,6 @@ Server-only credentials must never be exposed through `NEXT_PUBLIC_*` names; onl
 
 ## Docs note
 
+`README.md` and `CODEX.md` are likewise stale: they still describe the removed dashboard stack (NextAuth, Firebase, work orders). Trust this file and the code over them.
+
 Most files in `docs/` (the `*-feature-guide.md` files, `firestore-database-structure.md`, `billing-subscription-flow.md`) describe the removed dashboard and are historical, not current guidance. `docs/prd-learning-marketplace-mvp-vi.md` is a planning document only (see above).
