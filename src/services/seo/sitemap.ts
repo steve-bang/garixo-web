@@ -1,7 +1,7 @@
 const DEFAULT_SITE_URL = 'https://www.garixo.com';
 
 export function getSiteBaseUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim() || DEFAULT_SITE_URL;
+  const raw = process.env.SITE_URL?.trim() || DEFAULT_SITE_URL;
   return raw.endsWith('/') ? raw.slice(0, -1) : raw;
 }
 

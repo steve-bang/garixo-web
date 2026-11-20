@@ -9,15 +9,19 @@ import { trackPageView } from '@/lib/analytics/ga';
  * App Router pageview tracker.
  * Fires one GA page_view on every route/search change.
  */
-export function GoogleAnalyticsPageview(): null {
+export function GoogleAnalyticsPageview({
+  measurementId
+}: {
+  measurementId: string;
+}): null {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const query = searchParams.toString();
     const pagePath = query ? `${pathname}?${query}` : pathname;
-    trackPageView(pagePath);
-  }, [pathname, searchParams]);
+    trackPageView(pagePath, measurementId);
+  }, [pathname, searchParams, measurementId]);
 
   return null;
 }

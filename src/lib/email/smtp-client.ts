@@ -16,11 +16,11 @@ type SmtpConfig = {
 };
 
 function getSmtpConfig(): SmtpConfig | null {
-  const host = env.NEXT_PUBLIC_SMTP_HOST?.trim();
-  const portValue = env.NEXT_PUBLIC_SMTP_PORT?.trim();
-  const username = env.NEXT_PUBLIC_SMTP_USERNAME?.trim();
-  const password = env.NEXT_PUBLIC_SMTP_PASSWORD?.trim();
-  const sender = env.NEXT_PUBLIC_SMTP_SENDER?.trim();
+  const host = env.SMTP_HOST?.trim();
+  const portValue = env.SMTP_PORT?.trim();
+  const username = env.SMTP_USERNAME?.trim();
+  const password = env.SMTP_PASSWORD?.trim();
+  const sender = env.SMTP_SENDER?.trim();
 
   if (!host || !portValue || !username || !password || !sender) {
     return null;

@@ -21,19 +21,28 @@ export const metadata: Metadata = {
   }
 };
 
+// GA4 is a server-only env var; it is rendered into the page here, not bundled.
+function getGaMeasurementId(): string | undefined {
+  return process.env.NODE_ENV === 'production' ? process.env.GA4 : undefined;
+}
+
 export default function RootLayout({
   children
 }: {
   children: ReactNode;
 }): JSX.Element {
+  const gaMeasurementId = getGaMeasurementId();
+
   return (
     <html lang="en">
       <body>
         <WebsiteStructuredData />
-        <GoogleAnalytics />
-        <Suspense fallback={null}>
-          <GoogleAnalyticsPageview />
-        </Suspense>
+        <GoogleAnalytics measurementId={gaMeasurementId} />
+        {gaMeasurementId ? (
+          <Suspense fallback={null}>
+            <GoogleAnalyticsPageview measurementId={gaMeasurementId} />
+          </Suspense>
+        ) : null}
         {children}
       </body>
     </html>

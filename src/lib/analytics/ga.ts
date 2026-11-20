@@ -18,8 +18,7 @@ export function isGaReady(): boolean {
   return typeof window !== 'undefined' && typeof window.gtag === 'function';
 }
 
-export function trackPageView(pagePath: string): void {
-  const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+export function trackPageView(pagePath: string, measurementId: string): void {
   if (!measurementId || !isGaReady()) {
     return;
   }

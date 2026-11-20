@@ -83,9 +83,9 @@ docs/           Product and engineering documentation (see note below)
 
 ## Environment and secrets
 
-`src/config/env.ts` parses variables at import time: `NEXT_PUBLIC_API_URL` (required), plus optional `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_APP_SUPPORT_EMAIL`, and `NEXT_PUBLIC_SMTP_*`. `src/lib/email/` and `src/services/email.service.ts` are kept in the codebase for possible future reuse (e.g. a contact form) but currently have no callers.
+`src/config/env.ts` parses variables at import time: `API_URL` (required), plus optional `GA4`, `APP_SUPPORT_EMAIL`, and `SMTP_*`. `src/lib/email/` and `src/services/email.service.ts` are kept in the codebase for possible future reuse (e.g. a contact form) but currently have no callers.
 
-Server-only credentials must never be exposed through `NEXT_PUBLIC_*` names; only retain existing compatibility names when deliberately modifying legacy code.
+All env vars are server-only (no `NEXT_PUBLIC_*` prefix). `GA4` is read in `src/app/layout.tsx` and passed to the client components as a prop, since it is not in the browser bundle.
 
 ## Docs note
 

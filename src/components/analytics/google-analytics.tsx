@@ -1,5 +1,3 @@
-'use client';
-
 import Script from 'next/script';
 
 const GA_SCRIPT_ID = 'garixo-ga-script';
@@ -9,11 +7,12 @@ const GA_CONFIG_ID = 'garixo-ga-config';
  * Loads Google Analytics (GA4) script when measurement id is configured.
  * Script is disabled in non-production builds to keep local/dev traffic clean.
  */
-export function GoogleAnalytics(): JSX.Element | null {
-  const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-  const isProd = process.env.NODE_ENV === 'production';
-
-  if (!measurementId || !isProd) {
+export function GoogleAnalytics({
+  measurementId
+}: {
+  measurementId: string | undefined;
+}): JSX.Element | null {
+  if (!measurementId) {
     return null;
   }
 

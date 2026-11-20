@@ -188,7 +188,7 @@ Kế hoạch cũ đặt 3 bài/tuần và thất bại hoàn toàn trong việc 
 
 ## 7. Đo lường & Báo cáo
 
-- **Setup (Phase 0):** verify Google Search Console, xác nhận GA4 đang chạy đúng (đã có sẵn trong code, chỉ cần confirm `NEXT_PUBLIC_GA_MEASUREMENT_ID` đã set đúng ở production).
+- **Setup (Phase 0):** verify Google Search Console, xác nhận GA4 đang chạy đúng (đã có sẵn trong code, chỉ cần confirm `GA4` đã set đúng ở production).
 - **Check-in hàng tháng**, theo dõi:
   - Tổng clicks + impressions (GSC) so với mốc ở mục 3
   - Số trang được index (GSC Coverage report) — mục tiêu: tất cả bài publish phải được index trong vòng 1 tuần

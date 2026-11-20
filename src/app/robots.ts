@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 
 function getBaseUrl(): string {
   const raw =
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://www.garixo.com';
+    process.env.SITE_URL?.trim() || 'https://www.garixo.com';
   return raw.endsWith('/') ? raw.slice(0, -1) : raw;
 }
 

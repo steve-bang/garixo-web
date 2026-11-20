@@ -146,13 +146,12 @@ Follow the established pattern within the module you are changing.
 
 - `NEXTAUTH_URL`
 - `NEXTAUTH_SECRET`
-- `NEXT_PUBLIC_API_URL`
+- `API_URL`
 
 Firebase, SMTP, analytics, PayPal, and blog scheduler variables are listed in
 that file and `.env.example`. Never commit `.env.local`, credentials, private
 keys, payment secrets, or personal data. Server-only credentials must not be
-exposed through `NEXT_PUBLIC_*` names; retain existing compatibility names only
-when modifying legacy code deliberately.
+exposed through `NEXT_PUBLIC_*` names.
 
 ## Commands and quality baseline
 
