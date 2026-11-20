@@ -60,7 +60,7 @@ export function buildUrlsetXml(urls: SitemapUrl[]): string {
  * Rule used: date of the last commit touching the page's own
  * `src/app/<route>/page.tsx` on origin/main
  * (`git log -1 --format=%cI -- <file>`), converted to a UTC calendar date.
- * Exception: /privacy-policy and /term-of-services use the "Last updated"
+ * Exception: /privacy-policy and /terms-of-service use the "Last updated"
  * date printed on the page itself. `/blog` is not listed because it is derived
  * from the latest blog post; case studies have no date source and get no lastmod.
  */
@@ -81,7 +81,7 @@ export const STATIC_PAGE_LASTMOD: Readonly<Record<string, string>> = {
   '/tools/auto-repair-labor-rate-calculator': '2026-08-15',
   '/tools/auto-repair-shop-profit-calculator': '2026-08-15',
   '/privacy-policy': '2026-02-24',
-  '/term-of-services': '2026-02-24'
+  '/terms-of-service': '2026-02-24'
 };
 
 export function xmlEscape(value: string): string {

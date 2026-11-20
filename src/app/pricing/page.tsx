@@ -113,7 +113,7 @@ export const revalidate = false;
 export const metadata: Metadata = {
   title: 'Garage Management Software Pricing — From $79/mo | Garixo',
   description:
-    'Garage management software pricing starts at $79/mo. Work orders, inventory, customers & staff included. 14-day free trial. No credit card needed.',
+    'Garixo plans start at $79/month for up to 5 users, or $129/month for up to 12. Unlimited work orders, 14-day free trial, no credit card required.',
   keywords: ['garage management software pricing', 'auto repair software cost'],
   alternates: {
     canonical: '/pricing'
@@ -125,7 +125,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Garage Management Software Pricing — From $79/mo | Garixo',
     description:
-      'Garage management software pricing starts at $79/mo. Work orders, inventory, customers & staff included. 14-day free trial. No credit card needed.',
+      'Garixo plans start at $79/month for up to 5 users, or $129/month for up to 12. Unlimited work orders, 14-day free trial, no credit card required.',
     type: 'website',
     url: 'https://www.garixo.com/pricing'
   },
@@ -133,7 +133,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Garage Management Software Pricing — From $79/mo | Garixo',
     description:
-      'Garage management software pricing starts at $79/mo. Work orders, inventory, customers & staff included. 14-day free trial. No credit card needed.'
+      'Garixo plans start at $79/month for up to 5 users, or $129/month for up to 12. Unlimited work orders, 14-day free trial, no credit card required.'
   }
 };
 
@@ -211,7 +211,7 @@ export default function PricingPage(): JSX.Element {
         <section className="border-b border-border bg-background-primary py-s12">
           <div className="mx-auto w-full max-w-[980px] px-s4 text-center">
             <h1 className="text-[34px] font-bold leading-tight text-text-primary md:text-[50px]">
-              Simple Pricing for Independent Garage Owners
+              Garage Management Software Pricing: Plans From $79/Month
             </h1>
             <p className="mx-auto mt-s3 max-w-[760px] text-body text-text-secondary">
               No hidden fees. No long setup. Start your free trial and run work

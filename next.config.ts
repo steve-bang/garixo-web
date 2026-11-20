@@ -10,6 +10,21 @@ const nextConfig: NextConfig = {
       }
     ]
   },
+  async redirects() {
+    return [
+      {
+        source: '/term-of-services',
+        destination: '/terms-of-service',
+        permanent: true
+      },
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'garixo.com' }],
+        destination: 'https://www.garixo.com/:path*',
+        permanent: true
+      }
+    ];
+  },
   async headers() {
     return [
       {

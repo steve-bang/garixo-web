@@ -103,7 +103,7 @@ export function LandingFooter(): JSX.Element {
                 </Link>
               </p>
               <p>
-                <Link href="/term-of-services" className="hover:text-white">
+                <Link href="/terms-of-service" className="hover:text-white">
                   Terms of Service
                 </Link>
               </p>

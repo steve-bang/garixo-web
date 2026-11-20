@@ -28,7 +28,7 @@ export const caseStudies: CaseStudy[] = [
       'Daily revenue was only checked at end of week.'
     ],
     after: [
-      'Moved all work orders into one GARIXO dashboard.',
+      'Moved all work orders into one Garixo dashboard.',
       'Service advisors sent approvals quickly from one screen.',
       'Owner reviewed live jobs and revenue every day.'
     ],
@@ -38,7 +38,7 @@ export const caseStudies: CaseStudy[] = [
       'Approval wait time down 42%'
     ],
     quote:
-      'GARIXO gave us a simple daily system. My team works faster, and I finally know what is happening in the shop at all times.',
+      'Garixo gave us a simple daily system. My team works faster, and I finally know what is happening in the shop at all times.',
     ownerName: 'Mark Reynolds'
   },
   {
@@ -65,7 +65,7 @@ export const caseStudies: CaseStudy[] = [
       'Front desk response time down 45%'
     ],
     quote:
-      'We are not a tech-heavy shop, but GARIXO was easy for everyone. It removed confusion from our day-to-day work.',
+      'We are not a tech-heavy shop, but Garixo was easy for everyone. It removed confusion from our day-to-day work.',
     ownerName: 'Daniel Ortiz'
   },
   {
@@ -92,7 +92,7 @@ export const caseStudies: CaseStudy[] = [
       'Owner reporting time down 60%'
     ],
     quote:
-      'GARIXO helped us run a cleaner operation without adding complexity. My staff adopted it quickly and customers noticed the difference.',
+      'Garixo helped us run a cleaner operation without adding complexity. My staff adopted it quickly and customers noticed the difference.',
     ownerName: 'Susan Park'
   }
 ];

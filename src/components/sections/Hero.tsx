@@ -67,7 +67,7 @@ export function Hero(): JSX.Element {
               Set up in 3 minutes
             </span>
             <span className="rounded-full bg-surface-hover px-s2 py-1">
-              500+ shops trust Garixo
+              100+ shops trust Garixo
             </span>
           </div>
         </div>

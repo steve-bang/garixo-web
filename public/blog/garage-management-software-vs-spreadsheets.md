@@ -162,7 +162,7 @@ The shift isn't about swapping a spreadsheet for a fancier spreadsheet. It's abo
 
 ## What the Switch Actually Looks Like: Real Shop Management System ROI
 
-"How fast will I see results?" That's the right question to ask before committing to any new tool. Based on data from 500+ shops onboarded with Garixo, most see measurable operational improvement within the first 90 days.
+"How fast will I see results?" That's the right question to ask before committing to any new tool. Based on data from 100+ shops onboarded with Garixo, most see measurable operational improvement within the first 90 days.
 
 **Here's what a typical transition timeline looks like:**
 
@@ -199,4 +199,4 @@ Spreadsheets aren't broken — they just don't scale past a certain point. Once 
 
 Three things to take from this: spreadsheets hit a ceiling faster than most owners expect; the average shop sees +22% operational efficiency within 90 days of switching; and the **garage management software vs spreadsheets** question usually resolves the same way — shops that commit to the right tool stop asking "where are we?" and start asking "what's next?"
 
-**[Try Garixo free — no credit card, setup in minutes. 500+ shops already running on it.](https://garixo.com/auth/sign-up)**
+**[Try Garixo free — no credit card, setup in minutes. 100+ shops already running on it.](https://garixo.com/auth/sign-up)**
