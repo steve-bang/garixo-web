@@ -32,7 +32,7 @@ const STATIC_PATHS = [
   '/tools/auto-repair-labor-rate-calculator',
   '/tools/auto-repair-shop-profit-calculator',
   '/privacy-policy',
-  '/term-of-services'
+  '/terms-of-service'
 ] as const;
 
 export async function GET(): Promise<Response> {

@@ -12,7 +12,7 @@ import { Trust } from '@/components/sections/Trust';
 export const revalidate = false;
 
 export const metadata: Metadata = {
-  title: 'Garage Management Software for Independent Auto Shops | Garixo',
+  title: 'Garage Management Software for Independent Shops | Garixo',
   description:
     'Garixo is all-in-one garage management software for auto repair shops. Track vehicles, technicians & inventory. See daily profit clearly. Setup in minutes.',
   keywords: [

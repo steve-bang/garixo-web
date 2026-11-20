@@ -196,6 +196,9 @@ export default async function CaseStudyDetailPage({
             <h2 id="results-title" className="text-h2">
               The Results
             </h2>
+            <p className="mt-s2 text-small text-text-secondary">
+              Results reported by the shop owner.
+            </p>
             <div className="mt-s4 grid gap-s3 sm:grid-cols-3">
               {study.results.map((result) => (
                 <div

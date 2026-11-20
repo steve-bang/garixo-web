@@ -70,7 +70,7 @@ export function CTA(): JSX.Element {
                 className="group rounded-lg border border-border bg-surface-default p-s4"
               >
                 <summary className="cursor-pointer list-none text-h3 text-text-primary">
-                  {faq.question}
+                  <h3 className="inline text-h3">{faq.question}</h3>
                 </summary>
                 <p className="mt-s2 text-small leading-6 text-text-secondary">
                   {faq.answer}

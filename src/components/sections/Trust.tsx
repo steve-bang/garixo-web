@@ -106,7 +106,7 @@ export function Trust(): JSX.Element {
         >
           <Card className="p-s4 text-center shadow-xs">
             <p className="text-[36px] font-bold leading-none text-primary-700">
-              500+
+              100+
             </p>
             <p className="mt-s1 text-small text-text-secondary">
               independent shops onboarded

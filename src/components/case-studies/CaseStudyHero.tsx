@@ -7,10 +7,10 @@ export function CaseStudyHero(): JSX.Element {
     <section className="border-b border-border bg-background-primary">
       <div className="mx-auto w-full max-w-[1200px] px-s4 py-s16 text-center">
         <h1 className="mx-auto max-w-[900px] text-[34px] font-bold leading-tight text-text-primary md:text-[52px]">
-          How Auto Repair Shops Increase Revenue with GARIXO
+          How Auto Repair Shops Increase Revenue with Garixo
         </h1>
         <p className="mx-auto mt-s3 max-w-[760px] text-body text-text-secondary">
-          Real case studies from independent shop owners using GARIXO garage
+          Real case studies from independent shop owners using Garixo garage
           management software to simplify daily work, improve approvals, and
           increase revenue.
         </p>

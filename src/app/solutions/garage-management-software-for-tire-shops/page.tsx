@@ -697,7 +697,7 @@ export default function TireShopSolutionsPage(): JSX.Element {
               </Link>
               <span className="hidden text-text-muted sm:inline">•</span>
               <Link
-                href="/blog/"
+                href="/blog/auto-repair-shop-inventory-management-software"
                 className="font-medium text-primary-700 underline-offset-2 hover:underline"
               >
                 how to manage tire shop inventory

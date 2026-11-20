@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     'Read Garixo Terms of Service for global users, including key terms relevant for the United States market.',
   alternates: {
-    canonical: '/term-of-services'
+    canonical: '/terms-of-service'
   },
   robots: {
     index: true,

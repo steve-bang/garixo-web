@@ -711,10 +711,10 @@ export default function MobileMechanicsSolutionsPage(): JSX.Element {
               </Link>
               <span className="hidden text-text-muted sm:inline">•</span>
               <Link
-                href="/blog/"
+                href="/blog/how-to-price-auto-repair-services"
                 className="font-medium text-primary-700 underline-offset-2 hover:underline"
               >
-                how to run a mobile mechanic business
+                how to price auto repair services
               </Link>
             </div>
           </div>
